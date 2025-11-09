@@ -53,7 +53,7 @@ if(isset($_POST['action'])) {
         $nonce = $_POST['nonce'];
         $signature = $_POST['signature'];
         $public_key = $_POST['public_key'];
-        $res = ec_verify($nonce, $signature, $public_key);
+        $res = CryptoHelper::ec_verify($nonce, $signature, $public_key);
         if(!$res) {
             $msg=[['type'=>'danger', 'msg'=>'Invalid private key']];
         } else {

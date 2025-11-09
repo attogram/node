@@ -49,7 +49,7 @@ class SdkUtil
 
     static function createAndSignTx($private_key, $dst, $val, $type, $msg=null, $chain_id = CHAIN_ID)
     {
-        $public_key = priv2pub($private_key);
+        $public_key = CryptoHelper::priv2pub($private_key);
         $tx = new Transaction($public_key, $dst, $val, $type, time(), $msg);
         $base = $tx->getSignatureBase();
         $signature = ec_sign($base, $private_key, $chain_id);
@@ -61,7 +61,7 @@ class SdkUtil
         $txData=self::api_get($node, "generateMasternodeRemoveTx&address=".$address.
             "&payout_address=$payout_address&mn_address=".$masternode);
         $tx=Transaction::getFromArray($txData);
-        $tx->publicKey = priv2pub($private_key);
+        $tx->publicKey = CryptoHelper::priv2pub($private_key);
         $base = $tx->getSignatureBase();
         $tx->signature = ec_sign($base, $private_key,$chain_id);
         $txArr = $tx->toArray();
@@ -75,7 +75,7 @@ class SdkUtil
         $txData = self::api_get($node, "generateMasternodeCreateTx&address=".$address."&mn_address=".$masternode.
             (!empty($reward_address) ? "&reward_address=".$reward_address : ""));
         $tx=Transaction::getFromArray($txData);
-        $tx->publicKey = priv2pub($private_key);
+        $tx->publicKey = CryptoHelper::priv2pub($private_key);
         $base = $tx->getSignatureBase();
         $tx->signature = ec_sign($base, $private_key,"00");
         $txArr = $tx->toArray();

@@ -41,7 +41,7 @@ class SCUtil {
         ];
         $text = base64_encode(json_encode($deploy_data));
         $sc_signature = ec_sign($text, $private_key);
-        $public_key = priv2pub($private_key);
+        $public_key = CryptoHelper::priv2pub($private_key);
 
         $tx =  Transaction::generateSmartContractDeployTx($code, $sc_signature, $public_key, $sc_address, $amount, $params, $metadata);
         return $tx;
@@ -91,13 +91,13 @@ class SCUtil {
     }
 
     static function generateScExecTx($private_key, $sc_address, $method, $amount=0, $params=[]) {
-        $public_key = priv2pub($private_key);
+        $public_key = CryptoHelper::priv2pub($private_key);
         $tx=Transaction::generateSmartContractExecTx($public_key, $sc_address, $method, $amount, $params);
         return $tx;
     }
 
     static function generateScSendTx($sc_private_key, $dst_address, $method, $amount=0, $params=[]) {
-        $sc_public_key = priv2pub($sc_private_key);
+        $sc_public_key = CryptoHelper::priv2pub($sc_private_key);
         $tx = Transaction::generateSmartContractSendTx($sc_public_key, $dst_address, $method, $amount, $params);
         return $tx;
     }

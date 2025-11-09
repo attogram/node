@@ -196,7 +196,7 @@ class Nodeutil
 	}
 
 	static function validatePublicKey($public_key) {
-		$pem_public_key = coin2pem($public_key);
+		$pem_public_key = CryptoHelper::coin2pem($public_key);
 		$pkey = openssl_pkey_get_public($pem_public_key);
 		return ($pkey !== false);
 	}

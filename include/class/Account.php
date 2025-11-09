@@ -6,7 +6,7 @@ class Account
 	// checks the ecdsa secp256k1 signature for a specific public key
 	public static function checkSignature($data, $signature, $public_key, $height = null) {
 		$chain_id = Block::getChainId($height);
-		$res = ec_verify($data, $signature, $public_key, $chain_id);
+		$res = CryptoHelper::ec_verify($data, $signature, $public_key, $chain_id);
 //        _log("check_signature: $data | signature=$signature | pub_key=$public_key | res=$res");
 		return $res;
 	}
@@ -39,13 +39,13 @@ class Account
 		}
 
         // converts the PEM to a base58 format
-        $private_key = pem2coin($pvkey);
+        $private_key = CryptoHelper::pem2coin($pvkey);
 
         // exports the private key encoded as PEM
         $pub = openssl_pkey_get_details($key1);
 
         // converts the PEM to a base58 format
-        $public_key = pem2coin($pub['key']);
+        $public_key = CryptoHelper::pem2coin($pub['key']);
 
 		// generates the account's address based on the public key
 		$address = Account::getAddress($public_key);

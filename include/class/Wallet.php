@@ -41,7 +41,7 @@ class Wallet
         if(isset($this->namedAgs['import'])) {
             try {
                 $privateKey=readline("Please enter private key: ");
-                $publicKey = priv2pub($privateKey);
+                $publicKey = CryptoHelper::priv2pub($privateKey);
                 $wallet=COIN."\n".$privateKey."\n".$publicKey;
                 if(file_exists($this->wallet)) {
                     die("Wallet already exists.");

@@ -585,7 +585,7 @@ class PeerRequest
             api_echo("PM: Message already processed",0);
         }
         $signature = $envelope['signature'];
-        $res = ec_verify($envelope['payload'], $signature, $public_key);
+        $res = CryptoHelper::ec_verify($envelope['payload'], $signature, $public_key);
         if(!$res) {
             api_err("PM: Signature failed", 0);
         }

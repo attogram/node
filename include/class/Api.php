@@ -873,7 +873,7 @@ class Api
 		if(empty($nonce)) {
 			api_err("Nonce required");
 		}
-		$res = ec_verify($nonce, $signature, DEV_PUBLIC_KEY);
+		$res = CryptoHelper::ec_verify($nonce, $signature, DEV_PUBLIC_KEY);
 		if(!$res) {
 			api_err("Signature verification failed");
 		}
@@ -889,7 +889,7 @@ class Api
 		if(empty($nonce)) {
 			api_err("Nonce required");
 		}
-		$res = ec_verify($nonce, $signature, DEV_PUBLIC_KEY);
+		$res = CryptoHelper::ec_verify($nonce, $signature, DEV_PUBLIC_KEY);
 		if(!$res) {
 			api_err("Signature verification failed");
 		}
@@ -914,7 +914,7 @@ class Api
 		if(!($time > time() - 100 && $time < time() + 100)) {
 			api_err("Expired request time");
 		}
-		$res = ec_verify($msg, $signature, DEV_PUBLIC_KEY);
+		$res = CryptoHelper::ec_verify($msg, $signature, DEV_PUBLIC_KEY);
 		if(!$res) {
 			api_err("Signature verification failed");
 		}
@@ -951,7 +951,7 @@ class Api
 		if($time < time() - 60*5) {
 			api_err("Invalid time");
 		}
-		$res = ec_verify($nonce, $signature, DEV_PUBLIC_KEY);
+		$res = CryptoHelper::ec_verify($nonce, $signature, DEV_PUBLIC_KEY);
 		if(!$res) {
 			api_err("Signature failed");
 		}
@@ -1006,7 +1006,7 @@ class Api
 		if($nonce < time() - 60*5) {
 			api_err("Invalid nonce");
 		}
-		$res = ec_verify($nonce, $signature, DEV_PUBLIC_KEY);
+		$res = CryptoHelper::ec_verify($nonce, $signature, DEV_PUBLIC_KEY);
 		if(!$res) {
 			api_err("Signature failed");
 		}

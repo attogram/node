@@ -44,7 +44,7 @@ class SmartContractEngine
 				throw new Exception("Empty public key for Smart Contract $sc_address");
 			}
 
-			$res = ec_verify($smartContract['code'], $signature, $sc_public_key);
+			$res = CryptoHelper::ec_verify($smartContract['code'], $signature, $sc_public_key);
 			if (!$res) {
 				throw new Exception("Signature not valid for Smart Contract $sc_address");
 			}

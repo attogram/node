@@ -1047,7 +1047,7 @@ class Block
 			$data = json_encode($data);
 			$this->prevBlockId = $prev_block_id;
 			$signature_base = $this->getSignatureBase();
-			$res = ec_verify($signature_base, $this->signature, $public_key, Block::getChainId($this->height));
+			$res = CryptoHelper::ec_verify($signature_base, $this->signature, $public_key, Block::getChainId($this->height));
 			if(!$res) {
 				throw new Exception("Block signature check failed signature_base=$signature_base signature={$this->signature} public_key=$public_key");
 			}

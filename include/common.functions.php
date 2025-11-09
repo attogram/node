@@ -14,7 +14,7 @@ function floatvalue($val) {
 function ec_sign($data, $key, $chain_id = CHAIN_ID)
 {
 	// transform the base58 key format to PEM
-	$private_key = coin2pem($key, true);
+	$private_key = CryptoHelper::coin2pem($key, true);
 
 	$data = $chain_id . $data;
 
@@ -31,20 +31,6 @@ function ec_sign($data, $key, $chain_id = CHAIN_ID)
 	return base58_encode($signature);
 }
 
-// converts the key in base58 to PEM
-function coin2pem($data, $is_private_key = false)
-{
-	$data = base58_decode($data);
-	$data = base64_encode($data);
-
-	$dat = str_split($data, 64);
-	$data = implode("\n", $dat);
-
-	if ($is_private_key) {
-		return "-----BEGIN EC PRIVATE KEY-----\n".$data."\n-----END EC PRIVATE KEY-----\n";
-	}
-	return "-----BEGIN PUBLIC KEY-----\n".$data."\n-----END PUBLIC KEY-----\n";
-}
 
 function base58_decode($base58)
 {

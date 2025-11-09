@@ -33,7 +33,7 @@ class Masternode extends Task
 			$this->verified = 0;
 			$base = self::getSignatureBase($this->public_key, $height);
 			$chain_id = Block::getChainId($height);
-			$res = ec_verify($base, $this->signature, $this->public_key, $chain_id);
+			$res = CryptoHelper::ec_verify($base, $this->signature, $this->public_key, $chain_id);
 			if(!$res) {
 				throw new Exception("Masternode signature not valid");
 			}
@@ -890,7 +890,7 @@ class Masternode extends Task
 					}
 				}
 				$signatureBase = Masternode::getSignatureBase($mnPublicKey, $height);
-				$res = ec_verify($signatureBase, $block->mn_signature, $mnPublicKey, Block::getChainId($height));
+				$res = CryptoHelper::ec_verify($signatureBase, $block->mn_signature, $mnPublicKey, Block::getChainId($height));
 				if(!$res) {
 					throw new Exception("Masternode signature not valid");
 				}
@@ -976,7 +976,7 @@ class Masternode extends Task
 				}
 
 				$base = Masternode::getSignatureBase($mnPublickKey, $block->height);
-				$res = ec_verify($base, $block->mn_signature, $mnPublickKey, Block::getChainId($block->height));
+				$res = CryptoHelper::ec_verify($base, $block->mn_signature, $mnPublickKey, Block::getChainId($block->height));
 				if(!$res) {
 					throw new Exception("Masternode: masternode signature failed");
 				}

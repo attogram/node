@@ -985,14 +985,14 @@ class Util
 			echo "Missing private key".PHP_EOL;
 			exit;
 		}
-		$private_key = coin2pem($privateKey, true);
+		$private_key = CryptoHelper::coin2pem($privateKey, true);
 		$pkey = openssl_pkey_get_private($private_key);
 		if(!$pkey) {
 			echo "Invalid private key $privateKey".PHP_EOL;
 			exit;
 		}
 		$k = openssl_pkey_get_details($pkey);
-		$public_key = pem2coin($k['key']);
+		$public_key = CryptoHelper::pem2coin($k['key']);
 
 		echo "phpcoin".PHP_EOL;
 		echo $privateKey.PHP_EOL;
@@ -1036,7 +1036,7 @@ class Util
 		} else {
 			$publicKey = $key;
 		}
-		$res = @ec_verify($message, $signature, $publicKey);
+		$res = @CryptoHelper::ec_verify($message, $signature, $publicKey);
 		if($res) {
 			echo "Signature valid".PHP_EOL;
 		} else {
