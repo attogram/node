@@ -104,3 +104,5 @@ $_config['dapps_disable_auto_propagate']=true;
 
 // set server to maintenance mode
 //$_config['maintenance']=1;
+
+$_config['enable_message_parsing']=false;
