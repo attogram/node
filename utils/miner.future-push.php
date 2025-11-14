@@ -16,6 +16,7 @@ class FuturePushMiner extends Miner
     private $speed;
     private $sleep_time;
     private $attempt;
+    private $forked;
     public $slipTime = 20; // Default slip time in seconds
 
     function measureSpeed($t1, $th) {
