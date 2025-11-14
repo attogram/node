@@ -230,6 +230,23 @@ foreach ($argv as $item){
     }
 }
 
+if (in_array('help', $argv) || in_array('--help', $argv)) {
+    echo "PHPCoin Timewarp Exploit Miner (Version ".MINER_VERSION.")".PHP_EOL;
+    echo "Usage: php utils/miner.timewarp.php <node> <address> <cpu> [options]".PHP_EOL;
+    echo PHP_EOL;
+    echo "Arguments:".PHP_EOL;
+    echo "  <node>          The URL of the node (e.g., http://127.0.0.1)".PHP_EOL;
+    echo "  <address>       The mining address".PHP_EOL;
+    echo "  <cpu>           The percentage of CPU to use (0-100)".PHP_EOL;
+    echo PHP_EOL;
+    echo "Options:".PHP_EOL;
+    echo "  --threads=<num> Number of threads to use for mining (default: 1)".PHP_EOL;
+    echo "  --slip-time=<sec> The number of seconds to slip the timestamp into the future (default: 20, max: 30)".PHP_EOL;
+    echo "  --wait-time=<sec> The number of seconds to wait after finding a block before submitting (default: 20)".PHP_EOL;
+    echo "  --help          Display this help message".PHP_EOL;
+    exit;
+}
+
 
 if(file_exists(getcwd()."/miner.conf")) {
 	$minerConf = parse_ini_file(getcwd()."/miner.conf");
