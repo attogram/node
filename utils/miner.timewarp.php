@@ -11,8 +11,31 @@ if(Phar::running()) {
 class TimewarpMiner extends Miner
 {
     private $running = true;
+    private $hashing_time = 0;
+    private $hashing_cnt = 0;
+    private $speed;
+    private $sleep_time;
+    private $attempt;
     public $slipTime = 20; // Default slip time in seconds
     public $waitTime = 20; // Default wait time in seconds
+
+    function measureSpeed($t1, $th) {
+        $t2 = microtime(true);
+        $this->hashing_cnt++;
+        $this->hashing_time = $this->hashing_time + ($t2-$th);
+
+        $diff = $t2 - $t1;
+        $this->speed = round($this->attempt / $diff,2);
+
+        $calc_cnt = round($this->speed * 60);
+
+        if($calc_cnt > 0 && $this->hashing_cnt % $calc_cnt == 0) {
+            $this->sleep_time = $this->cpu == 0 ? INF : round((($this->hashing_time/$this->hashing_cnt)*1000)*(100-$this->cpu)/$this->cpu);
+            if($this->sleep_time < 0) {
+                $this->sleep_time = 0;
+            }
+        }
+    }
 
     public function start()
     {
