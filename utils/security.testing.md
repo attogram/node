@@ -40,10 +40,11 @@ php utils/miner.timewarp.php http://127.0.0.1 Pfoo1234567890abcdefghijklmnopqrst
 
 ### Recommended Defense
 
-To defend against the Timewarp attack, the codebase should be updated to implement a **Median Time Past (MTP)** check.
+A robust defense against the Timewarp attack requires a multi-layered approach to ensure network-wide time synchronization.
 
--   **How it works:** A new block should only be accepted if its timestamp is greater than the median timestamp of the last 11 blocks.
--   **Effectiveness:** This prevents any single miner from manipulating the timestamp by more than a few seconds, as the block's time would be rejected for being inconsistent with the median of recent blocks.
+1.  **Implement Median Time Past (MTP):** This is the primary defense. A new block should only be accepted if its timestamp is greater than the median timestamp of the last 11 blocks. This prevents any single miner from manipulating the timestamp significantly.
+2.  **Use a Network Time Protocol (NTP) Client:** Each node should periodically synchronize its system clock with a trusted NTP server. This prevents the node's local clock from drifting significantly, which is a prerequisite for some time-based attacks.
+3.  **Implement Peer-to-Peer Time Checks:** Nodes should query each other for the time and refuse to connect to peers whose clocks are too far out of sync with their own. This helps to isolate nodes with incorrect time and maintain a consistent network time.
 
 ---
 
@@ -83,7 +84,8 @@ php utils/miner.future-push.php http://127.0.0.1 Pfoo1234567890abcdefghijklmnopq
 
 ### Recommended Defense
 
-To defend against the Future-Push attack, the allowable window for future-dating blocks should be drastically reduced.
+A layered defense is the most effective way to prevent Future-Push and other "slip time" attacks.
 
--   **How it works:** In the block validation logic, lower the maximum acceptable future timestamp from the current `time() + 30` to a much smaller value.
--   **Suggestion:** A value of `time() + 2` or `time() + 3` is sufficient to account for minor network clock drift without providing a large enough window to be exploited by this attack.
+1.  **Drastically Reduce the Future-Dating Window:** This is the most direct defense. Lower the maximum acceptable future timestamp from the current `time() + 30` to a much smaller value, such as `time() + 2`. This provides a small buffer for network latency and clock drift without being large enough to be gameable.
+2.  **Implement Median Time Past (MTP):** As with the Timewarp attack, an MTP check will ensure that a block's timestamp is consistent with the recent history of the blockchain, preventing large deviations into the future.
+3.  **Synchronize Clocks with NTP:** Nodes should use an NTP client to keep their local system time accurate, reducing the likelihood of network splits caused by clock drift.
