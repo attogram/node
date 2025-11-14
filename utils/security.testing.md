@@ -89,3 +89,27 @@ A layered defense is the most effective way to prevent Future-Push and other "sl
 1.  **Drastically Reduce the Future-Dating Window:** This is the most direct defense. Lower the maximum acceptable future timestamp from the current `time() + 30` to a much smaller value, such as `time() + 2`. This provides a small buffer for network latency and clock drift without being large enough to be gameable.
 2.  **Implement Median Time Past (MTP):** As with the Timewarp attack, an MTP check will ensure that a block's timestamp is consistent with the recent history of the blockchain, preventing large deviations into the future.
 3.  **Synchronize Clocks with NTP:** Nodes should use an NTP client to keep their local system time accurate, reducing the likelihood of network splits caused by clock drift.
+
+---
+
+## 3. Analysis of Required Hash Power
+
+This section provides a theoretical analysis of the hash power required to successfully execute these attacks, based on the following approximate network statistics:
+-   **Average Block Time:** ~65 seconds
+-   **Average Hash Rate:** ~1600 H/s
+
+### Timewarp Attack
+
+The Timewarp attack is a **post-mining timing manipulation**. It does not provide any advantage in *finding* a valid hash. A miner must first find a genuinely valid block through normal mining, competing with the rest of the network's hash power.
+
+Therefore, this attack **does not reduce the hash power required** to solve a block. Its primary purpose is to manipulate the `elapsed` time to influence the difficulty calculation for *subsequent* blocks.
+
+### Future-Push Attack
+
+The Future-Push attack provides a significant and direct advantage to the miner by allowing them to find a valid block in much less time than normally required.
+
+-   **Normal Mining:** A miner must search for a hash until the `elapsed` time is high enough to lower the `target` to a point where their `hit` is valid. Based on network statistics, this takes an average of **65 seconds**.
+
+-   **Exploit Mining:** A miner using the Future-Push attack can find a block with a `hit` that is initially invalid. By setting the timestamp forward by 29 seconds, they are effectively mining against a `target` that is appropriate for an `elapsed` time of `current_elapsed + 29`. This allows them to find a "valid" block much earlier.
+
+A simplified calculation shows that a miner can solve a block in as little as **10 seconds**, then push the timestamp forward to make it valid. This represents an **~85% reduction** in the time required to find a block, which translates to a massive amplification of the miner's effective hash power. A miner with only a fraction of the network's hash rate could successfully use this attack to find blocks far more frequently than their hash power would normally allow.
