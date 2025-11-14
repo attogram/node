@@ -113,3 +113,19 @@ The Future-Push attack provides a significant and direct advantage to the miner 
 -   **Exploit Mining:** A miner using the Future-Push attack can find a block with a `hit` that is initially invalid. By setting the timestamp forward by 29 seconds, they are effectively mining against a `target` that is appropriate for an `elapsed` time of `current_elapsed + 29`. This allows them to find a "valid" block much earlier.
 
 A simplified calculation shows that a miner can solve a block in as little as **10 seconds**, then push the timestamp forward to make it valid. This represents an **~85% reduction** in the time required to find a block, which translates to a massive amplification of the miner's effective hash power. A miner with only a fraction of the network's hash rate could successfully use this attack to find blocks far more frequently than their hash power would normally allow.
+
+---
+
+## 4. Combining Exploits for Maximum Effect
+
+The "Future-Push" and "Timewarp" attacks can be used in concert to create the most impactful exploit. This combined strategy allows a miner to not only find a block with a significant time advantage but also to maximally influence the difficulty of the next block.
+
+The process is as follows:
+
+1.  **Use the Future-Push Method:** A miner runs the `miner.future-push.php` script to find a block that is initially invalid but can be made valid by pushing the timestamp forward. This allows them to "solve" the block in a fraction of the normal time (e.g., 10 seconds).
+
+2.  **Apply the Timewarp Principle:** Instead of broadcasting the block immediately, the miner waits for an additional period (e.g., 20-30 seconds).
+
+3.  **Broadcast with a Future Timestamp:** After waiting, the miner broadcasts the block with its timestamp set far into the future (e.g., `time() + 29s`).
+
+The result is a massively inflated `elapsed` time. For example, if a block is found in 10 seconds, the miner waits 25 seconds, and then pushes the timestamp 29 seconds into the future, the `elapsed` time for a block that only took 10 seconds to mine will be recorded as `10 + 25 + 29 = 64` seconds. This makes the invalid block appear as a normally mined block, which completely breaks the difficulty adjustment mechanism for the next block.
