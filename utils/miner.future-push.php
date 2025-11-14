@@ -146,10 +146,22 @@ class FuturePushMiner extends Miner
 
                 $this->measureSpeed($t1, $th);
 
-                $s = "PID=" . getmypid() . " Mining attempt={$this->attempt} height=$height difficulty=$difficulty elapsed=$elapsed hit=$hit target=$target speed={$this->speed} submits=" .
-                    $this->miningStat['submits'] . " accepted=" . $this->miningStat['accepted'] . " rejected=" . $this->miningStat['rejected'] . " dropped=" . $this->miningStat['dropped'];
+                $s = sprintf("PID:%-8d Att:%-10d H:%-10d Diff:%-18s Elps:%-5d Hit:%-15s Tgt:%-20s Spd:%-8.2f S:%-3d A:%-3d R:%-3d D:%-3d",
+                    getmypid(),
+                    $this->attempt,
+                    $height,
+                    (string)$difficulty,
+                    $elapsed,
+                    (string)$hit,
+                    (string)$target,
+                    $this->speed,
+                    $this->miningStat['submits'],
+                    $this->miningStat['accepted'],
+                    $this->miningStat['rejected'],
+                    $this->miningStat['dropped']
+                );
                 if (!$this->forked && !in_array("--flat-log", $argv)) {
-                    echo "$s \r";
+                    echo $s . " \r";
                 } else {
                     echo $s . PHP_EOL;
                 }
