@@ -8,7 +8,17 @@ This document contains a security audit of the smart contract and dapp system.
 
 **Description:**
 
-The `dapps_exec` function provides a mechanism for a dapp to execute arbitrary PHP code on the node that is running it. This function is protected by a check, `Dapps::isLocal()`, which is intended to ensure that only "local" dapps can use it. However, if a user can be tricked into installing a malicious dapp, that dapp is considered "local" and can use `dapps_exec` to execute any code it wants, completely bypassing the sandbox.
+The `dapps_exec` function in `include/class/Dapps.php` provides a mechanism for a dapp to execute arbitrary PHP code on the node that is running it. This function is protected by a check, `Dapps::isLocal()`, which is intended to ensure that only "local" dapps can use it. However, if a user can be tricked into installing a malicious dapp, that dapp is considered "local" and can use `dapps_exec` to execute any code it wants, completely bypassing the sandbox.
+
+The vulnerable code is located in `include/class/Dapps.php` on line 542:
+
+```php
+		if($actionObj['type']=="dapps_exec" && self::isLocal($dapps_id)) {
+			$code = $actionObj['code'];
+			eval($code);
+			exit;
+		}
+```
 
 **Attack Vector:**
 
@@ -21,7 +31,7 @@ The `dapps_exec` function provides a mechanism for a dapp to execute arbitrary P
 4.  The dapp returns the malicious action string.
 5.  The `Dapps::render()` method in `include/class/Dapps.php` receives this string and calls `Dapps::processAction()`.
 6.  `Dapps::processAction()` checks if the dapp is local. Since it is, the check passes.
-7.  The `eval()` function is called with the attacker's code, and the file `/tmp/pwned` is created on the node's filesystem.
+7.  The `eval()` function on line 544 is called with the attacker's code, and the file `/tmp/pwned` is created on the node's filesystem.
 
 **Proof of Concept:**
 
@@ -46,6 +56,29 @@ The `dapps_exec` function is extremely dangerous and should be removed entirely.
 **Description:**
 
 The `query` method in `include/class/sc/SmartContractBase.php` is vulnerable to SQL injection. This method allows a smart contract to execute a SQL query against the node's database, and it does so by directly concatenating a user-provided string into the query. This means that a malicious smart contract can execute any arbitrary SQL it wants, including `UPDATE` and `DELETE` statements.
+
+The vulnerable code is located in `include/class/sc/SmartContractBase.php` on line 237:
+
+```php
+    static function query($address, $name, $height, $sql, $params =[]) {
+        $db = SmartContractContext::$db;
+
+        $sql="select s.var_key, s.var_value from smart_contract_state s
+               where s.sc_address = :sc_address and s.variable = :variable and s.height <= :height $sql order by s.var_key";
+        $all_params = $params;
+        $all_params[":sc_address"] = $address;
+        $all_params[":variable"] = $name;
+        $all_params[":height"] = $height;
+        $rows=$db->run($sql, $all_params);
+        $list = [];
+        foreach ($rows as $row) {
+            $key = $row['var_key'];
+            $val = $row['var_value'];
+            $list[$key]=$val;
+        }
+        return $list;
+    }
+```
 
 **Attack Vector:**
 
