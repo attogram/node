@@ -47,7 +47,7 @@ require_once __DIR__. '/../common/include/top.php';
 			<td><?php echo $transaction['val'] ?></td>
 			<td><?php echo $transaction['fee'] ?></td>
 			<td><?php echo Transaction::typeLabel($transaction['type']) ?></td>
-			<td style="word-break: break-all"><?php echo $transaction['message'] ?></td>
+			<td style="word-break: break-all"><?php echo display_message($transaction['message']) ?></td>
 		</tr>
 		<?php } ?>
 	</tbody>

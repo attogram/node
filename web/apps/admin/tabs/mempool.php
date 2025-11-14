@@ -59,7 +59,7 @@ $count=count($transactions);
 				<td><?php echo $transaction['val'] ?></td>
 				<td><?php echo $transaction['fee'] ?></td>
 				<td><?php echo $transaction['type'] ?></td>
-				<td style="word-break: break-all"><?php echo $transaction['message'] ?></td>
+				<td style="word-break: break-all"><?php echo display_message($transaction['message']) ?></td>
 				<td><?php echo $transaction['peer'] ?></td>
 				<td><?php echo $transaction['error'] ?></td>
                 <td>
