@@ -92,27 +92,31 @@ A layered defense is the most effective way to prevent Future-Push and other "sl
 
 ---
 
-## 3. Analysis of Required Hash Power
+## 3. Analysis of Exploit Advantage
 
-This section provides a theoretical analysis of the hash power required to successfully execute these attacks, based on the following approximate network statistics:
--   **Average Block Time:** ~65 seconds
--   **Average Hash Rate:** ~1600 H/s
+This section provides a theoretical analysis of the advantage an attacker gains by executing these exploits, based on the following approximate **total network** statistics:
+-   **Average Network Block Time:** ~65 seconds
+-   **Average Network Hash Rate:** ~1600 H/s
 
 ### Timewarp Attack
 
-The Timewarp attack is a **post-mining timing manipulation**. It does not provide any advantage in *finding* a valid hash. A miner must first find a genuinely valid block through normal mining, competing with the rest of the network's hash power.
+The Timewarp attack is a **post-mining timing manipulation**. It does not provide any advantage in *finding* a valid hash. A miner must first find a genuinely valid block through normal, competitive mining.
 
-Therefore, this attack **does not reduce the hash power required** to solve a block. Its primary purpose is to manipulate the `elapsed` time to influence the difficulty calculation for *subsequent* blocks.
+Therefore, this attack **provides no advantage in solving a block**. Its sole purpose is to manipulate the `elapsed` time *after* a block has been solved to influence the difficulty calculation for future blocks.
 
 ### Future-Push Attack
 
-The Future-Push attack provides a significant and direct advantage to the miner by allowing them to find a valid block in much less time than normally required.
+The Future-Push attack provides a significant advantage by allowing an attacker to validate a block that would be considered invalid by honest miners.
 
--   **Normal Mining:** A miner must search for a hash until the `elapsed` time is high enough to lower the `target` to a point where their `hit` is valid. Based on network statistics, this takes an average of **65 seconds**.
+The core of the Elapsed Proof of Work system is that the `target` (difficulty) is inversely proportional to the `elapsed` time since the last block. Honest miners must keep hashing until the `elapsed` time is high enough to lower the `target` below their `hit`. On average, this takes the entire network **~65 seconds**.
 
--   **Exploit Mining:** A miner using the Future-Push attack can find a block with a `hit` that is initially invalid. By setting the timestamp forward by 29 seconds, they are effectively mining against a `target` that is appropriate for an `elapsed` time of `current_elapsed + 29`. This allows them to find a "valid" block much earlier.
+An attacker using the Future-Push exploit can find a block with a low `elapsed` time (e.g., 10 seconds) and a `hit` that is *too low* for the high `target`. By pushing the timestamp forward 29 seconds, they submit the block with an `elapsed` time of `10 + 29 = 39` seconds.
 
-A simplified calculation shows that a miner can solve a block in as little as **10 seconds**, then push the timestamp forward to make it valid. This represents an **~85% reduction** in the time required to find a block, which translates to a massive amplification of the miner's effective hash power. A miner with only a fraction of the network's hash rate could successfully use this attack to find blocks far more frequently than their hash power would normally allow.
+The advantage is clear:
+-   An **honest miner** needs a `hit` that can beat a `target` calculated with an `elapsed` time of ~65 seconds.
+-   An **attacker** only needs a `hit` that can beat a `target` calculated with an `elapsed` time of ~39 seconds.
+
+Because the target is significantly easier to beat, the attacker can find a valid block much faster than an honest miner with the same hash power. This gives them a disproportionate share of the block rewards and allows them to find blocks more frequently than their raw hash power would otherwise permit.
 
 ---
 
