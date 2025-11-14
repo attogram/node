@@ -17,6 +17,7 @@ class TimewarpMiner extends Miner
     private $sleep_time;
     private $attempt;
     private $forked;
+    private $miningNodes = [];
     public $slipTime = 20; // Default slip time in seconds
     public $waitTime = 20; // Default wait time in seconds
 
