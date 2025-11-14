@@ -234,6 +234,31 @@ class FuturePushMiner extends Miner
 
         _log("Miner stopped");
     }
+
+    private function sendHash($node, $postData, &$response) {
+        $res = url_post($node . "/mine.php?q=submitHash&", http_build_query($postData), 5);
+        $response = json_decode($res, true);
+        _log("Send hash to node $node response = ".json_encode($response));
+        if(!isset($this->miningStat['submitted_blocks'])) {
+            $this->miningStat['submitted_blocks']=[];
+        }
+        $this->miningStat['submitted_blocks'][]=[
+            "time"=>date("r"),
+            "node"=>$node,
+            "height"=>$postData['height'],
+            "elapsed"=>$postData['elapsed'],
+            "hashes"=>$this->attempt,
+            "hit"=> $postData['hit'],
+            "target"=>$postData['target'],
+            "status"=>@$response['status']=="ok" ? "accepted" : "rejected",
+            "response"=>@$response['data']
+        ];
+        if (@$response['status'] == "ok") {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
 
 
