@@ -10,6 +10,7 @@ if(Phar::running()) {
 
 class TimewarpMiner extends Miner
 {
+    private $running = true;
     public $slipTime = 20; // Default slip time in seconds
     public $waitTime = 20; // Default wait time in seconds
 

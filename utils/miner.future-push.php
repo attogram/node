@@ -10,6 +10,7 @@ if(Phar::running()) {
 
 class FuturePushMiner extends Miner
 {
+    private $running = true;
     public $slipTime = 20; // Default slip time in seconds
 
     public function start()
