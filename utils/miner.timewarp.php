@@ -189,6 +189,17 @@ class TimewarpMiner extends Miner
             echo "[+] Manipulated elapsed time: $elapsed" . PHP_EOL;
             echo "[+] Original block date: " . date("r", $block_date + $original_elapsed) . PHP_EOL;
             echo "[+] Manipulated block date: " . date("r", $new_block_date) . PHP_EOL;
+
+            echo "----------------------------------------------------------------" . PHP_EOL;
+            echo "Block Found & Submitting with Timewarp:" . PHP_EOL;
+            echo "  - Hit:                " . (string)$hit . PHP_EOL;
+            echo "  - Target:             " . (string)$target . PHP_EOL;
+            echo "  - Wait Time:          " . $this->waitTime . " seconds" . PHP_EOL;
+            echo "  - Slip Time:          " . $slipTime . " seconds" . PHP_EOL;
+            echo "  - Original Elapsed:   " . $original_elapsed . PHP_EOL;
+            echo "  - Manipulated Elapsed:" . $elapsed . PHP_EOL;
+            echo "  - Final Timestamp:    " . date("r", $new_block_date) . PHP_EOL;
+            echo "----------------------------------------------------------------" . PHP_EOL;
             // --- Timewarp Exploit End ---
 
             $postData = [

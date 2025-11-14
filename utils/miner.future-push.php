@@ -193,6 +193,16 @@ class FuturePushMiner extends Miner
                 continue;
             }
 
+            echo "----------------------------------------------------------------" . PHP_EOL;
+            echo "Block Found & Submitting with Future-Push:" . PHP_EOL;
+            echo "  - Hit:                 " . (string)$hit . PHP_EOL;
+            echo "  - Original Target:     " . (string)$target . " (INVALID)" . PHP_EOL;
+            echo "  - Future Target:       " . (string)$future_target . " (VALID)" . PHP_EOL;
+            echo "  - Slip Time:           " . $slipTime . " seconds" . PHP_EOL;
+            echo "  - Manipulated Elapsed: " . $elapsed . PHP_EOL;
+            echo "  - Final Timestamp:     " . date("r", $new_block_date) . PHP_EOL;
+            echo "----------------------------------------------------------------" . PHP_EOL;
+
             $postData = [
                 'argon' => $bl->argon,
                 'nonce' => $bl->nonce,
