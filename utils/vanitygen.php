@@ -15,7 +15,9 @@ print VANITYGEN_NAME . ' v' . VANITYGEN_VERSION . PHP_EOL;
 
 setupOrExit();
 
-generateVanityAddress(getOptionsOrExit($argv));
+$options = getOptionsOrExit($argv);
+validatePrefix($options['prefix'], $options['case_sensitive']);
+generateVanityAddress($options);
 
 print PHP_EOL . 'Exiting ' . VANITYGEN_NAME . PHP_EOL;
 
@@ -26,30 +28,43 @@ print PHP_EOL . 'Exiting ' . VANITYGEN_NAME . PHP_EOL;
  *
  * @param string $prefix The prefix to validate.
  */
-function validatePrefix(string $prefix): void
+function validatePrefix(string $prefix, bool $caseSensitive): void
 {
-    // Normalize prefix to always start with 'P' for consistent validation
-    $normalizedPrefix = $prefix;
-    if (!str_starts_with($normalizedPrefix, 'P')) {
-        // If it starts with 'p', replace it. Otherwise, prepend 'P'.
-        if (str_starts_with(strtolower($normalizedPrefix), 'p')) {
-            $normalizedPrefix = 'P' . substr($normalizedPrefix, 1);
-        } else {
-            $normalizedPrefix = 'P' . $normalizedPrefix;
+    // The prefix that will be checked against the valid list.
+    $prefixToValidate = $prefix;
+
+    // A PHPCoin address must start with 'P'.
+    // If the check is case-sensitive, any prefix starting with 'p' is automatically invalid.
+    // If the check is case-insensitive, we normalize 'p' to 'P' to match the generator's behavior.
+    if (str_starts_with($prefixToValidate, 'p')) {
+        if (!$caseSensitive) {
+            $prefixToValidate = 'P' . substr($prefixToValidate, 1);
         }
+    } else if (!str_starts_with($prefixToValidate, 'P')) {
+        // If the prefix doesn't start with 'p' or 'P', prepend 'P' to it.
+        $prefixToValidate = 'P' . $prefixToValidate;
     }
 
-    if (strlen($normalizedPrefix) < 2) {
-        return; // Not long enough to have a second character, so nothing to validate.
+    if (strlen($prefixToValidate) < 2) {
+        return; // Not long enough for a 2-char check.
     }
+
+    $prefixToCheck = substr($prefixToValidate, 0, 2);
 
     $validPrefixes = [
         'PX', 'PY', 'PZ', 'Pa', 'Pb', 'Pc', 'Pd', 'Pe', 'Pf', 'Pg', 'Ph', 'Pi', 'Pj', 'Pk', 'Pm', 'Pn', 'Po', 'Pp', 'Pq', 'Pr', 'Ps', 'Pt', 'Pu', 'Pv', 'Pw'
     ];
 
-    $prefixToCheck = substr($normalizedPrefix, 0, 2);
+    $isValid = false;
+    if ($caseSensitive) {
+        $isValid = in_array($prefixToCheck, $validPrefixes, true);
+    } else {
+        // For case-insensitive, we compare the lowercase versions.
+        $lowerValidPrefixes = array_map('strtolower', $validPrefixes);
+        $isValid = in_array(strtolower($prefixToCheck), $lowerValidPrefixes);
+    }
 
-    if (!in_array($prefixToCheck, $validPrefixes, true)) {
+    if (!$isValid) {
         sort($validPrefixes);
         $validPrefixesList = implode(', ', $validPrefixes);
         exit('ERROR: Impossible prefix.' . PHP_EOL . 'Valid prefixes start with: ' . $validPrefixesList . PHP_EOL);
@@ -162,8 +177,6 @@ function getOptionsOrExit(array $argv): array
     if (empty($arguments[0])) {
         exit('ERROR: No prefix provided.' . PHP_EOL . VANITYGEN_USAGE . PHP_EOL);
     }
-
-    validatePrefix($arguments[0]);
 
     if (isset($options['d'])) {
         $debug = true;
