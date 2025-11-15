@@ -27,6 +27,7 @@ print PHP_EOL . 'Exiting ' . VANITYGEN_NAME . PHP_EOL;
  * Exits with an error message if the prefix is invalid.
  *
  * @param string $prefix The prefix to validate.
+ * @param bool $caseSensitive Whether the check should be case sensitive.
  */
 function validatePrefix(string $prefix, bool $caseSensitive): void
 {
@@ -184,7 +185,7 @@ function getOptionsOrExit(array $argv): array
 
     return [
         'prefix' => $arguments[0],
-        'case_sensitive' => isset($options['c']) ? true : false,
+        'case_sensitive' => isset($options['c'])
     ];
 }
 
