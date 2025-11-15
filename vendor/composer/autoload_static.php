@@ -31,6 +31,7 @@ class ComposerStaticInit2194f6688160511c482e6ad0f67eb5d0
         'NodeMiner' => __DIR__ . '/../..' . '/include/class/NodeMiner.php',
         'NodeSync' => __DIR__ . '/../..' . '/include/class/NodeSync.php',
         'Nodeutil' => __DIR__ . '/../..' . '/include/class/Nodeutil.php',
+        'Pajax' => __DIR__ . '/../..' . '/include/class/Pajax.php',
         'Peer' => __DIR__ . '/../..' . '/include/class/Peer.php',
         'PeerPost' => __DIR__ . '/../..' . '/include/class/PeerPost.php',
         'PeerRequest' => __DIR__ . '/../..' . '/include/class/PeerRequest.php',

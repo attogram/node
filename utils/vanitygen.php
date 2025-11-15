@@ -1,7 +1,7 @@
 <?php
 
 const VANITYGEN_NAME = 'PHPCoin Vanity Address Generator';
-const VANITYGEN_VERSION = '0.0.1';
+const VANITYGEN_VERSION = '0.0.2';
 const VANITYGEN_USAGE = 'Usage: php vanitygen.php prefix [-c] [-d]' . PHP_EOL .
     '  prefix     Prefix for the PHPCoin address (e.g., "Php")' . PHP_EOL .
     '  -c         Case sensitive matching' . PHP_EOL .
@@ -18,6 +18,43 @@ setupOrExit();
 generateVanityAddress(getOptionsOrExit($argv));
 
 print PHP_EOL . 'Exiting ' . VANITYGEN_NAME . PHP_EOL;
+
+/**
+ * Validates the provided prefix against the list of mathematically possible second characters.
+ *
+ * Exits with an error message if the prefix is invalid.
+ *
+ * @param string $prefix The prefix to validate.
+ */
+function validatePrefix(string $prefix): void
+{
+    // The logic in generateVanityAddress function already normalizes the prefix to start with 'P'.
+    // I will apply the same normalization here for validation purposes.
+    $normalizedPrefix = $prefix;
+    if (! str_starts_with($normalizedPrefix, 'p') && ! str_starts_with($normalizedPrefix, 'P')) {
+        $normalizedPrefix = 'P' . $normalizedPrefix;
+    }
+    if (str_starts_with($normalizedPrefix, 'p')) {
+        $normalizedPrefix = 'P' . substr($normalizedPrefix, 1);
+    }
+
+    if (strlen($normalizedPrefix) < 2) {
+        return; // No second character to validate.
+    }
+
+    $validSecondChars = ['X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w'];
+    $secondChar = $normalizedPrefix[1];
+
+    if (!in_array($secondChar, $validSecondChars, true)) {
+        sort($validSecondChars);
+        $validPrefixes = [];
+        foreach ($validSecondChars as $char) {
+            $validPrefixes[] = 'P' . $char;
+        }
+        $validPrefixesList = implode(', ', $validPrefixes);
+        exit('ERROR: Impossible prefix.' . PHP_EOL . 'Valid prefixes start with: ' . $validPrefixesList . PHP_EOL);
+    }
+}
 
 /**
  * Generates a vanity PHPCoin address based on the provided options.
@@ -125,6 +162,8 @@ function getOptionsOrExit(array $argv): array
     if (empty($arguments[0])) {
         exit('ERROR: No prefix provided.' . PHP_EOL . VANITYGEN_USAGE . PHP_EOL);
     }
+
+    validatePrefix($arguments[0]);
 
     if (isset($options['d'])) {
         $debug = true;

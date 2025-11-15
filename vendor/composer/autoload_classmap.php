@@ -24,6 +24,7 @@ return array(
     'NodeMiner' => $baseDir . '/include/class/NodeMiner.php',
     'NodeSync' => $baseDir . '/include/class/NodeSync.php',
     'Nodeutil' => $baseDir . '/include/class/Nodeutil.php',
+    'Pajax' => $baseDir . '/include/class/Pajax.php',
     'Peer' => $baseDir . '/include/class/Peer.php',
     'PeerPost' => $baseDir . '/include/class/PeerPost.php',
     'PeerRequest' => $baseDir . '/include/class/PeerRequest.php',
