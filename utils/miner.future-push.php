@@ -154,16 +154,16 @@ class FuturePushMiner extends Miner
 
                 $this->measureSpeed($t1, $th);
 
-                $s = sprintf("PID:%-8d Att:%-10d H:%-10d Diff:%-18s Elps:%-5d Hit:%-15s Tgt:%-20s Slp-Tgt:%-20s Bst-Hit:%-15s Spd:%-8.2f S:%-3d A:%-3d R:%-3d D:%-3d",
+                $s = sprintf("PID:%-6d Atmpt:%-6d Hght:%-8d Dfclty:%-10s Elpsd:%-4d Hit:%-10s Bst-Hit:%-10s Trgt:%-10s Slp-Trgt:%-10s Spd:%-6.2f S:%-2d A:%-2d R:%-2d D:%-2d",
                     getmypid(),
                     $this->attempt,
                     $height,
                     (string)$difficulty,
                     $elapsed,
                     (string)$hit,
+                    (string)$bestHit,
                     (string)$target,
                     (string)$future_target,
-                    (string)$bestHit,
                     $this->speed,
                     $this->miningStat['submits'],
                     $this->miningStat['accepted'],
