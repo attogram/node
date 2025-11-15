@@ -18,6 +18,8 @@ class FuturePushMiner extends Miner
     private $attempt;
     private $forked;
     private $miningNodes = [];
+    public $threadId = 1;
+    public $totalThreads = 1;
     public $checkInterval = 10; // Default check interval in seconds
     public $slipTime = 20; // Default slip time in seconds
 
@@ -170,10 +172,11 @@ class FuturePushMiner extends Miner
                     $this->miningStat['rejected'],
                     $this->miningStat['dropped']
                 );
-                if (!$this->forked && !in_array("--flat-log", $argv)) {
-                    echo $s . " \r";
-                } else {
+                if (in_array("--flat-log", $argv)) {
                     echo $s . PHP_EOL;
+                } else {
+                    $moveDown = $this->threadId > 1 ? str_repeat("\n", $this->threadId - 1) : "";
+                    echo "\033[u" . $moveDown . "\r" . $s . "\033[K";
                 }
                 $this->miningStat['hashes']++;
                 if ($prev_elapsed != $elapsed && $elapsed % $this->checkInterval == 0) {
@@ -201,6 +204,13 @@ class FuturePushMiner extends Miner
 
             if (!$blockFound || $elapsed <= 0) {
                 continue;
+            }
+
+            if (!in_array("--flat-log", $argv)) {
+                // Restore cursor, scroll past the refreshing block, and save a new anchor
+                echo "\033[u";
+                echo str_repeat(PHP_EOL, $this->totalThreads + 2);
+                echo "\033[s";
             }
 
             echo "----------------------------------------------------------------" . PHP_EOL;
@@ -393,9 +403,11 @@ $_config['chain_id'] = trim(file_exists(dirname(__DIR__)."/chain_id"));
 
 define("ROOT", __DIR__);
 
-function startMiner($address,$node, $forked) {
+function startMiner($address,$node, $forked, $threadId = 1, $totalThreads = 1) {
     global $cpu, $block_cnt, $slipTime, $checkInterval;
     $miner = new FuturePushMiner($address, $node, $forked);
+    $miner->threadId = $threadId;
+    $miner->totalThreads = $totalThreads;
     if (!empty($slipTime)) {
         $miner->slipTime = $slipTime;
     }
@@ -410,10 +422,14 @@ function startMiner($address,$node, $forked) {
 if($threads == 1) {
     startMiner($address,$node, false);
 } else {
+    if (!in_array("--flat-log", $argv)) {
+        echo "\033[s"; // Save cursor position
+        echo str_repeat(PHP_EOL, $threads);
+    }
     $forker = new Forker();
     for($i=1; $i<=$threads; $i++) {
-        $forker->fork(function() use ($address,$node) {
-            startMiner($address,$node, true);
+        $forker->fork(function() use ($address, $node, $i, $threads) {
+            startMiner($address, $node, true, $i, $threads);
         });
     }
     $forker->exec();
