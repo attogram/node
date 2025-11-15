@@ -213,7 +213,7 @@ class TimewarpMiner extends Miner
                 'target' => (string)$target,
                 'date' => $new_block_date,
                 'elapsed' => $elapsed,
-                'minerInfo' => 'phpcoin-miner cli ' . VERSION,
+                'minerInfo' => 'phpcoin-miner cli ' . MINER_VERSION,
                 "version" => MINER_VERSION
             ];
 

