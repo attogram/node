@@ -11,6 +11,7 @@ class Miner {
 	public $block_cnt = 0;
 	public $cpu = 25;
     public $minerid;
+    public $outputFormat;
     private $forked;
 
 	private $running = true;
@@ -20,6 +21,7 @@ class Miner {
     private $speed;
     private $sleep_time;
     private $attempt;
+    private $bestHit = 0;
 
     private $miningNodes = [];
 
@@ -174,6 +176,7 @@ class Miner {
 			$offset = $nodeTime - $now;
 
 			$this->attempt = 0;
+            $this->bestHit = 0;
 
 			$bl = new Block(null, $this->address, $height, null, null, $data, $difficulty, Block::versionCode($height), null, $prev_block_id);
 
@@ -197,12 +200,29 @@ class Miner {
 				$bl->date = $block_date;
 				$hit = $bl->calculateHit();
 				$target = $bl->calculateTarget($elapsed);
+
+                if($hit > $this->bestHit) {
+                    $this->bestHit = $hit;
+                }
+
 				$blockFound = ($hit > 0 && $target > 0 && $hit > $target);
 
                 $this->measureSpeed($t1, $th);
 
-				$s = "PID=".getmypid()." Mining attempt={$this->attempt} height=$height difficulty=$difficulty elapsed=$elapsed hit=$hit target=$target speed={$this->speed} submits=".
-                    $this->miningStat['submits']." accepted=".$this->miningStat['accepted']. " rejected=".$this->miningStat['rejected']. " dropped=".$this->miningStat['dropped'];
+				$s = sprintf("PID:%-6d Atmpt:%-6d Hght:%-8d Elpsd:%-4d Hit:%-8s Best:%-12s Target:%-12s  Spd:%-6.2f S:%-2d A:%-2d R:%-2d D:%-2d",
+                    getmypid(),
+                    $this->attempt,
+                    $height,
+                    $elapsed,
+                    number_format(gmp_intval($hit)),
+                    number_format(gmp_intval($this->bestHit)),
+                    number_format(gmp_intval($target)),
+                    $this->speed,
+                    $this->miningStat['submits'],
+                    $this->miningStat['accepted'],
+                    $this->miningStat['rejected'],
+                    $this->miningStat['dropped']
+                );
                 if(!$this->forked && !in_array("--flat-log", $argv)){
                     echo "$s \r";
                 } else {
