@@ -214,7 +214,7 @@ class FuturePushMiner extends Miner
                 'target' => (string)$future_target,
                 'date' => $new_block_date,
                 'elapsed' => $elapsed,
-                'minerInfo' => 'phpcoin-miner cli ' . VERSION,
+                'minerInfo' => 'phpcoin-miner cli ' . MINER_VERSION,
                 "version" => MINER_VERSION
             ];
 
