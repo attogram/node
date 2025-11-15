@@ -292,26 +292,10 @@ class Miner {
             }
 
             if($accepted) {
-                if ($this->outputFormat == 'fancy') {
-                    echo PHP_EOL . "================================================================================" . PHP_EOL;
-                    echo "Block found and accepted! Height: " . $postData['height'] . PHP_EOL;
-                    echo " -> Hash: " . $bl->hash() . PHP_EOL;
-                    echo " -> Raw Post Data:" . PHP_EOL;
-                    print_r($postData);
-                    echo "================================================================================" . PHP_EOL;
-                }
                 _log("Block confirmed", 1);
                 $this->miningStat['accepted']++;
             } else {
-                if ($this->outputFormat == 'fancy') {
-                    echo PHP_EOL . "--------------------------------------------------------------------------------" . PHP_EOL;
-                    echo "Block found but REJECTED! Height: " . $postData['height'] . PHP_EOL;
-                    echo " -> Server response: " . json_encode($response) . PHP_EOL;
-                    echo " -> Raw Post Data:" . PHP_EOL;
-                    print_r($postData);
-                    echo "--------------------------------------------------------------------------------" . PHP_EOL;
-                }
-                _log("Block not confirmed: " . $res, 1);
+                _log("Block not confirmed: " . json_encode($response), 1);
                 $this->miningStat['rejected']++;
             }
 
@@ -333,7 +317,22 @@ class Miner {
     private function sendHash($node, $postData, &$response) {
         $res = url_post($node . "/mine.php?q=submitHash&", http_build_query($postData), 5);
         $response = json_decode($res, true);
-        _log("Send hash to node $node response = ".json_encode($response));
+        if ($this->outputFormat == 'fancy') {
+            $status = @$response['status'] == "ok" ? "ACCEPTED" : "REJECTED";
+            if ($status == "ACCEPTED") {
+                echo str_repeat(PHP_EOL, 5);
+            }
+            $line_break = ($status == "ACCEPTED") ? "========================================" : "----------------------------------------";
+            echo PHP_EOL . $line_break . PHP_EOL;
+            echo "Submission to " . $node . " -> " . $status . PHP_EOL;
+            echo " -> Raw Post Data:" . PHP_EOL;
+            print_r($postData);
+            echo " -> Server Response:" . PHP_EOL;
+            print_r($response);
+            echo $line_break . PHP_EOL;
+        } else {
+            _log("Send hash to node $node response = ".json_encode($response));
+        }
         if(!isset($this->miningStat['submitted_blocks'])) {
             $this->miningStat['submitted_blocks']=[];
         }
