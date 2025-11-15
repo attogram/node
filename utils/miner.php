@@ -3,9 +3,9 @@ if(php_sapi_name() !== 'cli') exit;
 const DEFAULT_CHAIN_ID = "01";
 const MINER_VERSION = "1.5";
 if(Phar::running()) {
-	require_once 'vendor/autoload.php';
+        require_once 'vendor/autoload.php';
 } else {
-	require_once dirname(__DIR__).'/vendor/autoload.php';
+        require_once dirname(__DIR__).'/vendor/autoload.php';
 }
 
 $node = @$argv[1];
@@ -22,11 +22,11 @@ foreach ($argv as $item){
 
 
 if(file_exists(getcwd()."/miner.conf")) {
-	$minerConf = parse_ini_file(getcwd()."/miner.conf");
-	$node = $minerConf['node'];
-	$address = $minerConf['address'];
-	$block_cnt = @$minerConf['block_cnt'];
-	$cpu = @$minerConf['cpu'];
+        $minerConf = parse_ini_file(getcwd()."/miner.conf");
+        $node = $minerConf['node'];
+        $address = $minerConf['address'];
+        $block_cnt = @$minerConf['block_cnt'];
+        $cpu = @$minerConf['cpu'];
     $threads = @$minerConf['threads'];
 }
 
@@ -45,26 +45,26 @@ echo "Threads:        ".$threads.PHP_EOL;
 
 
 if(empty($node) && empty($address)) {
-	die("Usage: miner <node> <address> <cpu>".PHP_EOL);
+        die("Usage: miner <node> <address> <cpu>".PHP_EOL);
 }
 
 if(empty($node)) {
-	die("Node not defined".PHP_EOL);
+        die("Node not defined".PHP_EOL);
 }
 if(empty($address)) {
-	die("Address not defined".PHP_EOL);
+        die("Address not defined".PHP_EOL);
 }
 
 $res = url_get($node . "/api.php?q=getPublicKey&address=".$address);
 if(empty($res)) {
-	die("No response from node".PHP_EOL);
+        die("No response from node".PHP_EOL);
 }
 $res = json_decode($res, true);
 if(empty($res)) {
-	die("Invalid response from node".PHP_EOL);
+        die("Invalid response from node".PHP_EOL);
 }
 if(!($res['status']=="ok" && !empty($res['data']))) {
-	die("Invalid response from node: ".json_encode($res).PHP_EOL);
+        die("Invalid response from node: ".json_encode($res).PHP_EOL);
 }
 
 echo "Network:        ".$res['network'].PHP_EOL;
