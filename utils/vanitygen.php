@@ -39,6 +39,19 @@ function generateVanityAddress(array $options): array
         $prefix = 'P' . substr($prefix, 1);
     }
 
+    $valid_second_chars = ['X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w'];
+
+    if (strlen($prefix) > 1) {
+        $second_char = $prefix[1];
+        $check_char = $options['case_sensitive'] ? $second_char : strtolower($second_char);
+        $search_array = $options['case_sensitive'] ? $valid_second_chars : array_map('strtolower', $valid_second_chars);
+        if (!in_array($check_char, $search_array)) {
+            exit("ERROR: The second character of a PHPCoin address can not be a number or the letter 'l'.\n" .
+                "The requested prefix '$prefix' is mathematically impossible.\n" .
+                "Valid second characters are: " . implode(', ', $valid_second_chars) . "\n");
+        }
+    }
+
     $caseSensitive = $options['case_sensitive'];
 
     print 'Prefix: ' . $prefix . PHP_EOL;
