@@ -12,21 +12,21 @@ function usage() {
     echo "PHPCoin Miner Version ".MINER_VERSION.PHP_EOL;
     echo "Usage: php miner.php [options]".PHP_EOL;
     echo "Options:".PHP_EOL;
-    echo "  -h, --help            Show this help message and exit".PHP_EOL;
     echo "  -n, --node=<url>      Node URL to connect to".PHP_EOL;
     echo "  -a, --address=<addr>  Address to mine for".PHP_EOL;
     echo "  -c, --cpu=<percent>   CPU usage percentage (default: 50)".PHP_EOL;
     echo "  -t, --threads=<num>   Number of mining threads (default: 1)".PHP_EOL;
+    echo "  -h, --help            Show this help message and exit".PHP_EOL;
     echo PHP_EOL;
     echo "A miner.conf file can be used for default values.".PHP_EOL;
     exit;
 }
 
-$short_opts = "n:a:c::t::h";
-$long_opts = ["node:", "address:", "cpu::", "threads::", "help"];
+$short_opts = "n:a:c:t:h";
+$long_opts = ["node:", "address:", "cpu:", "threads:", "help"];
 $options = getopt($short_opts, $long_opts);
 
-if (isset($options['h']) || isset($options['help'])) {
+if ($argc == 1 || isset($options['h']) || isset($options['help'])) {
     usage();
 }
 
@@ -48,13 +48,13 @@ if (isset($options['n'])) $node = $options['n'];
 if (isset($options['node'])) $node = $options['node'];
 if (isset($options['a'])) $address = $options['a'];
 if (isset($options['address'])) $address = $options['address'];
-if (isset($options['c'])) $cpu = $options['c'];
-if (isset($options['cpu'])) $cpu = $options['cpu'];
-if (isset($options['t'])) $threads = $options['t'];
-if (isset($options['threads'])) $threads = $options['threads'];
+if (isset($options['c'])) $cpu = (int)$options['c'];
+if (isset($options['cpu'])) $cpu = (int)$options['cpu'];
+if (isset($options['t'])) $threads = (int)$options['t'];
+if (isset($options['threads'])) $threads = (int)$options['threads'];
 
 if(empty($threads)) $threads = 1;
-if(is_null($cpu)) $cpu = 50;
+if(empty($cpu)) $cpu = 50;
 if($cpu > 100) $cpu = 100;
 
 
@@ -65,10 +65,12 @@ echo "CPU:            ".$cpu.PHP_EOL;
 echo "Threads:        ".$threads.PHP_EOL;
 
 if(empty($node)) {
-	die("Error: Node not defined. Use --help for usage information.".PHP_EOL);
+    echo "Error: Node not defined.".PHP_EOL.PHP_EOL;
+    usage();
 }
 if(empty($address)) {
-	die("Error: Address not defined. Use --help for usage information.".PHP_EOL);
+	echo "Error: Address not defined.".PHP_EOL.PHP_EOL;
+    usage();
 }
 
 $res = url_get($node . "/api.php?q=getPublicKey&address=".$address);
