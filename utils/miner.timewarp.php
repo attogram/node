@@ -18,6 +18,8 @@ class TimewarpMiner extends Miner
     private $attempt;
     private $forked;
     private $miningNodes = [];
+    public $threadId = 1;
+    public $totalThreads = 1;
     public $checkInterval = 10; // Default check interval in seconds
     public $slipTime = 20; // Default slip time in seconds
     public $waitTime = 20; // Default wait time in seconds
@@ -147,10 +149,15 @@ class TimewarpMiner extends Miner
                     $this->miningStat['rejected'],
                     $this->miningStat['dropped']
                 );
-                if (!$this->forked && !in_array("--flat-log", $argv)) {
-                    echo $s . " \r";
-                } else {
+                if (in_array("--flat-log", $argv)) {
                     echo $s . PHP_EOL;
+                } else {
+                    // Move cursor up to the top of the block
+                    echo "\033[" . ($this->totalThreads - $this->threadId + 1) . "A";
+                    // Print the output
+                    echo "\r" . $s . "\033[K";
+                    // Move cursor back down to the bottom
+                    echo "\033[" . ($this->totalThreads - $this->threadId + 1) . "B";
                 }
                 $this->miningStat['hashes']++;
                 if ($prev_elapsed != $elapsed && $elapsed % $this->checkInterval == 0) {
@@ -178,6 +185,11 @@ class TimewarpMiner extends Miner
 
             if (!$blockFound || $elapsed <= 0) {
                 continue;
+            }
+
+            if (!in_array("--flat-log", $argv)) {
+                // Move cursor to the bottom to not overwrite the block info
+                echo "\n";
             }
 
             // --- Timewarp Exploit Start ---
@@ -253,6 +265,10 @@ class TimewarpMiner extends Miner
 
             if ($this->block_cnt > 0 && $this->cnt >= $this->block_cnt) {
                 break;
+            }
+
+            if (!in_array("--flat-log", $argv)) {
+                echo str_repeat(PHP_EOL, $this->totalThreads);
             }
 
             _log("Mining stats: " . json_encode($this->miningStat), 2);
@@ -395,9 +411,11 @@ $_config['chain_id'] = trim(file_exists(dirname(__DIR__)."/chain_id"));
 
 define("ROOT", __DIR__);
 
-function startMiner($address,$node, $forked) {
+function startMiner($address,$node, $forked, $threadId = 1, $totalThreads = 1) {
     global $cpu, $block_cnt, $slipTime, $waitTime, $checkInterval;
     $miner = new TimewarpMiner($address, $node, $forked);
+    $miner->threadId = $threadId;
+    $miner->totalThreads = $totalThreads;
     if (!empty($slipTime)) {
         $miner->slipTime = $slipTime;
     }
@@ -415,10 +433,13 @@ function startMiner($address,$node, $forked) {
 if($threads == 1) {
     startMiner($address,$node, false);
 } else {
+    if (!in_array("--flat-log", $argv)) {
+        echo str_repeat(PHP_EOL, $threads);
+    }
     $forker = new Forker();
     for($i=1; $i<=$threads; $i++) {
-        $forker->fork(function() use ($address,$node) {
-            startMiner($address,$node, true);
+        $forker->fork(function() use ($address, $node, $i, $threads) {
+            startMiner($address, $node, true, $i, $threads);
         });
     }
     $forker->exec();
