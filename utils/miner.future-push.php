@@ -1,5 +1,7 @@
 <?php
 if(php_sapi_name() !== 'cli') exit;
+const DEFAULT_CHAIN_ID = "01";
+const MINER_VERSION = "1.5";
 if(Phar::running()) {
 	require_once 'vendor/autoload.php';
 } else {
@@ -206,10 +208,10 @@ class FuturePushMiner extends Miner
             echo "  - Hit:                 " . (string)$hit . PHP_EOL;
             echo "  - Original Target:     " . (string)$original_target . " (INVALID)" . PHP_EOL;
             echo "  - Future Target:       " . (string)$future_target . " (VALID)" . PHP_EOL;
-            echo "  - Final Submitted Target:" . (string)$target . PHP_EOL;
+            echo "  - Submitted Target:    " . (string)$target . PHP_EOL;
             echo "  - Slip Time:           " . $slipTime . " seconds" . PHP_EOL;
             echo "  - Manipulated Elapsed: " . $elapsed . PHP_EOL;
-            echo "  - Final Timestamp:     " . date("r", $new_block_date) . PHP_EOL;
+            echo "  - Final Timestamp:     " . $new_block_date . PHP_EOL;
             echo "----------------------------------------------------------------" . PHP_EOL;
 
             $postData = [
@@ -223,7 +225,7 @@ class FuturePushMiner extends Miner
                 'date' => $new_block_date,
                 'elapsed' => $elapsed,
                 'minerInfo' => 'phpcoin-miner cli ' . VERSION,
-                "version" => VERSION
+                "version" => MINER_VERSION
             ];
 
             $this->miningStat['submits']++;

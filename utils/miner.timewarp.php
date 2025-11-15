@@ -1,5 +1,7 @@
 <?php
 if(php_sapi_name() !== 'cli') exit;
+const DEFAULT_CHAIN_ID = "01";
+const MINER_VERSION = "1.5";
 if(Phar::running()) {
 	require_once 'vendor/autoload.php';
 } else {
@@ -217,7 +219,7 @@ class TimewarpMiner extends Miner
                 'date' => $new_block_date,
                 'elapsed' => $elapsed,
                 'minerInfo' => 'phpcoin-miner cli ' . VERSION,
-                "version" => VERSION
+                "version" => MINER_VERSION
             ];
 
             $this->miningStat['submits']++;
