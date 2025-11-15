@@ -57,6 +57,54 @@ In this case, the vulnerability occurs because the untrusted input from the smar
 
 The protection of prepared statements is completely bypassed because the malicious SQL is not treated as data; it is part of the SQL command itself.
 
+### Proposed Fix
+
+The `query` method should be refactored to prevent arbitrary SQL execution. Instead of accepting a raw SQL string, it should only accept a structured set of conditions, which can then be safely converted into a parameterized query. This eliminates the possibility of injection.
+
+Here is an example of a refactored `query` method:
+
+```php
+    static function query($address, $filters = [], $params = []) {
+        $db = SmartContractContext::$db;
+        $final_sql="with s as (select ss.variable, ss.var_key, ss.var_value
+               from (select s.sc_address, s.variable, ifnull(s.var_key, 'null') as var_key, max(s.height) as height
+                     from smart_contract_state s
+                     where s.sc_address = :sc_address
+                     group by s.variable, s.var_key, s.sc_address) as last_vars
+                        join smart_contract_state ss
+                             on (ss.sc_address = last_vars.sc_address and ss.variable = last_vars.variable
+                                 and ifnull(ss.var_key, 'null') = last_vars.var_key and ss.height = last_vars.height))
+                                 select *
+                from s
+                where 1=1 ";
+
+        $all_params = $params;
+        $all_params[":sc_address"] = $address;
+
+        // Safely build WHERE clauses from a structured filter array
+        foreach ($filters as $key => $value) {
+            // Use a whitelist to prevent injection in column names
+            if (!in_array($key, ['variable', 'var_key', 'var_value'])) {
+                throw new Exception("Invalid filter key provided: $key");
+            }
+            // Add the condition to the SQL and the value to the parameters array
+            $final_sql .= " AND " . $key . " = :" . $key . "_filter";
+            $all_params[":" . $key . "_filter"] = $value;
+        }
+
+        $rows=$db->run($final_sql, $all_params);
+        $list = [];
+        foreach ($rows as $row) {
+            $key = $row['var_key'];
+            $val = $row['var_value'];
+            $list[$key]=$val;
+        }
+        return $list;
+    }
+```
+
+This revised function changes the API so that smart contracts can no longer pass arbitrary SQL. Instead, they would provide a simple key-value array for filtering, like `['variable' => 'owner']`, which is then safely converted into a prepared statement.
+
 **Conclusion:**
 
-The SQL injection vulnerability in `SmartContractBase::query` is a critical vulnerability that allows a malicious smart contract to take complete control of the node's database. This vulnerability should be addressed immediately by removing the `query` method or by implementing a safe, parameterized query system.
+The SQL injection vulnerability in `SmartContractBase::query` is a critical vulnerability that allows a malicious smart contract to take complete control of the node's database. This vulnerability should be addressed immediately by removing the `query` method or by implementing a safe, parameterized query system as proposed above.
