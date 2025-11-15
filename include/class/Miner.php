@@ -295,7 +295,7 @@ class Miner {
                 if ($this->outputFormat == 'fancy') {
                     echo PHP_EOL . "================================================================================" . PHP_EOL;
                     echo "Block found and accepted! Height: " . $postData['height'] . PHP_EOL;
-                    echo " -> Hash: " . $bl->getHash() . PHP_EOL;
+                    echo " -> Hash: " . $bl->hash() . PHP_EOL;
                     echo " -> Raw Post Data:" . PHP_EOL;
                     print_r($postData);
                     echo "================================================================================" . PHP_EOL;
