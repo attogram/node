@@ -8,34 +8,55 @@ if(Phar::running()) {
 	require_once dirname(__DIR__).'/vendor/autoload.php';
 }
 
-$node = @$argv[1];
-$address = @$argv[2];
-$cpu = @$argv[3];
-$block_cnt = @$argv[4];
-
-foreach ($argv as $item){
-    if(strpos($item, "--threads")!==false) {
-        $arr = explode("=", $item);
-        $threads = $arr[1];
-    }
+function usage() {
+    echo "PHPCoin Miner Version ".MINER_VERSION.PHP_EOL;
+    echo "Usage: php miner.php [options]".PHP_EOL;
+    echo "Options:".PHP_EOL;
+    echo "  -h, --help            Show this help message and exit".PHP_EOL;
+    echo "  -n, --node=<url>      Node URL to connect to".PHP_EOL;
+    echo "  -a, --address=<addr>  Address to mine for".PHP_EOL;
+    echo "  -c, --cpu=<percent>   CPU usage percentage (default: 50)".PHP_EOL;
+    echo "  -t, --threads=<num>   Number of mining threads (default: 1)".PHP_EOL;
+    echo PHP_EOL;
+    echo "A miner.conf file can be used for default values.".PHP_EOL;
+    exit;
 }
 
+$short_opts = "n:a:c::t::h";
+$long_opts = ["node:", "address:", "cpu::", "threads::", "help"];
+$options = getopt($short_opts, $long_opts);
+
+if (isset($options['h']) || isset($options['help'])) {
+    usage();
+}
+
+$node = null;
+$address = null;
+$cpu = 50;
+$threads = 1;
 
 if(file_exists(getcwd()."/miner.conf")) {
 	$minerConf = parse_ini_file(getcwd()."/miner.conf");
-	$node = $minerConf['node'];
-	$address = $minerConf['address'];
-	$block_cnt = @$minerConf['block_cnt'];
+	$node = @$minerConf['node'];
+	$address = @$minerConf['address'];
 	$cpu = @$minerConf['cpu'];
     $threads = @$minerConf['threads'];
 }
 
-if(empty($threads)) {
-    $threads=1;
-}
+// CLI options override config file
+if (isset($options['n'])) $node = $options['n'];
+if (isset($options['node'])) $node = $options['node'];
+if (isset($options['a'])) $address = $options['a'];
+if (isset($options['address'])) $address = $options['address'];
+if (isset($options['c'])) $cpu = $options['c'];
+if (isset($options['cpu'])) $cpu = $options['cpu'];
+if (isset($options['t'])) $threads = $options['t'];
+if (isset($options['threads'])) $threads = $options['threads'];
 
-$cpu = is_null($cpu) ? 50 : $cpu;
+if(empty($threads)) $threads = 1;
+if(is_null($cpu)) $cpu = 50;
 if($cpu > 100) $cpu = 100;
+
 
 echo "PHPCoin Miner Version ".MINER_VERSION.PHP_EOL;
 echo "Mining server:  ".$node.PHP_EOL;
@@ -43,16 +64,11 @@ echo "Mining address: ".$address.PHP_EOL;
 echo "CPU:            ".$cpu.PHP_EOL;
 echo "Threads:        ".$threads.PHP_EOL;
 
-
-if(empty($node) && empty($address)) {
-	die("Usage: miner <node> <address> <cpu>".PHP_EOL);
-}
-
 if(empty($node)) {
-	die("Node not defined".PHP_EOL);
+	die("Error: Node not defined. Use --help for usage information.".PHP_EOL);
 }
 if(empty($address)) {
-	die("Address not defined".PHP_EOL);
+	die("Error: Address not defined. Use --help for usage information.".PHP_EOL);
 }
 
 $res = url_get($node . "/api.php?q=getPublicKey&address=".$address);
@@ -79,7 +95,7 @@ define("ROOT", __DIR__);
 function startMiner($address,$node, $forked) {
     global $cpu;
     $miner = new Miner($address, $node, $forked);
-    $miner->block_cnt = empty($block_cnt) ? 0 : $block_cnt;
+    $miner->outputFormat = 'fancy';
     $miner->cpu = $cpu;
     $miner->start();
 }

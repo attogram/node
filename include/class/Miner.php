@@ -2,10 +2,11 @@
 
 class Miner {
 
-
+    public $outputFormat = 'default';
 	public $address;
 	public $private_key;
 	public $node;
+    public $bestHit = 0;
 	public $miningStat;
 	public $cnt = 0;
 	public $block_cnt = 0;
@@ -174,6 +175,7 @@ class Miner {
 			$offset = $nodeTime - $now;
 
 			$this->attempt = 0;
+            $this->bestHit = 0;
 
 			$bl = new Block(null, $this->address, $height, null, null, $data, $difficulty, Block::versionCode($height), null, $prev_block_id);
 
@@ -196,17 +198,39 @@ class Miner {
 				$bl->nonce=$bl->calculateNonce($block_date, $elapsed, $chain_id);
 				$bl->date = $block_date;
 				$hit = $bl->calculateHit();
+                if ($hit > $this->bestHit) {
+                    $this->bestHit = $hit;
+                }
 				$target = $bl->calculateTarget($elapsed);
 				$blockFound = ($hit > 0 && $target > 0 && $hit > $target);
 
                 $this->measureSpeed($t1, $th);
 
-				$s = "PID=".getmypid()." Mining attempt={$this->attempt} height=$height difficulty=$difficulty elapsed=$elapsed hit=$hit target=$target speed={$this->speed} submits=".
-                    $this->miningStat['submits']." accepted=".$this->miningStat['accepted']. " rejected=".$this->miningStat['rejected']. " dropped=".$this->miningStat['dropped'];
-                if(!$this->forked && !in_array("--flat-log", $argv)){
-                    echo "$s \r";
+                if ($this->outputFormat == 'fancy') {
+                    $s = sprintf(
+                        "PID:%-5s Atmpt:%-7s Hght:%-7s Elpsd:%-5s Hit:%-12s Best:%-12s Target:%-12s Spd:%-7.2f S:%-2d A:%-2d R:%-2d D:%-2d",
+                        getmypid(),
+                        $this->attempt,
+                        $height,
+                        $elapsed,
+                        number_format(gmp_strval($hit)),
+                        number_format(gmp_strval($this->bestHit)),
+                        number_format(gmp_strval($target)),
+                        $this->speed,
+                        $this->miningStat['submits'],
+                        $this->miningStat['accepted'],
+                        $this->miningStat['rejected'],
+                        $this->miningStat['dropped']
+                    );
+                    echo "\r" . $s;
                 } else {
-                    echo $s. PHP_EOL;
+                    $s = "PID=".getmypid()." Mining attempt={$this->attempt} height=$height difficulty=$difficulty elapsed=$elapsed hit=$hit target=$target speed={$this->speed} submits=".
+                        $this->miningStat['submits']." accepted=".$this->miningStat['accepted']. " rejected=".$this->miningStat['rejected']. " dropped=".$this->miningStat['dropped'];
+                    if(!$this->forked && !in_array("--flat-log", $argv)){
+                        echo "$s \r";
+                    } else {
+                        echo $s. PHP_EOL;
+                    }
                 }
 				$this->miningStat['hashes']++;
 				if($prev_elapsed != $elapsed && $elapsed % 10 == 0) {
@@ -268,9 +292,25 @@ class Miner {
             }
 
             if($accepted) {
+                if ($this->outputFormat == 'fancy') {
+                    echo PHP_EOL . "================================================================================" . PHP_EOL;
+                    echo "Block found and accepted! Height: " . $postData['height'] . PHP_EOL;
+                    echo " -> Hash: " . $bl->getHash() . PHP_EOL;
+                    echo " -> Raw Post Data:" . PHP_EOL;
+                    print_r($postData);
+                    echo "================================================================================" . PHP_EOL;
+                }
                 _log("Block confirmed", 1);
                 $this->miningStat['accepted']++;
             } else {
+                if ($this->outputFormat == 'fancy') {
+                    echo PHP_EOL . "--------------------------------------------------------------------------------" . PHP_EOL;
+                    echo "Block found but REJECTED! Height: " . $postData['height'] . PHP_EOL;
+                    echo " -> Server response: " . json_encode($response) . PHP_EOL;
+                    echo " -> Raw Post Data:" . PHP_EOL;
+                    print_r($postData);
+                    echo "--------------------------------------------------------------------------------" . PHP_EOL;
+                }
                 _log("Block not confirmed: " . $res, 1);
                 $this->miningStat['rejected']++;
             }
