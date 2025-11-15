@@ -7,9 +7,8 @@ if(Phar::running()) {
 	require_once dirname(__DIR__).'/vendor/autoload.php';
 }
 if(!defined("MINER_VERSION")) {
-    define("MINER_VERSION", "1.6.8");
+    define("MINER_VERSION", "1.5");
 }
-
 
 class FuturePushMiner extends Miner
 {
@@ -109,7 +108,6 @@ class FuturePushMiner extends Miner
             $t1 = microtime(true);
             $prev_elapsed = null;
             $bestHit = "0";
-            $is_future_push_submission = false;
             while (!$blockFound) {
                 $this->attempt++;
                 if ($this->sleep_time == INF) {

@@ -7,7 +7,7 @@ if(Phar::running()) {
 	require_once dirname(__DIR__).'/vendor/autoload.php';
 }
 if(!defined("MINER_VERSION")) {
-    define("MINER_VERSION", "1.6.8");
+    define("MINER_VERSION", "1.5");
 }
 
 class TimewarpMiner extends Miner
