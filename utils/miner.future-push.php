@@ -208,10 +208,10 @@ class FuturePushMiner extends Miner
             echo "  - Hit:                 " . (string)$hit . PHP_EOL;
             echo "  - Original Target:     " . (string)$original_target . " (INVALID)" . PHP_EOL;
             echo "  - Future Target:       " . (string)$future_target . " (VALID)" . PHP_EOL;
-            echo "  - Final Submitted Target:" . (string)$target . PHP_EOL;
+            echo "  - Submitted Target:    " . (string)$target . PHP_EOL;
             echo "  - Slip Time:           " . $slipTime . " seconds" . PHP_EOL;
             echo "  - Manipulated Elapsed: " . $elapsed . PHP_EOL;
-            echo "  - Final Timestamp:     " . date("r", $new_block_date) . PHP_EOL;
+            echo "  - Final Timestamp:     " . $new_block_date . PHP_EOL;
             echo "----------------------------------------------------------------" . PHP_EOL;
 
             $postData = [
@@ -224,7 +224,7 @@ class FuturePushMiner extends Miner
                 'target' => (string)$target,
                 'date' => $new_block_date,
                 'elapsed' => $elapsed,
-                'minerInfo' => 'phpcoin-miner cli ' . MINER_VERSION,
+                'minerInfo' => 'phpcoin-miner cli ' . VERSION,
                 "version" => MINER_VERSION
             ];
 
@@ -317,7 +317,7 @@ foreach ($argv as $item){
 }
 
 if (in_array('help', $argv) || in_array('--help', $argv)) {
-    echo "PHPCoin Future-Push Exploit Miner (Version ".MINER_VERSION.")".PHP_EOL;
+    echo "PHPCoin Future-Push Exploit Miner (Version ".VERSION.")".PHP_EOL;
     echo "Usage: php utils/miner.future-push.php <node> <address> <cpu> [options]".PHP_EOL;
     echo PHP_EOL;
     echo "Arguments:".PHP_EOL;
@@ -350,7 +350,7 @@ if(empty($threads)) {
 $cpu = is_null($cpu) ? 50 : $cpu;
 if($cpu > 100) $cpu = 100;
 
-echo "PHPCoin Miner Version ".MINER_VERSION.PHP_EOL;
+echo "PHPCoin Miner Version ".VERSION.PHP_EOL;
 echo "Mining server:  ".$node.PHP_EOL;
 echo "Mining address: ".$address.PHP_EOL;
 echo "CPU:            ".$cpu.PHP_EOL;

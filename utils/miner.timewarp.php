@@ -218,7 +218,7 @@ class TimewarpMiner extends Miner
                 'target' => (string)$target,
                 'date' => $new_block_date,
                 'elapsed' => $elapsed,
-                'minerInfo' => 'phpcoin-miner cli ' . MINER_VERSION,
+                'minerInfo' => 'phpcoin-miner cli ' . VERSION,
                 "version" => MINER_VERSION
             ];
 
@@ -315,7 +315,7 @@ foreach ($argv as $item){
 }
 
 if (in_array('help', $argv) || in_array('--help', $argv)) {
-    echo "PHPCoin Timewarp Exploit Miner (Version ".MINER_VERSION.")".PHP_EOL;
+    echo "PHPCoin Timewarp Exploit Miner (Version ".VERSION.")".PHP_EOL;
     echo "Usage: php utils/miner.timewarp.php <node> <address> <cpu> [options]".PHP_EOL;
     echo PHP_EOL;
     echo "Arguments:".PHP_EOL;
@@ -349,7 +349,7 @@ if(empty($threads)) {
 $cpu = is_null($cpu) ? 50 : $cpu;
 if($cpu > 100) $cpu = 100;
 
-echo "PHPCoin Miner Version ".MINER_VERSION.PHP_EOL;
+echo "PHPCoin Miner Version ".VERSION.PHP_EOL;
 echo "Mining server:  ".$node.PHP_EOL;
 echo "Mining address: ".$address.PHP_EOL;
 echo "CPU:            ".$cpu.PHP_EOL;
