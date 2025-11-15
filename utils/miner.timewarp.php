@@ -224,6 +224,10 @@ class TimewarpMiner extends Miner
                 "version" => MINER_VERSION
             ];
 
+            echo "RAW POST DATA:" . PHP_EOL;
+            print_r($postData);
+            echo "----------------------------------------------------------------" . PHP_EOL;
+
             $this->miningStat['submits']++;
             $res = $this->sendHash($this->node, $postData, $response);
             $accepted = false;
