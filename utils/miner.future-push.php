@@ -108,6 +108,7 @@ class FuturePushMiner extends Miner
             $t1 = microtime(true);
             $prev_elapsed = null;
             $bestHit = "0";
+            $is_future_push_submission = false;
             while (!$blockFound) {
                 $this->attempt++;
                 if ($this->sleep_time == INF) {
@@ -236,8 +237,8 @@ class FuturePushMiner extends Miner
                 'target' => (string)$submit_target,
                 'date' => $submit_date,
                 'elapsed' => $submit_elapsed,
-                'minerInfo' => 'phpcoin-miner cli ' . MINER_VERSION,
-                "version" => VERSION
+                'minerInfo' => 'phpcoin-miner cli ' . VERSION,
+                "version" => MINER_VERSION
             ];
 
             echo "RAW POST DATA:" . PHP_EOL;
