@@ -16,10 +16,33 @@ print VANITYGEN_NAME . ' v' . VANITYGEN_VERSION . PHP_EOL;
 setupOrExit();
 
 $options = getOptionsOrExit($argv);
+
+// First, validate the original, user-provided prefix.
 validatePrefix($options['prefix'], $options['case_sensitive']);
+
+// If validation passes, normalize the prefix for the generator.
+$options['prefix'] = normalizePrefix($options['prefix']);
+
+// Finally, generate the address with the normalized prefix.
 generateVanityAddress($options);
 
 print PHP_EOL . 'Exiting ' . VANITYGEN_NAME . PHP_EOL;
+
+/**
+ * Normalizes a prefix to ensure it starts with a capital 'P'.
+ *
+ * @param string $prefix The user-provided prefix.
+ * @return string The normalized prefix.
+ */
+function normalizePrefix(string $prefix): string
+{
+    // If the prefix starts with 'p' (case-insensitively), replace the first char with 'P'.
+    if (strtolower(substr($prefix, 0, 1)) === 'p') {
+        return 'P' . substr($prefix, 1);
+    }
+    // Otherwise, prepend 'P'.
+    return 'P' . $prefix;
+}
 
 /**
  * Validates the provided prefix against the list of mathematically possible second characters.
@@ -31,26 +54,12 @@ print PHP_EOL . 'Exiting ' . VANITYGEN_NAME . PHP_EOL;
  */
 function validatePrefix(string $prefix, bool $caseSensitive): void
 {
-    // The prefix that will be checked against the valid list.
-    $prefixToValidate = $prefix;
-
-    // A PHPCoin address must start with 'P'.
-    // If the check is case-sensitive, any prefix starting with 'p' is automatically invalid.
-    // If the check is case-insensitive, we normalize 'p' to 'P' to match the generator's behavior.
-    if (str_starts_with($prefixToValidate, 'p')) {
-        if (!$caseSensitive) {
-            $prefixToValidate = 'P' . substr($prefixToValidate, 1);
-        }
-    } else if (!str_starts_with($prefixToValidate, 'P')) {
-        // If the prefix doesn't start with 'p' or 'P', prepend 'P' to it.
-        $prefixToValidate = 'P' . $prefixToValidate;
-    }
-
-    if (strlen($prefixToValidate) < 2) {
+    // It is assumed the prefix has been normalized before being passed to this function.
+    if (strlen($prefix) < 2) {
         return; // Not long enough for a 2-char check.
     }
 
-    $prefixToCheck = substr($prefixToValidate, 0, 2);
+    $prefixToCheck = substr($prefix, 0, 2);
 
     $validPrefixes = [
         'PX', 'PY', 'PZ', 'Pa', 'Pb', 'Pc', 'Pd', 'Pe', 'Pf', 'Pg', 'Ph', 'Pi', 'Pj', 'Pk', 'Pm', 'Pn', 'Po', 'Pp', 'Pq', 'Pr', 'Ps', 'Pt', 'Pu', 'Pv', 'Pw'
@@ -83,15 +92,6 @@ function validatePrefix(string $prefix, bool $caseSensitive): void
 function generateVanityAddress(array $options): array
 {
     $prefix = $options['prefix'];
-    // All PHPCoin addresses start with uppercase 'P'
-    if (! str_starts_with($prefix, 'p') && ! str_starts_with($prefix, 'P')) {
-        $prefix = 'P' . $prefix;
-    }
-    // Force starting with uppercase 'P'
-    if (str_starts_with($prefix, 'p')) {
-        $prefix = 'P' . substr($prefix, 1);
-    }
-
     $caseSensitive = $options['case_sensitive'];
 
     print 'Prefix: ' . $prefix . PHP_EOL;
