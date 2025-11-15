@@ -16,14 +16,15 @@ function usage() {
     echo "  -a, --address=<addr>  Address to mine for".PHP_EOL;
     echo "  -c, --cpu=<percent>   CPU usage percentage (default: 50)".PHP_EOL;
     echo "  -t, --threads=<num>   Number of mining threads (default: 1)".PHP_EOL;
+    echo "  -o, --output=<fmt>    Output format (default|fancy). Default is 'fancy'".PHP_EOL;
     echo "  -h, --help            Show this help message and exit".PHP_EOL;
     echo PHP_EOL;
     echo "A miner.conf file can be used for default values.".PHP_EOL;
     exit;
 }
 
-$short_opts = "n:a:c:t:h";
-$long_opts = ["node:", "address:", "cpu:", "threads:", "help"];
+$short_opts = "n:a:c:t:o:h";
+$long_opts = ["node:", "address:", "cpu:", "threads:", "output:", "help"];
 $options = getopt($short_opts, $long_opts);
 
 if ($argc == 1 || isset($options['h']) || isset($options['help'])) {
@@ -34,6 +35,7 @@ $node = null;
 $address = null;
 $cpu = 50;
 $threads = 1;
+$output_format = 'fancy';
 
 if(file_exists(getcwd()."/miner.conf")) {
 	$minerConf = parse_ini_file(getcwd()."/miner.conf");
@@ -41,6 +43,7 @@ if(file_exists(getcwd()."/miner.conf")) {
 	$address = @$minerConf['address'];
 	$cpu = @$minerConf['cpu'];
     $threads = @$minerConf['threads'];
+    $output_format = @$minerConf['output_format'];
 }
 
 // CLI options override config file
@@ -52,9 +55,12 @@ if (isset($options['c'])) $cpu = (int)$options['c'];
 if (isset($options['cpu'])) $cpu = (int)$options['cpu'];
 if (isset($options['t'])) $threads = (int)$options['t'];
 if (isset($options['threads'])) $threads = (int)$options['threads'];
+if (isset($options['o'])) $output_format = $options['o'];
+if (isset($options['output'])) $output_format = $options['output'];
 
 if(empty($threads)) $threads = 1;
 if(empty($cpu)) $cpu = 50;
+if(empty($output_format)) $output_format = 'fancy';
 if($cpu > 100) $cpu = 100;
 
 
@@ -95,9 +101,9 @@ $_config['chain_id'] = trim(file_exists(dirname(__DIR__)."/chain_id"));
 define("ROOT", __DIR__);
 
 function startMiner($address,$node, $forked) {
-    global $cpu;
+    global $cpu, $output_format;
     $miner = new Miner($address, $node, $forked);
-    $miner->outputFormat = 'fancy';
+    $miner->outputFormat = $output_format;
     $miner->cpu = $cpu;
     $miner->start();
 }
