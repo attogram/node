@@ -28,6 +28,35 @@ The `query` method in `include/class/sc/SmartContractBase.php` is vulnerable to 
 
 The investigation confirmed that the database driver's `run` method uses PDO's `prepare` and `execute` methods, which would normally prevent SQL injection. However, because the user-provided SQL is concatenated into the main query string *before* it is passed to the `run` method, the prepared statement is created with the malicious SQL already in it. This renders the protection offered by prepared statements ineffective.
 
+### Example Attack
+
+A malicious smart contract could contain the following method:
+
+```php
+/**
+ * @SmartContractTransact
+ */
+public function exploit() {
+    $malicious_sql = "; UPDATE accounts SET balance = 1000000 WHERE id = 'attacker_account_id'; --";
+    $this->query($this->address, "some_variable", $this->height, $malicious_sql);
+}
+```
+
+When this method is executed, the `query` method in `SmartContractBase.php` will construct the following SQL query:
+
+```sql
+select s.var_key, s.var_value from smart_contract_state s
+where s.sc_address = :sc_address and s.variable = :variable and s.height <= :height ; UPDATE accounts SET balance = 1000000 WHERE id = 'attacker_account_id'; -- order by s.var_key
+```
+
+### Why Prepared Statements Are Not Effective Here
+
+A prepared statement works by separating the SQL query's structure from the data that is being passed into it. The database server first receives the query structure with placeholders (e.g., `?` or `:name`), and then it receives the data for those placeholders. This prevents the data from being interpreted as part of the SQL command.
+
+In this case, the vulnerability occurs because the untrusted input from the smart contract (`$malicious_sql`) is concatenated directly into the main SQL string *before* the `prepare` step. The `DB::run` method receives a single, already-compromised string. When `PDO::prepare` is called on this string, the database server sees two complete and valid SQL statements, and it will execute both of them.
+
+The protection of prepared statements is completely bypassed because the malicious SQL is not treated as data; it is part of the SQL command itself.
+
 **Conclusion:**
 
 The SQL injection vulnerability in `SmartContractBase::query` is a critical vulnerability that allows a malicious smart contract to take complete control of the node's database. This vulnerability should be addressed immediately by removing the `query` method or by implementing a safe, parameterized query system.
