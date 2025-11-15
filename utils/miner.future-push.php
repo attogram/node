@@ -1,11 +1,10 @@
 <?php
 if(php_sapi_name() !== 'cli') exit;
-const DEFAULT_CHAIN_ID = "01";
 const MINER_VERSION = "1.5";
 if(Phar::running()) {
-	require_once 'vendor/autoload.php';
+	require_once 'include/init.inc.php';
 } else {
-	require_once dirname(__DIR__).'/vendor/autoload.php';
+	require_once dirname(__DIR__).'/include/init.inc.php';
 }
 
 class FuturePushMiner extends Miner
@@ -224,8 +223,8 @@ class FuturePushMiner extends Miner
                 'target' => (string)$target,
                 'date' => $new_block_date,
                 'elapsed' => $elapsed,
-                'minerInfo' => 'phpcoin-miner cli ' . MINER_VERSION,
-                "version" => MINER_VERSION
+                'minerInfo' => 'phpcoin-miner cli ' . VERSION,
+                "version" => VERSION
             ];
 
             $this->miningStat['submits']++;
@@ -317,7 +316,7 @@ foreach ($argv as $item){
 }
 
 if (in_array('help', $argv) || in_array('--help', $argv)) {
-    echo "PHPCoin Future-Push Exploit Miner (Version ".MINER_VERSION.")".PHP_EOL;
+    echo "PHPCoin Future-Push Exploit Miner (Version ".VERSION.")".PHP_EOL;
     echo "Usage: php utils/miner.future-push.php <node> <address> <cpu> [options]".PHP_EOL;
     echo PHP_EOL;
     echo "Arguments:".PHP_EOL;
