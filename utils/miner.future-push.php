@@ -18,6 +18,7 @@ class FuturePushMiner extends Miner
     private $attempt;
     private $forked;
     private $miningNodes = [];
+    public $checkInterval = 10; // Default check interval in seconds
     public $slipTime = 20; // Default slip time in seconds
 
     function measureSpeed($t1, $th) {
@@ -166,7 +167,7 @@ class FuturePushMiner extends Miner
                     echo $s . PHP_EOL;
                 }
                 $this->miningStat['hashes']++;
-                if ($prev_elapsed != $elapsed && $elapsed % 10 == 0) {
+                if ($prev_elapsed != $elapsed && $elapsed % $this->checkInterval == 0) {
                     $prev_elapsed = $elapsed;
                     $info = $this->getMiningInfo();
                     if ($info !== false) {
@@ -299,6 +300,10 @@ foreach ($argv as $item){
         $arr = explode("=", $item);
         $slipTime = $arr[1];
     }
+    if(strpos($item, "--check-interval")!==false) {
+        $arr = explode("=", $item);
+        $checkInterval = $arr[1];
+    }
 }
 
 if (in_array('help', $argv) || in_array('--help', $argv)) {
@@ -311,9 +316,10 @@ if (in_array('help', $argv) || in_array('--help', $argv)) {
     echo "  <cpu>           The percentage of CPU to use (0-100)".PHP_EOL;
     echo PHP_EOL;
     echo "Options:".PHP_EOL;
-    echo "  --threads=<num> Number of threads to use for mining (default: 1)".PHP_EOL;
-    echo "  --slip-time=<sec> The number of seconds to slip the timestamp into the future (default: 20, max: 30)".PHP_EOL;
-    echo "  --help          Display this help message".PHP_EOL;
+    echo "  --threads=<num>          Number of threads to use for mining (default: 1)".PHP_EOL;
+    echo "  --slip-time=<sec>        The number of seconds to slip the timestamp into the future (default: 20, max: 30)".PHP_EOL;
+    echo "  --check-interval=<sec>   The interval in seconds to check for new blocks (default: 10)".PHP_EOL;
+    echo "  --help                   Display this help message".PHP_EOL;
     exit;
 }
 
@@ -374,10 +380,13 @@ $_config['chain_id'] = trim(file_exists(dirname(__DIR__)."/chain_id"));
 define("ROOT", __DIR__);
 
 function startMiner($address,$node, $forked) {
-    global $cpu, $block_cnt, $slipTime;
+    global $cpu, $block_cnt, $slipTime, $checkInterval;
     $miner = new FuturePushMiner($address, $node, $forked);
     if (!empty($slipTime)) {
         $miner->slipTime = $slipTime;
+    }
+    if (!empty($checkInterval)) {
+        $miner->checkInterval = $checkInterval;
     }
     $miner->block_cnt = empty($block_cnt) ? 0 : $block_cnt;
     $miner->cpu = $cpu;
