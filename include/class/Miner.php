@@ -2,7 +2,6 @@
 
 class Miner {
 
-
 	public $address;
 	public $private_key;
 	public $node;
@@ -209,15 +208,16 @@ class Miner {
 
                 $this->measureSpeed($t1, $th);
 
-				$s = sprintf("PID:%-6d Atmpt:%-6d Hght:%-8d Elpsd:%-4d Hit:%-8s Best:%-12s Target:%-12s  Spd:%-6.2f S:%-2d A:%-2d R:%-2d D:%-2d",
+				$s = sprintf("PID:%-7d #:%-5d Speed:%-6.2f Block:%-10d Count:%-4d Hit:%-12s Best:%-12s Target:%-12s Diff:%-12s S:%-2d A:%-2d R:%-2d D:%-2d",
                     getmypid(),
                     $this->attempt,
+                    $this->speed,
                     $height,
                     $elapsed,
                     number_format(gmp_intval($hit)),
                     number_format(gmp_intval($this->bestHit)),
                     number_format(gmp_intval($target)),
-                    $this->speed,
+                    number_format(gmp_intval($difficulty)),
                     $this->miningStat['submits'],
                     $this->miningStat['accepted'],
                     $this->miningStat['rejected'],
