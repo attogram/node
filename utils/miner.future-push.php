@@ -105,6 +105,7 @@ class FuturePushMiner extends Miner
 
             $t1 = microtime(true);
             $prev_elapsed = null;
+            $bestHit = "0";
             while (!$blockFound) {
                 $this->attempt++;
                 if ($this->sleep_time == INF) {
@@ -122,6 +123,9 @@ class FuturePushMiner extends Miner
                 $bl->nonce = $bl->calculateNonce($block_date, $elapsed, $chain_id);
                 $bl->date = $block_date;
                 $hit = $bl->calculateHit();
+                if(gmp_cmp($hit, $bestHit) > 0) {
+                    $bestHit = $hit;
+                }
                 $target = $bl->calculateTarget($elapsed);
 
                 // --- Future-Push Exploit Logic ---
@@ -150,7 +154,7 @@ class FuturePushMiner extends Miner
 
                 $this->measureSpeed($t1, $th);
 
-                $s = sprintf("PID:%-8d Att:%-10d H:%-10d Diff:%-18s Elps:%-5d Hit:%-15s Tgt:%-20s Spd:%-8.2f S:%-3d A:%-3d R:%-3d D:%-3d",
+                $s = sprintf("PID:%-8d Att:%-10d H:%-10d Diff:%-18s Elps:%-5d Hit:%-15s Tgt:%-20s Slp-Tgt:%-20s Bst-Hit:%-15s Spd:%-8.2f S:%-3d A:%-3d R:%-3d D:%-3d",
                     getmypid(),
                     $this->attempt,
                     $height,
@@ -158,6 +162,8 @@ class FuturePushMiner extends Miner
                     $elapsed,
                     (string)$hit,
                     (string)$target,
+                    (string)$future_target,
+                    (string)$bestHit,
                     $this->speed,
                     $this->miningStat['submits'],
                     $this->miningStat['accepted'],
@@ -349,6 +355,10 @@ echo "Mining server:  ".$node.PHP_EOL;
 echo "Mining address: ".$address.PHP_EOL;
 echo "CPU:            ".$cpu.PHP_EOL;
 echo "Threads:        ".$threads.PHP_EOL;
+echo "Miner:          Future-Push Exploit".PHP_EOL;
+if(!empty($slipTime)) {
+	echo "Slip Time:      ".$slipTime.PHP_EOL;
+}
 
 
 if(empty($node) && empty($address)) {
