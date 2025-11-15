@@ -28,29 +28,29 @@ print PHP_EOL . 'Exiting ' . VANITYGEN_NAME . PHP_EOL;
  */
 function validatePrefix(string $prefix): void
 {
-    // The logic in generateVanityAddress function already normalizes the prefix to start with 'P'.
-    // I will apply the same normalization here for validation purposes.
+    // Normalize prefix to always start with 'P' for consistent validation
     $normalizedPrefix = $prefix;
-    if (! str_starts_with($normalizedPrefix, 'p') && ! str_starts_with($normalizedPrefix, 'P')) {
-        $normalizedPrefix = 'P' . $normalizedPrefix;
-    }
-    if (str_starts_with($normalizedPrefix, 'p')) {
-        $normalizedPrefix = 'P' . substr($normalizedPrefix, 1);
+    if (!str_starts_with($normalizedPrefix, 'P')) {
+        // If it starts with 'p', replace it. Otherwise, prepend 'P'.
+        if (str_starts_with(strtolower($normalizedPrefix), 'p')) {
+            $normalizedPrefix = 'P' . substr($normalizedPrefix, 1);
+        } else {
+            $normalizedPrefix = 'P' . $normalizedPrefix;
+        }
     }
 
     if (strlen($normalizedPrefix) < 2) {
-        return; // No second character to validate.
+        return; // Not long enough to have a second character, so nothing to validate.
     }
 
-    $validSecondChars = ['X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w'];
-    $secondChar = $normalizedPrefix[1];
+    $validPrefixes = [
+        'PX', 'PY', 'PZ', 'Pa', 'Pb', 'Pc', 'Pd', 'Pe', 'Pf', 'Pg', 'Ph', 'Pi', 'Pj', 'Pk', 'Pm', 'Pn', 'Po', 'Pp', 'Pq', 'Pr', 'Ps', 'Pt', 'Pu', 'Pv', 'Pw'
+    ];
 
-    if (!in_array($secondChar, $validSecondChars, true)) {
-        sort($validSecondChars);
-        $validPrefixes = [];
-        foreach ($validSecondChars as $char) {
-            $validPrefixes[] = 'P' . $char;
-        }
+    $prefixToCheck = substr($normalizedPrefix, 0, 2);
+
+    if (!in_array($prefixToCheck, $validPrefixes, true)) {
+        sort($validPrefixes);
         $validPrefixesList = implode(', ', $validPrefixes);
         exit('ERROR: Impossible prefix.' . PHP_EOL . 'Valid prefixes start with: ' . $validPrefixesList . PHP_EOL);
     }
