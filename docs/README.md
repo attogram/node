@@ -1,17 +1,22 @@
-# Introduction
+# PHPCoin Documentation
 
-## For developers
-
-* [Node installation](for-developers/Node-installation.md)
-* [Node administration](for-developers/Node-administration.md)
-* [Import blockchain](for-developers/Import-blockchain.md)
-* Building wallet and miner
-* [Decentralized Apps (Dapps)](for-developers/Decentralized-Apps-(Dapps).md)
-
-## For users
-* [Creating address](for-users/Creating-address.md)
-* [Verifying address](for-users/Verifying-address.md)
-* [GUI Wallet](for-users/GUI-Wallet.md)
-* Command line miner
-* Command line wallet
+* [Upgrade of php on phpcoin node](Upgrade-of-php-on-phpcoin-node.md)
+* [node configuration](node-configuration.md)
+* [README](README.md)
+* [getting started](getting-started.md)
 * [Masternodes](for-users/Masternodes.md)
+* [Verifying address](for-users/Verifying-address.md)
+* [README](for-users/README.md)
+* [GUI Wallet](for-users/GUI-Wallet.md)
+* [Creating address](for-users/Creating-address.md)
+* [Create masternode with GUI wallet](for-users/Create-masternode-with-GUI-wallet.md)
+* [api](api.md)
+* [README](for-developers/README.md)
+* [Node installation](for-developers/Node-installation.md)
+* [block](for-developers/tech/block.md)
+* [address](for-developers/tech/address.md)
+* [README](for-developers/tech/README.md)
+* [transaction](for-developers/tech/transaction.md)
+* [Decentralized Apps (Dapps)](for-developers/Decentralized-Apps-(Dapps).md)
+* [Import blockchain](for-developers/Import-blockchain.md)
+* [Node administration](for-developers/Node-administration.md)
