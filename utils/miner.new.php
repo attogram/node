@@ -1,7 +1,7 @@
 <?php
 if(php_sapi_name() !== 'cli') exit;
 const DEFAULT_CHAIN_ID = "01";
-const MINER_VERSION = "1.6";
+const MINER_VERSION = "1.5";
 if(Phar::running()) {
 	require_once 'vendor/autoload.php';
 } else {
@@ -9,7 +9,7 @@ if(Phar::running()) {
 }
 
 function usage() {
-    echo "PHPCoin Miner Version ".MINER_VERSION.PHP_EOL;
+    echo "PHPCoin Miner NEW Version ".MINER_VERSION.PHP_EOL;
     echo "Usage: php miner.new.php [options]".PHP_EOL;
     echo "Options:".PHP_EOL;
     echo "  -n, --node=<url>      Node URL to connect to".PHP_EOL;
@@ -63,7 +63,7 @@ if(empty($threads)) {
 $cpu = is_null($cpu) ? 50 : $cpu;
 if($cpu > 100) $cpu = 100;
 
-echo "PHPCoin Miner Version ".MINER_VERSION.PHP_EOL;
+echo "PHPCoin Miner NEW Version ".MINER_VERSION.PHP_EOL;
 echo "Mining server:  ".$node.PHP_EOL;
 echo "Mining address: ".$address.PHP_EOL;
 echo "CPU:            ".$cpu.PHP_EOL;

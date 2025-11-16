@@ -223,7 +223,8 @@ class Miner {
                     $this->miningStat['rejected'],
                     $this->miningStat['dropped']
                 );
-                if(!$this->forked && !in_array("--flat-log", $argv)){
+                //if(!$this->forked && !in_array("--flat-log", $argv)){
+                if(!in_array("--flat-log", $argv)){    
                     echo "$s \r";
                 } else {
                     echo $s. PHP_EOL;
