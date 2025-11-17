@@ -174,7 +174,7 @@ function base58_decode($base58)
 //
 
 const VANITYGEN_NAME = 'PHPCoin Vanity Address Generator';
-const VANITYGEN_VERSION = '0.0.1';
+const VANITYGEN_VERSION = '0.0.2';
 const VANITYGEN_USAGE = 'Usage: php vanitygen.php prefix [-c] [-d]' . PHP_EOL .
     '  prefix     Prefix for the PHPCoin address (e.g., "Php")' . PHP_EOL .
     '  -c         Case sensitive matching' . PHP_EOL .
