@@ -1,6 +1,7 @@
 # Compiler and Flags
 CC = gcc
-CFLAGS = -Wall -O3 -pthread
+# Added -march=native and -funroll-loops for aggressive optimization
+CFLAGS = -Wall -O3 -march=native -funroll-loops -pthread
 LDFLAGS = -static
 LIBS = -lgmp -lcurl -largon2 -lcrypto -lpthread
 
