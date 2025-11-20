@@ -66,12 +66,17 @@ The following table shows the final results from running the benchmark script (`
 
 ### Analysis
 
-The benchmark results are surprising and highlight the highly optimized nature of the PHP engine.
+The benchmark results highlight a crucial distinction: the difference between a language and its implementation.
 
-- **`calculate_target`**: As expected, the C implementation shows a massive **4.1x** speedup. This function is dominated by large number arithmetic. The C code calls the GMP library directly, which is significantly faster than calling it through the PHP interpreter's wrapper, where data marshalling and function call overhead add up.
+- **`calculate_target`**: As expected, the C implementation shows a massive **4.1x** speedup. This function is dominated by large number arithmetic. The C code calls the GMP library directly, which is significantly faster than calling it through the PHP interpreter's wrapper, where data marshalling and function call overhead become a bottleneck.
 
-- **Argon2 & SHA256 (`calculateArgonHash`, `calculateNonce`, `calculateHit`)**: For these standard cryptographic functions, the C implementations were consistently slower than their PHP counterparts. This might seem counter-intuitive, but it's important to remember what a PHP function call like `password_hash()` or `hash()` actually does. These are not interpreted functions; they are thin wrappers that call directly into the PHP engine's internal, highly optimized C source code. This internal code has been tuned for performance over many years, often including platform-specific assembly optimizations.
+- **Argon2 & SHA256 (`calculateArgonHash`, `calculateNonce`, `calculateHit`)**: For these standard cryptographic functions, the C implementations were slower than their PHP counterparts. This is not because "PHP is faster than C," but because the comparison is more nuanced. The PHP `hash()` and `password_hash()` functions are themselves thin wrappers around highly optimized, pre-compiled C code that is part of the PHP engine.
 
-Therefore, the comparison is "apples-to-apples" in terms of the *algorithm being executed*, but not in terms of the *optimization level of the implementation*. Our C code calls standard, generic library functions (`libcrypto`, `libargon2`), while the PHP code calls a specialized, heavily-optimized version of those same functions that is part of the PHP core. The benchmark demonstrates that for standard, well-solved problems like SHA256 and Argon2, the PHP core team has done an excellent job of optimization, making the overhead of calling them from a script negligible.
+Therefore, the benchmark is effectively comparing:
+- **(A)** PHP's production-grade, internally optimized C implementation.
+- **vs.**
+- **(B)** Our custom C implementation which uses standard, generic crypto libraries.
 
-The key takeaway is that the most significant performance gain was achieved by removing the PHP overhead from the one function that was *not* a standard, pre-optimized cryptographic primitive: the GMP-based `calculate_target`.
+The results show that for these standard algorithms, the PHP core's internal C code is more aggressively optimized than the generic `libcrypto` and `libargon2` libraries linked by our C program.
+
+**Conclusion:** The C rewrite was highly successful in accelerating the custom, non-standard algorithm (`calculateTarget`), which was the primary bottleneck. The slower performance in standard hashing functions is a testament to the optimization of the PHP engine's internal C code, not a reflection of C's performance as a language.
