@@ -2,7 +2,6 @@
 
 class Miner {
 
-
 	public $address;
 	public $private_key;
 	public $node;
@@ -11,6 +10,7 @@ class Miner {
 	public $block_cnt = 0;
 	public $cpu = 25;
     public $minerid;
+    public $outputFormat;
     private $forked;
 
 	private $running = true;
@@ -20,6 +20,7 @@ class Miner {
     private $speed;
     private $sleep_time;
     private $attempt;
+    private $bestHit = 0;
 
     private $miningNodes = [];
 
@@ -174,6 +175,7 @@ class Miner {
 			$offset = $nodeTime - $now;
 
 			$this->attempt = 0;
+            $this->bestHit = 0;
 
 			$bl = new Block(null, $this->address, $height, null, null, $data, $difficulty, Block::versionCode($height), null, $prev_block_id);
 
@@ -197,13 +199,32 @@ class Miner {
 				$bl->date = $block_date;
 				$hit = $bl->calculateHit();
 				$target = $bl->calculateTarget($elapsed);
+
+                if($hit > $this->bestHit) {
+                    $this->bestHit = $hit;
+                }
+
 				$blockFound = ($hit > 0 && $target > 0 && $hit > $target);
 
                 $this->measureSpeed($t1, $th);
 
-				$s = "PID=".getmypid()." Mining attempt={$this->attempt} height=$height difficulty=$difficulty elapsed=$elapsed hit=$hit target=$target speed={$this->speed} submits=".
-                    $this->miningStat['submits']." accepted=".$this->miningStat['accepted']. " rejected=".$this->miningStat['rejected']. " dropped=".$this->miningStat['dropped'];
-                if(!$this->forked && !in_array("--flat-log", $argv)){
+				$s = sprintf("PID:%-7d #:%-5d Speed:%-6.2f Block:%-10d Count:%-4d Hit:%-12s Best:%-12s Target:%-12s Diff:%-12s S:%-2d A:%-2d R:%-2d D:%-2d",
+                    getmypid(),
+                    $this->attempt,
+                    $this->speed,
+                    $height,
+                    $elapsed,
+                    number_format(gmp_intval($hit)),
+                    number_format(gmp_intval($this->bestHit)),
+                    number_format(gmp_intval($target)),
+                    number_format(gmp_intval($difficulty)),
+                    $this->miningStat['submits'],
+                    $this->miningStat['accepted'],
+                    $this->miningStat['rejected'],
+                    $this->miningStat['dropped']
+                );
+                //if(!$this->forked && !in_array("--flat-log", $argv)){
+                if(!in_array("--flat-log", $argv)){    
                     echo "$s \r";
                 } else {
                     echo $s. PHP_EOL;
@@ -236,6 +257,13 @@ class Miner {
 				continue;
 			}
 
+            if ($this->outputFormat == 'fancy') {
+                echo str_repeat(PHP_EOL, 5);
+                echo "========================================" . PHP_EOL;
+                echo "Block found! Height: " . $height . PHP_EOL;
+                echo " -> Hash: " . $bl->hash() . PHP_EOL;
+            }
+
             $postData = [
                 'argon' => $bl->argon,
                 'nonce' => $bl->nonce,
@@ -249,6 +277,13 @@ class Miner {
                 'minerInfo' => 'phpcoin-miner cli ' . VERSION,
                 "version" => MINER_VERSION
             ];
+
+            if ($this->outputFormat == 'fancy') {
+                echo " -> Raw Post Data:" . PHP_EOL;
+                print_r($postData);
+                echo "----------------------------------------" . PHP_EOL;
+                echo "Submitting to nodes..." . PHP_EOL;
+            }
 
             $this->miningStat['submits']++;
             $res = $this->sendHash($this->node, $postData, $response);
@@ -293,7 +328,12 @@ class Miner {
     private function sendHash($node, $postData, &$response) {
         $res = url_post($node . "/mine.php?q=submitHash&", http_build_query($postData), 5);
         $response = json_decode($res, true);
-        _log("Send hash to node $node response = ".json_encode($response));
+        if ($this->outputFormat == 'fancy') {
+            $status = @$response['status'] == "ok" ? "ACCEPTED" : "REJECTED";
+            echo " -> Submitting to " . $node . "... " . $status . " | " . json_encode($response) . PHP_EOL;
+        } else {
+            _log("Send hash to node $node response = ".json_encode($response));
+        }
         if(!isset($this->miningStat['submitted_blocks'])) {
             $this->miningStat['submitted_blocks']=[];
         }
