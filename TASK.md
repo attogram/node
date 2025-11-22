@@ -27,3 +27,4 @@ This file will be used by AI agent and user to coordinate the documentation impr
     - [ ] `docs/staking/README.md`
     - [ ] `docs/wallet/README.md`
   - [ ] The content of each new `README.md` will be a markdown-formatted list of the files within its directory.
+- [ ] create header and navigation onto every doc file
