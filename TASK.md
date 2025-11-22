@@ -28,3 +28,4 @@ This file will be used by AI agent and user to coordinate the documentation impr
     - [x] 1.3.9 `docs/wallet/README.md`
   - [x] 1.4 The content of each new `README.md` will be a markdown-formatted list of the files within its directory.
 - [ ] 2. Create header and navigation onto every doc file
+- [ ] 3. docs/readme as short intro and toc linking to ALL doc files
