@@ -19,7 +19,7 @@ if(isset($_GET['link'])) {
     $link = $_GET['link'];
     $file = $docsDir.'/docs/' . $link;
 } else {
-    $file = $docsDir.'/docs/index.md';
+    $file = $docsDir.'/docs/README.md';
 }
 
 $pd = new ParsedownExt();
