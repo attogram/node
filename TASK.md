@@ -12,6 +12,7 @@ This file will be used by AI agent and user to coordinate the documentation impr
 1. Always keep this task file updated.
 2. Always commit early and commit often. Keep actions atomic, and always immediately commit and push changes.
 3. After a commit, perform validation steps (like tests or code reviews). If corrections are needed, make them in a new, separate commit. Do not wait for a review before pushing the initial change.
+4. If the user states they have updated `TASK.md` or any other file, all other work must stop. The immediate priority is to pull the latest changes using `git fetch` and `git reset`. Overwriting user changes is a critical failure.
 
 ## tasks
 - [x] 1. Standardize README.md as index file
