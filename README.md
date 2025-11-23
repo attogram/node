@@ -1,5 +1,9 @@
 # The PHPCoin (PHP) cryptocurrency node.
 
+## Documentation
+
+For detailed information on installation, usage, and development, please see the [PHPCoin Documentation](./docs/README.md).
+
 Name: PHPCoin
 
 Symbol: PHP
@@ -45,7 +49,7 @@ Calculation: Balance * Maturity
 Website: 
 https://phpcoin.net/ 
 
-Bitcointalk:
+Bitcalk:
 https://bitcointalk.org/index.php?topic=5371138.0
 
 Github source: 
@@ -75,18 +79,6 @@ https://m1.phpcoin.net/
 
 https://m2.phpcoin.net/ 
 
-
-
-
-
-## Documentation
-
-For detailed information on installation, usage, and development, please see the [PHPCoin Documentation](./docs/README.md).
-
 ## Install
 
 Check [instructions](https://github.com/phpcoinn/node/wiki/Node-installation)
-
-
-
-
