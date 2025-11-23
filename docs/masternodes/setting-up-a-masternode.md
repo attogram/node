@@ -1,4 +1,4 @@
-[Docs Home](../README.md) > [Masternodes](README.md) > Setting up a Masternode
+[PHPCoin](../../README.md) > [Docs](../README.md) > [Masternodes](README.md) > Setting up a Masternode
 
 ---
 [Introduction](../introduction/README.md) | [Getting Started](../getting-started/README.md) | [Mining](../mining/README.md) | [Staking](../staking/README.md) | [Wallet](../wallet/README.md) | [Masternodes](README.md) | [Smart Contracts](../smart-contracts/README.md) | [dApps](../dapps/README.md) | [API](../api/README.md)
