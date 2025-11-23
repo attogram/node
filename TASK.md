@@ -10,7 +10,8 @@ This file will be used by AI agent and user to coordinate the documentation impr
 ## How to Work
 
 1. Always keep this task file updated.
-2. Always commit early and commit often. Keep actions atomic, and always immediately commit and push changes. Never wait to push. Ex: do not wait for subagent review before pushing.
+2. Always commit early and commit often. Keep actions atomic, and always immediately commit and push changes.
+3. After a commit, perform validation steps (like tests or code reviews). If corrections are needed, make them in a new, separate commit. Do not wait for a review before pushing the initial change.
 
 ## tasks
 - [x] 1. Standardize README.md as index file
