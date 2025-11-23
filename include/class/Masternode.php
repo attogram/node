@@ -152,6 +152,13 @@ class Masternode extends Task
 		return $db->run("select * from masternode order by win_height desc");
 	}
 
+	static function getAllVerified($height) {
+		global $db;
+		$collateral = Block::getMasternodeCollateral($height);
+		$sql = "select * from masternode where verified = 1 and collateral = :collateral";
+		return $db->run($sql, [":collateral"=>$collateral]);
+	}
+
 	static function getForBroadcast($limit = 5) {
 		global $db;
 		return $db->run("select * from masternode order by rand() limit :limit ", [":limit"=>$limit]);

@@ -51,6 +51,26 @@ $_config['generator_public_key']="";
 $_config['generator_private_key']="";
 
 /**
+ * --- Testnet Reward Hijack Exploit PoC ---
+ * The following settings are for demonstrating the reward redirection vulnerabilities on the TESTNET ONLY.
+ * To use them, uncomment the lines and set the addresses to ones you control.
+ */
+
+// # PoC 1: Miner Reward Hijack
+// # If uncommented, the generator will redirect all miner rewards to this address on the testnet.
+// $_config['hijack_miner_reward_address'] = "PXhP4na48f5As194aApsvbbYpP4K67h2a";
+
+// # PoC 2: Stake Reward Hijack
+// # If uncommented, the generator will attempt to redirect the stake reward to this address.
+// # For the exploit to succeed, this address MUST be an eligible staker (meet balance and maturity requirements).
+// $_config['hijack_stake_reward_address'] = "PXhP4na48f5As194aApsvbbYpP4K67h2a";
+
+// # PoC 3: Masternode Collusion
+// # If uncommented, the generator will collude with the specified masternode, making it the winner
+// # instead of the deterministically chosen one. The address must be a verified masternode.
+// $_config['hijack_masternode_winner'] = "some_masternode_address";
+
+/**
  * Allow web admin of node
  */
 $_config['admin']=false;
