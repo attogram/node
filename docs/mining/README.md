@@ -1,7 +1,5 @@
-[Docs Home](../README.md) > Mining
+[PHPCoin](../../README.md) > [Docs](../README.md) > Mining
 
----
-[Introduction](../introduction/README.md) | [Getting Started](../getting-started/README.md) | [Mining](README.md) | [Staking](../staking/README.md) | [Wallet](../wallet/README.md) | [Masternodes](../masternodes/README.md) | [Smart Contracts](../smart-contracts/README.md) | [dApps](../dapps/README.md) | [API](../api/README.md)
 ---
 
 # Mining

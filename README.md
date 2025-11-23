@@ -81,4 +81,4 @@ https://m2.phpcoin.net/
 
 ## Install
 
-Check [instructions](https://github.com/phpcoinn/node/wiki/Node-installation)
+Please see the [Installation Guide](./docs/getting-started/installation.md) for detailed instructions.
