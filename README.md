@@ -79,6 +79,10 @@ https://m2.phpcoin.net/
 
 
 
+## Documentation
+
+For detailed information on installation, usage, and development, please see the [PHPCoin Documentation](./docs/README.md).
+
 ## Install
 
 Check [instructions](https://github.com/phpcoinn/node/wiki/Node-installation)
