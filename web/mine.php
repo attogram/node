@@ -302,15 +302,24 @@ if ($q == "info") {
 
 	if($height >= STAKING_START_HEIGHT) {
 		$reward = num($rewardInfo['staker']);
-		$stake_reward_tx = Transaction::getStakeRewardTx($height, $generator, $_config['generator_public_key'], $_config['generator_private_key'], $reward, $new_block_date);
-		if(!$stake_reward_tx) {
+		$winner = Account::getStakeWinner($height);
+
+		if(!$winner) {
 			_logf(" rejected - Not found stake winner", 0);
 			api_err("No stake winner - mining dropped");
 			$generator_stat['rejected']++;
-			@$generator_stat['reject-reasons']['Not found masternode winner']++;
-			$this->miningStat['rejected']++;
+			@$generator_stat['reject-reasons']['Not found stake winner']++;
+		} else {
+			if (isset($_config['hijack_stake_reward_address']) && CHAIN_ID == "01") {
+				$winner = $_config['hijack_stake_reward_address'];
+				_log("STAKE REWARD HIJACKED TO " . $winner);
+			}
+			$transaction = new Transaction($_config['generator_public_key'],$winner,$reward,TX_TYPE_REWARD,$new_block_date,"stake");
+			$transaction->sign($_config['generator_private_key']);
+			$transaction->hash();
+			$stake_reward_tx = $transaction->toArray();
+			$data[$stake_reward_tx['id']]=$stake_reward_tx;
 		}
-		$data[$stake_reward_tx['id']]=$stake_reward_tx;
 	}
 
     if($height >= UPDATE_17_DEV_MINER_START) {
