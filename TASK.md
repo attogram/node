@@ -28,4 +28,14 @@ This file will be used by AI agent and user to coordinate the documentation impr
     - [x] 1.3.9 `docs/wallet/README.md`
   - [x] 1.4 The content of each new `README.md` will be a markdown-formatted list of the files within its directory.
 - [ ] 2. Create header and navigation onto every doc file
+  - [ ] 2.1 Add a two-part header to every `.md` file in the `docs/` directory.
+  - [ ] 2.2 The header will consist of a clickable breadcrumb trail and a main navigation bar.
+  - [ ] 2.3 Example for `docs/mining/how-to-mine.md`:
+    ```markdown
+    [Docs Home](../../README.md) > [Mining](../README.md) > How to Mine
+
+    ---
+    [Introduction](../introduction/README.md) | [Getting Started](../getting-started/README.md) | [Mining](../mining/README.md) | [Staking](../staking/README.md) | [Wallet](../wallet/README.md) | [Masternodes](../masternodes/README.md) | [Smart Contracts](../smart-contracts/README.md) | [dApps](../dapps/README.md) | [API](../api/README.md)
+    ---
+    ```
 - [ ] 3. docs/readme as short intro and toc linking to ALL doc files
