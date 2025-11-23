@@ -51,6 +51,9 @@ An attacker can execute the following steps:
 
 Other nodes will accept this block as valid because all consensus rules are met: the block is correctly mined, and the reward transaction has the correct value. The consensus protocol is missing a rule to check that `reward_transaction.dst == block.miner`. The same vulnerability applies to staker rewards.
 
+#### A Note on Proof-of-Work
+It is not possible for an attacker to simply change the `miner` address in the block header to their own. The `miner` address is a critical component of the data used to calculate the block's proof-of-work hash. Changing this address would invalidate the proof-of-work, and the attacker would have to re-mine the block from scratch. The vulnerability described above is that the attacker can use a legitimate miner's proof-of-work while redirecting the funds in a separate transaction.
+
 ### Masternode and Dev Rewards (Secure)
 
 The destinations for masternode and dev rewards are secure and cannot be redirected.
