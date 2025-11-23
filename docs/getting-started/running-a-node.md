@@ -1,3 +1,9 @@
+[Docs Home](../README.md) > [Getting Started](README.md) > Running a Node
+
+---
+[Introduction](../introduction/README.md) | [Getting Started](README.md) | [Mining](../mining/README.md) | [Staking](../staking/README.md) | [Wallet](../wallet/README.md) | [Masternodes](../masternodes/README.md) | [Smart Contracts](../smart-contracts/README.md) | [dApps](../dapps/README.md) | [API](../api/README.md)
+---
+
 # Running a Node
 
 Once you have installed your PHPcoin node, it will be running as a web application. You can access the web interface by navigating to the URL provided at the end of the installation process.

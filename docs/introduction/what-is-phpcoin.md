@@ -1,3 +1,9 @@
+[Docs Home](../README.md) > [Introduction](README.md) > What is PHPCoin?
+
+---
+[Introduction](README.md) | [Getting Started](../getting-started/README.md) | [Mining](../mining/README.md) | [Staking](../staking/README.md) | [Wallet](../wallet/README.md) | [Masternodes](../masternodes/README.md) | [Smart Contracts](../smart-contracts/README.md) | [dApps](../dapps/README.md) | [API](../api/README.md)
+---
+
 # What is PHPcoin?
 
 PHPcoin is a cryptocurrency built with PHP, designed to be lightweight, easy to use, and accessible to a wide range of users. It is a full-featured blockchain implementation that can be used for various purposes, from simple transactions to more complex decentralized applications (Dapps).

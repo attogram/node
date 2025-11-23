@@ -1,3 +1,9 @@
+[Docs Home](../README.md) > [Smart Contracts](README.md) > Smart Contract Builder's Guide
+
+---
+[Introduction](../introduction/README.md) | [Getting Started](../getting-started/README.md) | [Mining](../mining/README.md) | [Staking](../staking/README.md) | [Wallet](../wallet/README.md) | [Masternodes](../masternodes/README.md) | [Smart Contracts](README.md) | [dApps](../dapps/README.md) | [API](../api/README.md)
+---
+
 # 🛠️ PHPCoin Smart Contract Builder's Guide
 
 This guide outlines the essential structural and utility rules for creating a functional smart contract in the PHPCoin environment.

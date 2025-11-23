@@ -1,3 +1,9 @@
+[Docs Home](../README.md) > [Getting Started](README.md) > Installation
+
+---
+[Introduction](../introduction/README.md) | [Getting Started](README.md) | [Mining](../mining/README.md) | [Staking](../staking/README.md) | [Wallet](../wallet/README.md) | [Masternodes](../masternodes/README.md) | [Smart Contracts](../smart-contracts/README.md) | [dApps](../dapps/README.md) | [API](../api/README.md)
+---
+
 # Installation
 
 This guide will walk you through the process of installing a PHPcoin node on a Debian-based system (e.g., Ubuntu). The easiest way to install PHPcoin is by using the provided installation script, which automates the entire process.

@@ -1,3 +1,9 @@
+[Docs Home](../README.md) > [dApps](README.md) > Developing Dapps
+
+---
+[Introduction](../introduction/README.md) | [Getting Started](../getting-started/README.md) | [Mining](../mining/README.md) | [Staking](../staking/README.md) | [Wallet](../wallet/README.md) | [Masternodes](../masternodes/README.md) | [Smart Contracts](../smart-contracts/README.md) | [dApps](README.md) | [API](../api/README.md)
+---
+
 # Developing Dapps
 
 A Decentralized Application (Dapp) on PHPcoin is a web application that interacts with the PHPcoin blockchain. Dapps can be built using standard web technologies like PHP, HTML, and JavaScript.

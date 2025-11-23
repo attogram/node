@@ -1,3 +1,9 @@
+[Docs Home](../README.md) > [Introduction](README.md) > Features
+
+---
+[Introduction](README.md) | [Getting Started](../getting-started/README.md) | [Mining](../mining/README.md) | [Staking](../staking/README.md) | [Wallet](../wallet/README.md) | [Masternodes](../masternodes/README.md) | [Smart Contracts](../smart-contracts/README.md) | [dApps](../dapps/README.md) | [API](../api/README.md)
+---
+
 # Features
 
 PHPcoin comes with a wide range of features that make it a powerful and flexible cryptocurrency platform. Here are some of its key features:

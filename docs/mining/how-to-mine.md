@@ -1,3 +1,9 @@
+[Docs Home](../README.md) > [Mining](README.md) > How to Mine
+
+---
+[Introduction](../introduction/README.md) | [Getting Started](../getting-started/README.md) | [Mining](README.md) | [Staking](../staking/README.md) | [Wallet](../wallet/README.md) | [Masternodes](../masternodes/README.md) | [Smart Contracts](../smart-contracts/README.md) | [dApps](../dapps/README.md) | [API](../api/README.md)
+---
+
 # How to Mine
 
 PHPcoin uses a Proof-of-Work (PoW) consensus algorithm, which means that new coins are created by solving complex mathematical problems. This process is called mining.

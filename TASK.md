@@ -27,10 +27,10 @@ This file will be used by AI agent and user to coordinate the documentation impr
     - [x] 1.3.8 `docs/staking/README.md`
     - [x] 1.3.9 `docs/wallet/README.md`
   - [x] 1.4 The content of each new `README.md` will be a markdown-formatted list of the files within its directory.
-- [ ] 2. Create header and navigation onto every doc file
-  - [ ] 2.1 Add a two-part header to every `.md` file in the `docs/` directory.
-  - [ ] 2.2 The header will consist of a clickable breadcrumb trail and a main navigation bar.
-  - [ ] 2.3 Example for `docs/mining/how-to-mine.md`:
+- [x] 2. Create header and navigation onto every doc file
+  - [x] 2.1 Add a two-part header to every `.md` file in the `docs/` directory.
+  - [x] 2.2 The header will consist of a clickable breadcrumb trail and a main navigation bar.
+  - [x] 2.3 Example for `docs/mining/how-to-mine.md`:
     ```markdown
     [Docs Home](../../README.md) > [Mining](../README.md) > How to Mine
 
@@ -39,9 +39,3 @@ This file will be used by AI agent and user to coordinate the documentation impr
     ---
     ```
 - [ ] 3. docs/readme as short intro and toc linking to ALL doc files
-
-- [ ] 4. new docs/resources - list of important web sites, nodes, community sites etc
-
-- [ ] 5. update root project readme to link to docs dir.  update all breadcrumbs to use root of project as 1st crumb.  PHPCoin > docs > foo
-
-- [ ] 6. security fix web/apps/docs - we use _GET to build path. but never trust user input.  must secure against path transversal attacks, etc
