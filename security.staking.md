@@ -2,7 +2,7 @@
 
 ## Can a bad generator add a stake reward where none should exist?
 
-Yes. A malicious block generator who is also an eligible staker can forge a stake reward transaction for themselves, even if they were not the legitimate, consensus-determined winner for that block.
+Yes, but with an important caveat: a malicious block generator who is also an *eligible staker* can forge a stake reward transaction for themselves, even if they were not the legitimate, consensus-determined winner for that block.
 
 This vulnerability exists because while the block creation process correctly identifies a single stake winner, the block validation process fails to re-verify that winner.
 
@@ -20,5 +20,7 @@ This vulnerability exists because while the block creation process correctly ide
     *   The generator must also be an eligible staker (i.e., they meet the balance and maturity requirements).
     *   When creating a new block, the generator can simply ignore the real winner from `Account::getStakeWinner()` and instead insert a stake reward transaction with themselves as the destination.
     *   When they broadcast this block, other nodes will validate it. The `checkRewards` function will see a stake reward sent to an eligible staker, confirm the reward *amount* is correct, and approve the transaction.
+
+    It is important to note that a generator who is **not** an eligible staker cannot perform this attack. If they were to create a stake reward transaction for themselves, it would fail the validation checks for staking maturity and balance, causing the entire block to be rejected. The vulnerability is limited to accounts that are already valid stakers.
 
 The consensus protocol is missing the crucial step of verifying that `stake_reward_transaction.dst == Account::getStakeWinner(block.height)`. This allows any eligible staker who is also generating a block to illegitimately claim the stake reward for that block.
