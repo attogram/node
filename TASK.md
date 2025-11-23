@@ -39,3 +39,7 @@ This file will be used by AI agent and user to coordinate the documentation impr
     ---
     ```
 - [ ] 3. docs/readme as short intro and toc linking to ALL doc files
+
+- [ ] 4. new docs/resources - list of important web sites, nodes, community sites etc
+
+- [ ] 5. update root project readme to link to docs dir.  update all breadcrumbs to use root of project as 1st crumb.  PHPCoin > docs > foo
