@@ -40,7 +40,7 @@ This file will be used by AI agent and user to coordinate the documentation impr
     [Introduction](../introduction/README.md) | [Getting Started](../getting-started/README.md) | [Mining](../mining/README.md) | [Staking](../staking/README.md) | [Wallet](../wallet/README.md) | [Masternodes](../masternodes/README.md) | [Smart Contracts](../smart-contracts/README.md) | [dApps](../dapps/README.md) | [API](../api/README.md)
     ---
     ```
-- [ ] 3. docs/readme as short intro and toc linking to ALL doc files
+- [x] 3. docs/readme as short intro and toc linking to ALL doc files
 
 - [ ] 4. new docs/resources - list of important web sites, nodes, community sites etc
 
