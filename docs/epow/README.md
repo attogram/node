@@ -1,5 +1,12 @@
 # ePoW (Elapsed Proof of Work)
 
+## Table of Contents
+- [A Simple Explanation](#a-simple-explanation)
+- [Technical Workflow](#technical-workflow)
+- [Code Examples and Source Files](#code-examples-and-source-files)
+
+---
+
 ## A Simple Explanation
 
 ePoW, or Elapsed Proof of Work, is the consensus mechanism that keeps the phpcoin network secure and fair. If you're familiar with Bitcoin's Proof of Work (PoW), you'll find ePoW has some interesting differences.
