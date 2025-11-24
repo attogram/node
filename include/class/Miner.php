@@ -236,6 +236,13 @@ class Miner {
 				continue;
 			}
 
+            if ($this->outputFormat == 'fancy') {
+                echo str_repeat(PHP_EOL, 5);
+                echo "========================================" . PHP_EOL;
+                echo "Block found! Height: " . $height . PHP_EOL;
+                echo " -> Hash: " . $bl->hash() . PHP_EOL;
+            }
+
             $postData = [
                 'argon' => $bl->argon,
                 'nonce' => $bl->nonce,
@@ -249,6 +256,13 @@ class Miner {
                 'minerInfo' => 'phpcoin-miner cli ' . VERSION,
                 "version" => MINER_VERSION
             ];
+
+            if ($this->outputFormat == 'fancy') {
+                echo " -> Raw Post Data:" . PHP_EOL;
+                print_r($postData);
+                echo "----------------------------------------" . PHP_EOL;
+                echo "Submitting to nodes..." . PHP_EOL;
+            }
 
             $this->miningStat['submits']++;
             $res = $this->sendHash($this->node, $postData, $response);
@@ -293,7 +307,12 @@ class Miner {
     private function sendHash($node, $postData, &$response) {
         $res = url_post($node . "/mine.php?q=submitHash&", http_build_query($postData), 5);
         $response = json_decode($res, true);
-        _log("Send hash to node $node response = ".json_encode($response));
+        if ($this->outputFormat == 'fancy') {
+            $status = @$response['status'] == "ok" ? "ACCEPTED" : "REJECTED";
+            echo " -> Submitting to " . $node . "... " . $status . " | " . json_encode($response) . PHP_EOL;
+        } else {
+            _log("Send hash to node $node response = ".json_encode($response));
+        }
         if(!isset($this->miningStat['submitted_blocks'])) {
             $this->miningStat['submitted_blocks']=[];
         }
