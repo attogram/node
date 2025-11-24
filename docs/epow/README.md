@@ -4,19 +4,17 @@
 
 ePoW, or Elapsed Proof of Work, is the consensus mechanism that keeps the phpcoin network secure and fair. If you're familiar with Bitcoin's Proof of Work (PoW), you'll find ePoW has some interesting differences.
 
-In a traditional PoW system, miners compete to solve a complex mathematical puzzle. The first one to solve it gets to add the next block to the blockchain and is rewarded with new coins. The difficulty of this puzzle adjusts over time to ensure that blocks are found at a relatively constant rate.
+In a traditional PoW system, miners are given a single puzzle for each new block, and its difficulty is static while they work on it.
 
-The defining feature of ePoW, and what makes it different from traditional Proof of Work, is that the mining difficulty changes **while a block is being mined**.
-
-In a typical blockchain, the mining difficulty is constant for the entire time miners are working on a block. In phpcoin, the target to find a valid block gets lower every single second.
+The defining feature of ePoW is completely different: the puzzle gets easier to solve with every passing second.
 
 **Here's the core idea:**
 
-The mechanism is driven by the "elapsed time" since the last block was found. As miners work, this elapsed time increases. For each second that passes, the mining target becomes easier to hit. This means the longer a block goes unsolved, the easier it becomes to solve.
-
 To use an analogy:
-*   **Bitcoin** gives miners one single, very hard puzzle to solve.
-*   **phpcoin** gives miners a new puzzle every second, with each new puzzle being a little bit easier than the last.
+*   **Traditional PoW** gives miners one single, very hard puzzle to solve.
+*   **phpcoin's ePoW** gives miners a new puzzle every second, with each new puzzle being a little bit easier than the last.
+
+This unique mechanism is driven by the "elapsed time" since the last block was found. As miners work, this elapsed time increases, and for each second that passes, the mining target becomes easier to hit. This means the longer a block goes unsolved, the easier it becomes to solve.
 
 This has two key effects:
 *   **Stabilizes Block Time:** It ensures that blocks are found, on average, every 60 seconds. If a block isn't found quickly, the constantly decreasing difficulty makes it more and more likely to be found as time goes on.
