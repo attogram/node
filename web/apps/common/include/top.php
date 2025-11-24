@@ -281,6 +281,16 @@ $redirect=$_SERVER['REQUEST_URI'];
                                     <span data-key="t-theme">Theme</span>
                                 </a>
                             </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle arrow-none" href="#" id="lang-dropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="fas fa-globe me-2"></i> Language
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="lang-dropdown">
+                                    <a class="dropdown-item" href="?lang=en">English</a>
+                                    <a class="dropdown-item" href="?lang=es">Español</a>
+                                    <a class="dropdown-item" href="?lang=fr">Français</a>
+                                </div>
+                            </li>
                         </ul>
                     </div>
                 </nav>

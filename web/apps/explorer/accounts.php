@@ -13,13 +13,13 @@ require_once __DIR__. '/../common/include/top.php';
 ?>
 
 <ol class="breadcrumb m-0 ps-0 h4">
-    <li class="breadcrumb-item"><a href="/apps/explorer">Explorer</a></li>
-    <li class="breadcrumb-item active">Accounts</li>
+    <li class="breadcrumb-item"><a href="/apps/explorer"><?php echo __('Explorer') ?></a></li>
+    <li class="breadcrumb-item active"><?php echo __('Accounts') ?></li>
 </ol>
 
 <form class="app-search d-block pt-0" method="get" action="">
     <div class="position-relative">
-        <input type="text" class="form-control" placeholder="Search: Address" name="search" value="<?php echo $_GET['search'] ?>">
+        <input type="text" class="form-control" placeholder="<?php echo __('Search: Address') ?>" name="search" value="<?php echo $_GET['search'] ?>">
         <button class="btn btn-primary" type="submit"><i class="bx bx-search-alt align-middle"></i></button>
     </div>
 </form>
@@ -28,13 +28,13 @@ require_once __DIR__. '/../common/include/top.php';
     <table class="table table-sm table-striped dataTable">
         <thead class="table-light">
             <tr>
-                <th>Id</th>
-                <th>Public key</th>
-                <th>Block</th>
-                <?php echo sort_column('/apps/explorer/accounts.php?',$dm,'balance','Balance') ?>
-                <?php echo sort_column('/apps/explorer/accounts.php?',$dm,'height','Height') ?>
-                <?php echo sort_column('/apps/explorer/accounts.php?',$dm,'maturity','Maturity') ?>
-                <?php echo sort_column('/apps/explorer/accounts.php?',$dm,'weight','Weight') ?>
+                <th><?php echo __('Id') ?></th>
+                <th><?php echo __('Public key') ?></th>
+                <th><?php echo __('Block') ?></th>
+                <?php echo sort_column('/apps/explorer/accounts.php?',$dm,'balance',__('Balance')) ?>
+                <?php echo sort_column('/apps/explorer/accounts.php?',$dm,'height',__('Height')) ?>
+                <?php echo sort_column('/apps/explorer/accounts.php?',$dm,'maturity',__('Maturity')) ?>
+                <?php echo sort_column('/apps/explorer/accounts.php?',$dm,'weight',__('Weight')) ?>
             </tr>
         </thead>
         <tbody>

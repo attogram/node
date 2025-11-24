@@ -25,24 +25,24 @@ $count=count($transactions);
 
 ?>
 <h3>
-    Mempool Transactions
+    <?php echo __('Mempool Transactions') ?>
     <span class="float-end badge bg-primary"><?php echo $count ?></span>
 </h3>
 <div class="table-responsive">
 	<table class="table table-sm table-striped">
 		<thead class="table-light">
 		<tr>
-			<th>Id</th>
-			<th>Height</th>
-			<th>Date</th>
-			<th>Src</th>
-			<th>Dst</th>
-			<th>Value</th>
-			<th>Fee</th>
-			<th>Type</th>
-			<th>Message</th>
-			<th>Peer</th>
-			<th>Error</th>
+			<th><?php echo __('Id') ?></th>
+			<th><?php echo __('Height') ?></th>
+			<th><?php echo __('Date') ?></th>
+			<th><?php echo __('Src') ?></th>
+			<th><?php echo __('Dst') ?></th>
+			<th><?php echo __('Value') ?></th>
+			<th><?php echo __('Fee') ?></th>
+			<th><?php echo __('Type') ?></th>
+			<th><?php echo __('Message') ?></th>
+			<th><?php echo __('Peer') ?></th>
+			<th><?php echo __('Error') ?></th>
             <th></th>
 		</tr>
 		</thead>
@@ -64,7 +64,7 @@ $count=count($transactions);
 				<td><?php echo $transaction['error'] ?></td>
                 <td>
                     <a class="btn btn-danger btn-xs" href="<?php echo APP_URL ?>/?view=mempool&action=delete_tx&id=<?php echo $transaction['id']  ?>"
-                       onclick="if(!confirm('Delete mempool transaction?')) return false;">Delete</a>
+                       onclick="if(!confirm('<?php echo __('Delete mempool transaction?') ?>')) return false;"><?php echo __('Delete') ?></a>
                 </td>
 			</tr>
 		<?php } ?>
@@ -72,4 +72,4 @@ $count=count($transactions);
 	</table>
 </div>
 <a href="<?php echo APP_URL ?>/?view=mempool&action=empty_mempool" class="btn btn-danger"
-    onclick="if(!confirm('Confirm?')) return false">Clear mempool</a>
+    onclick="if(!confirm('<?php echo __('Confirm?') ?>')) return false"><?php echo __('Clear mempool') ?></a>

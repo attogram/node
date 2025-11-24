@@ -34,14 +34,14 @@ $serverData=Nodeutil::getServerData();
 
 
 ?>
-<div class="h4">Hostname: <?php echo $serverData['hostname'] ?></div>
-<div class="h5">Root folder: <?php echo ROOT ?></div>
+<div class="h4"><?php echo __('Hostname') ?>: <?php echo $serverData['hostname'] ?></div>
+<div class="h5"><?php echo __('Root folder') ?>: <?php echo ROOT ?></div>
 <hr/>
 
 <div class="row">
 	<div class="col-sm-6">
 		<dl class="row">
-			<dt class="col-sm-6">CPU Usage:</dt>
+			<dt class="col-sm-6"><?php echo __('CPU Usage') ?>:</dt>
 			<dd class="col-sm-6 d-flex align-items-center">
 				<div><?php echo round($serverData['stat']['cpuload'],2) ?> %</div>
 				<div class="progress flex-grow-1 mx-2">
@@ -49,7 +49,7 @@ $serverData=Nodeutil::getServerData();
 					     style="width: <?php echo $serverData['stat']['cpuload'] ?>%" aria-valuenow="<?php echo $serverData['stat']['cpuload'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
 				</div>
 			</dd>
-			<dt class="col-sm-6">Hard Disk Usage:</dt>
+			<dt class="col-sm-6"><?php echo __('Hard Disk Usage') ?>:</dt>
 			<dd class="col-sm-6 d-flex align-items-center">
 				<div><?php echo $serverData['stat']['diskusage'] ?> %</div>
 				<div class="progress flex-grow-1 mx-2">
@@ -57,19 +57,19 @@ $serverData=Nodeutil::getServerData();
 					     style="width: <?php echo $serverData['stat']['diskusage'] ?>%" aria-valuenow="<?php echo $serverData['stat']['diskusage'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
 				</div>
 			</dd>
-			<dt class="col-sm-6">Hard Disk Total:</dt>
+			<dt class="col-sm-6"><?php echo __('Hard Disk Total') ?>:</dt>
 			<dd class="col-sm-6"><?php echo $serverData['stat']['disktotal'] ?> GB</dd>
-			<dt class="col-sm-6">Hard Disk Used:</dt>
+			<dt class="col-sm-6"><?php echo __('Hard Disk Used') ?>:</dt>
 			<dd class="col-sm-6"><?php echo $serverData['stat']['diskused'] ?> GB</dd>
-			<dt class="col-sm-6">Hard Disk Free:</dt>
+			<dt class="col-sm-6"><?php echo __('Hard Disk Free') ?>:</dt>
 			<dd class="col-sm-6"><?php echo $serverData['stat']['diskfree'] ?> GB</dd>
-			<dt class="col-sm-6">Established Connections:</dt>
+			<dt class="col-sm-6"><?php echo __('Established Connections') ?>:</dt>
 			<dd class="col-sm-6"><?php echo $serverData['stat']['connections'] ?></dd>
 		</dl>
 	</div>
 	<div class="col-sm-6">
 		<dl class="row">
-			<dt class="col-sm-6">PHP Load:</dt>
+			<dt class="col-sm-6"><?php echo __('PHP Load') ?>:</dt>
 			<dd class="col-sm-6 d-flex align-items-center">
 				<div><?php echo $serverData['stat']['phpload'] ?> %</div>
 				<div class="progress flex-grow-1 mx-2">
@@ -77,7 +77,7 @@ $serverData=Nodeutil::getServerData();
 					     style="width: <?php echo $serverData['stat']['phpload'] ?>%" aria-valuenow="<?php echo $serverData['stat']['phpload'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
 				</div>
 			</dd>
-			<dt class="col-sm-6">RAM Usage:</dt>
+			<dt class="col-sm-6"><?php echo __('RAM Usage') ?>:</dt>
 			<dd class="col-sm-6 d-flex align-items-center">
 				<div><?php echo $serverData['stat']['memusage'] ?> %</div>
 				<div class="progress flex-grow-1 mx-2">
@@ -85,13 +85,13 @@ $serverData=Nodeutil::getServerData();
 					     style="width: <?php echo $serverData['stat']['memusage'] ?>%" aria-valuenow="<?php echo $serverData['stat']['memusage'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
 				</div>
 			</dd>
-			<dt class="col-sm-6">RAM Total:</dt>
+			<dt class="col-sm-6"><?php echo __('RAM Total') ?>:</dt>
 			<dd class="col-sm-6"><?php echo $serverData['stat']['memtotal'] ?> GB</dd>
-			<dt class="col-sm-6">RAM Used:</dt>
+			<dt class="col-sm-6"><?php echo __('RAM Used') ?>:</dt>
 			<dd class="col-sm-6"><?php echo $serverData['stat']['memused'] ?> GB</dd>
-			<dt class="col-sm-6">RAM Available:</dt>
+			<dt class="col-sm-6"><?php echo __('RAM Available') ?>:</dt>
 			<dd class="col-sm-6"><?php echo $serverData['stat']['memavailable'] ?> GB</dd>
-			<dt class="col-sm-6">Total Connections:</dt>
+			<dt class="col-sm-6"><?php echo __('Total Connections') ?>:</dt>
 			<dd class="col-sm-6"><?php echo $serverData['stat']['totalconnections'] ?></dd>
 		</dl>
 	</div>
@@ -108,18 +108,18 @@ $res=Nodeutil::psAux("php ".ROOT ."/", 1, "ps -e -o user,pid,ppid,pcpu,pmem,lsta
 
 ?>
 
-<div class="h4">Processes</div>
+<div class="h4"><?php echo __('Processes') ?></div>
 
 <table class="table table-striped table-sm">
     <thead>
         <tr>
-            <th>USER</th>
-            <th>PID</th>
-            <th>PPID</th>
-            <th>CPU</th>
-            <th>MEM</th>
-            <th>START</th>
-            <th>COMMAND</th>
+            <th><?php echo __('USER') ?></th>
+            <th><?php echo __('PID') ?></th>
+            <th><?php echo __('PPID') ?></th>
+            <th><?php echo __('CPU') ?></th>
+            <th><?php echo __('MEM') ?></th>
+            <th><?php echo __('START') ?></th>
+            <th><?php echo __('COMMAND') ?></th>
         </tr>
     </thead>
     <tbody>
@@ -138,7 +138,7 @@ $res=Nodeutil::psAux("php ".ROOT ."/", 1, "ps -e -o user,pid,ppid,pcpu,pmem,lsta
     </tbody>
 </table>
 
-<div class="h4">Tasks</div>
+<div class="h4"><?php echo __('Tasks') ?></div>
 
 <div class="row">
     <?php foreach($tasks as $task) {
@@ -151,14 +151,14 @@ $res=Nodeutil::psAux("php ".ROOT ."/", 1, "ps -e -o user,pid,ppid,pcpu,pmem,lsta
                     <h4 class="card-title"><?php echo $taskStatus['title'] ?></h4>
                     <div>
                         <?php if ($taskStatus['enabled']) { ?>
-                            <span class="badge bg-success">Enabled</span>
+                            <span class="badge bg-success"><?php echo __('Enabled') ?></span>
                         <?php } else { ?>
-                            <span class="badge bg-danger">Disabled</span>
+                            <span class="badge bg-danger"><?php echo __('Disabled') ?></span>
                         <?php } ?>
                         <?php if ($taskStatus['running']) { ?>
-                            <span class="badge bg-success">Running</span>
+                            <span class="badge bg-success"><?php echo __('Running') ?></span>
                         <?php } else { ?>
-                            <span class="badge bg-secondary">Idle</span>
+                            <span class="badge bg-secondary"><?php echo __('Idle') ?></span>
                         <?php } ?>
                         <a href="#" class="ml-2" role="button" data-bs-toggle="collapse" data-bs-target="#details_<?php echo $name ?>">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle-fill" viewBox="0 0 16 16">
@@ -172,41 +172,41 @@ $res=Nodeutil::psAux("php ".ROOT ."/", 1, "ps -e -o user,pid,ppid,pcpu,pmem,lsta
                         <div class="col-sm-12">
                             <?php if($taskStatus['running']) { ?>
                                 <div class="flex-row d-flex justify-content-between flex-wrap">
-                                    <div>Started:</div>
+                                    <div><?php echo __('Started') ?>:</div>
                                     <div><?php echo display_date($taskStatus['process']['started']) ?></div>
                                 </div>
                                 <div class="flex-row d-flex justify-content-between flex-wrap">
-                                    <div>Running:</div>
+                                    <div><?php echo __('Running') ?>:</div>
                                     <div><?php if (!empty($taskStatus['process']['started'])) echo date("H:i:s", time() - $taskStatus['process']['started']) ?></div>
                                 </div>
 
                                 <div class="flex-row d-flex justify-content-between flex-wrap">
-                                    <div>PID:</div>
+                                    <div><?php echo __('PID') ?>:</div>
                                     <div><?php echo $taskStatus['process']['pid'] ?></div>
                                 </div>
                                 <div class="flex-row d-flex justify-content-between flex-wrap">
-                                    <div>CPU:</div>
+                                    <div><?php echo __('CPU') ?>:</div>
                                     <div><?php echo $taskStatus['process']['cpu'] ?></div>
                                 </div>
                                 <div class="flex-row d-flex justify-content-between flex-wrap">
-                                    <div>Memory:</div>
+                                    <div><?php echo __('Memory') ?>:</div>
                                     <div><?php echo $taskStatus['process']['memory'] ?></div>
                                 </div>
                                 <div class="flex-row d-flex justify-content-between flex-wrap">
-                                    <div>Owner:</div>
+                                    <div><?php echo __('Owner') ?>:</div>
                                     <div><?php echo $taskStatus['process']['owner'] ?></div>
                                 </div>
                             <?php } else {
                                 $elapsed=date("H:i:s", time() - $taskStatus['last_run_time']);
                                 ?>
                                 <div class="flex-row d-flex justify-content-between flex-wrap">
-                                    <div>Last run time:</div>
+                                    <div><?php echo __('Last run time') ?>:</div>
                                     <div>
                                         <?php echo display_date($taskStatus['last_run_time']) ?>
                                     </div>
                                 </div>
                                 <div class="flex-row d-flex justify-content-between flex-wrap">
-                                    <div>Since last run:</div>
+                                    <div><?php echo __('Since last run') ?>:</div>
                                     <div>
                                         <?php echo !empty($taskStatus['last_run_time']) ? $elapsed : '' ?>
                                     </div>
@@ -220,15 +220,15 @@ $res=Nodeutil::psAux("php ".ROOT ."/", 1, "ps -e -o user,pid,ppid,pcpu,pmem,lsta
                     <div>
                         <?php if ($task::canDisable()) { ?>
                             <?php if ($taskStatus['enabled']) { ?>
-                                <a href="/apps/admin/?view=server&task=<?php echo $task ?>&action=task_disable" class="btn btn-sm btn-danger">Disable</a>
+                                <a href="/apps/admin/?view=server&task=<?php echo $task ?>&action=task_disable" class="btn btn-sm btn-danger"><?php echo __('Disable') ?></a>
                             <?php } else { ?>
-                                <a href="/apps/admin/?view=server&task=<?php echo $task ?>&action=task_enable" class="btn btn-sm btn-success">Enable</a>
+                                <a href="/apps/admin/?view=server&task=<?php echo $task ?>&action=task_enable" class="btn btn-sm btn-success"><?php echo __('Enable') ?></a>
                             <?php } ?>
                         <?php } ?>
                     </div>
                     <div>
                         <?php if ($taskStatus['running']) { ?>
-                            <a href="/apps/admin/?view=server&task=<?php echo $task ?>&action=task_stop" class="btn btn-sm btn-warning">Stop</a>
+                            <a href="/apps/admin/?view=server&task=<?php echo $task ?>&action=task_stop" class="btn btn-sm btn-warning"><?php echo __('Stop') ?></a>
                         <?php } ?>
                     </div>
                 </div>
