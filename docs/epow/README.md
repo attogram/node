@@ -10,10 +10,13 @@ phpcoin's ePoW adds a twist to this concept by incorporating the **time elapsed*
 
 **Here's the core idea:**
 
-*   If a block is found very quickly, it means there's a lot of mining power on the network. To compensate, ePoW increases the difficulty for the next block, making it harder to find.
-*   If a block takes a long time to be found, it suggests less mining power. ePoW then decreases the difficulty, making it easier to find the next block.
+Instead of a fixed mining difficulty that only changes periodically (like in Bitcoin), ePoW adjusts the difficulty **every second**.
 
-This dynamic adjustment helps to keep the block time consistent, ensuring a stable and predictable network. It also helps to discourage mining centralization, as large mining pools have a less significant advantage when the difficulty can adjust so rapidly.
+As miners work to find a new block, the `elapsed time` since the last block continuously increases. For each second that passes, the mining target gets a little bit lower, making it progressively easier to find a valid block. This is the most important feature of ePoW.
+
+This has two key effects:
+*   **Stabilizes Block Time:** It ensures that blocks are found, on average, every 60 seconds. If a block isn't found quickly, the constantly decreasing difficulty makes it more and more likely to be found as time goes on.
+*   **Fairness:** It reduces the advantage of large mining pools. The difficulty adjusts so rapidly that it creates a more level playing field for all miners on the network.
 
 In short, ePoW is a more responsive version of PoW that uses the "elapsed time" between blocks to regulate the network's block time and difficulty. This helps to maintain a fair and stable environment for all participants in the phpcoin network.
 
@@ -66,7 +69,7 @@ Unlike traditional Proof of Work where miners search for a random `nonce`, in eP
 Here is the mining loop:
 
 1.  For each second that passes, the miner increments the `elapsed_time` value.
-2.  A new **Argon2 hash** is calculated using the `previous_block_date` and the new `elapsed_time`. Argon2 is a memory-hard hashing algorithm, making it resistant to ASIC miners.
+2.  A new **Argon2id hash** is calculated using the `previous_block_date` and the new `elapsed_time`. Argon2id is a memory-hard hashing algorithm, making it resistant to ASIC miners.
 3.  A deterministic **`nonce`** is then calculated using a SHA-256 hash of the miner's address, the `elapsed_time`, and the new Argon2 hash. There is no randomness here; for the same inputs, the output `nonce` is always the same.
 4.  The miner calculates the `hit` value.
 5.  The miner recalculates the `target`, which changes with each increment of `elapsed_time`.
@@ -139,7 +142,7 @@ function calculateTarget($elapsed) {
     return $target;
 }
 ```
-[Link to `include/class/Block.php`](../../../include/class/Block.php)
+[Link to `include/class/Block.php`](../../include/class/Block.php)
 
 ### Calculating the Nonce and Argon Hash
 
@@ -167,7 +170,7 @@ function calculateArgonHash($prev_block_date, $elapsed) {
     return $argon;
 }
 ```
-[Link to `include/class/Block.php`](../../../include/class/Block.php)
+[Link to `include/class/Block.php`](../../include/class/Block.php)
 
 ### Block Submission
 
@@ -185,7 +188,7 @@ $argon = $_POST['argon'];
 
 $block = new Block($generator, $address, $height, $date, $nonce, $data, $difficulty, $version, $argon, $prev_block['id']);
 ```
-[Link to `web/mine.php`](../../../web/mine.php)
+[Link to `web/mine.php`](../../web/mine.php)
 
 ### Block Validation (Mine Check)
 
@@ -212,4 +215,4 @@ public function mine(&$err=null)
     return true;
 }
 ```
-[Link to `include/class/Block.php`](../../../include/class/Block.php)
+[Link to `include/class/Block.php`](../../include/class/Block.php)
