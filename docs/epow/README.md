@@ -6,13 +6,17 @@ ePoW, or Elapsed Proof of Work, is the consensus mechanism that keeps the phpcoi
 
 In a traditional PoW system, miners compete to solve a complex mathematical puzzle. The first one to solve it gets to add the next block to the blockchain and is rewarded with new coins. The difficulty of this puzzle adjusts over time to ensure that blocks are found at a relatively constant rate.
 
-phpcoin's ePoW adds a twist to this concept by incorporating the **time elapsed** between blocks into the mining process. Instead of a fixed difficulty for a certain period, the target difficulty for the *next* block is adjusted based on how long it took to find the *previous* block.
+The defining feature of ePoW, and what makes it different from traditional Proof of Work, is that the mining difficulty changes **while a block is being mined**.
+
+In a typical blockchain, the mining difficulty is constant for the entire time miners are working on a block. In phpcoin, the target to find a valid block gets lower every single second.
 
 **Here's the core idea:**
 
-Instead of a fixed mining difficulty that only changes periodically (like in Bitcoin), ePoW adjusts the difficulty **every second**.
+The mechanism is driven by the "elapsed time" since the last block was found. As miners work, this elapsed time increases. For each second that passes, the mining target becomes easier to hit. This means the longer a block goes unsolved, the easier it becomes to solve.
 
-As miners work to find a new block, the `elapsed time` since the last block continuously increases. For each second that passes, the mining target gets a little bit lower, making it progressively easier to find a valid block. This is the most important feature of ePoW.
+To use an analogy:
+*   **Bitcoin** gives miners one single, very hard puzzle to solve.
+*   **phpcoin** gives miners a new puzzle every second, with each new puzzle being a little bit easier than the last.
 
 This has two key effects:
 *   **Stabilizes Block Time:** It ensures that blocks are found, on average, every 60 seconds. If a block isn't found quickly, the constantly decreasing difficulty makes it more and more likely to be found as time goes on.
@@ -49,7 +53,7 @@ The `elapsed_time` is crucial because it directly influences the mining `target`
 
 ### 3. Calculating the Mining Target
 
-In phpcoin, a lower `hit` value is better. To find a valid block, a miner's `hit` must be greater than the `target`. The `target` is dynamically calculated using the `difficulty` and the `elapsed` time.
+In phpcoin, a **higher** `hit` value is better. To find a valid block, a miner's `hit` must be greater than the `target`. The `target` is dynamically calculated using the `difficulty` and the `elapsed` time.
 
 **Pseudo-code:**
 ```
