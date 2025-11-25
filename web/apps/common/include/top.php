@@ -286,9 +286,18 @@ $redirect=$_SERVER['REQUEST_URI'];
                                     <i class="fas fa-globe me-2"></i> Language
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="lang-dropdown">
-                                    <a class="dropdown-item" href="?lang=en">English</a>
-                                    <a class="dropdown-item" href="?lang=es">Español</a>
-                                    <a class="dropdown-item" href="?lang=fr">Français</a>
+                                    <?php
+                                    $langs = scandir(ROOT . '/web/lang');
+                                    foreach ($langs as $lang) {
+                                        if ($lang != "." && $lang != ".." && $lang != "README.md" && $lang != "template.php") {
+                                            $lang_code = str_replace(".php", "", $lang);
+                                            $lang_name = include ROOT . '/web/lang/' . $lang;
+                                            ?>
+                                            <a class="dropdown-item" href="?lang=<?php echo $lang_code ?>"><?php echo $lang_name['_lang_name'] ?></a>
+                                            <?php
+                                        }
+                                    }
+                                    ?>
                                 </div>
                             </li>
                         </ul>

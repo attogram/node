@@ -1,5 +1,6 @@
 <?php
 return [
+    '_lang_name' => 'English',
     'blocks' => 'Blocks',
     'transactions' => 'Transactions',
     'mempool' => 'Mempool',
