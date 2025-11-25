@@ -185,9 +185,9 @@ $nonce = uniqid();
 
 <?php if ($login) { ?>
     <div class="row">
-        <div class="col-6 h3"><?php echo __('Node Admin') ?></div>
+        <div class="col-6 h3"><?= __('Node Admin') ?></div>
         <div class="col-6 text-end">
-            <a href="<?php echo APP_URL ?>/?action=logout" class="btn btn-outline-primary"><?php echo __('Logout') ?></a>
+            <a href="<?= APP_URL ?>/?action=logout" class="btn btn-outline-primary"><?= __('Logout') ?></a>
         </div>
     </div>
     <hr/>
@@ -197,8 +197,8 @@ $nonce = uniqid();
 
 <?php if($msg) { ?>
 	<?php foreach ($msg as $m) { ?>
-        <div class="alert alert-<?php echo $m['type'] ?>">
-			<?php echo __($m['msg']) ?>
+        <div class="alert alert-<?= $m['type'] ?>">
+			<?= __($m['msg']) ?>
         </div>
 	<?php }
 }
@@ -211,19 +211,19 @@ $nonce = uniqid();
             <div class="col-sm-4">
                 <div class="card mt-5">
                     <div class="card-header">
-                        <h4 class="card-title"><?php echo __('Login') ?></h4>
-                        <p class="card-title-desc"><?php echo __('Login and administer your node server') ?></p>
+                        <h4 class="card-title"><?= __('Login') ?></h4>
+                        <p class="card-title-desc"><?= __('Login and administer your node server') ?></p>
                     </div>
                     <div class="card-body p-4">
                         <div class="row">
                             <div class="col-lg-12">
                                 <form method="post" action="">
                                     <input type="hidden" value="" name="public_key">
-                                    <input type="hidden" value="<?php echo $nonce ?>" name="nonce">
+                                    <input type="hidden" value="<?= $nonce ?>" name="nonce">
                                     <input type="hidden" value="" name="signature">
                                     <input type="hidden" value="private-key-login" name="action">
                                     <div class="mb-3">
-                                        <label class="form-label" for="password"><?php echo __('Private key') ?></label>
+                                        <label class="form-label" for="password"><?= __('Private key') ?></label>
                                         <input type="password" class="form-control" id="private_key" name="private_key" value="" required/>
                                     </div>
                                     <div class="row mb-4">
@@ -231,16 +231,16 @@ $nonce = uniqid();
                                             <div class="form-check">
                                                 <input class="form-check-input" type="checkbox" id="rememberPrivateKey">
                                                 <label class="form-check-label" for="rememberPrivateKey">
-                                                    <?php echo __('Remember private key') ?>
+                                                    <?= __('Remember private key') ?>
                                                 </label>
                                             </div>
                                             <div class="help-block text-muted text-info">
-                                                <?php echo __('Private key will be stored only locally in browser') ?>
+                                                <?= __('Private key will be stored only locally in browser') ?>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="mt-4">
-                                        <button type="button" class="btn btn-primary w-md" onclick="login()"><?php echo __('Login') ?></button>
+                                        <button type="button" class="btn btn-primary w-md" onclick="login()"><?= __('Login') ?></button>
                                     </div>
                                 </form>
                             </div>
@@ -265,10 +265,10 @@ $nonce = uniqid();
 
             function login() {
                 try {
-                    let chainId = "<?php echo CHAIN_ID ?>"
+                    let chainId = "<?= CHAIN_ID ?>"
                     let privateKey = $("form [name=private_key]").val().trim()
                     if(!privateKey) {
-                        throw new Error("<?php echo __('Empty private key') ?>");
+                        throw new Error("<?= __('Empty private key') ?>");
                     }
                     let nonce = $("form [name=nonce]").val().trim()
                     let sig = sign(chainId+nonce, privateKey)
@@ -286,7 +286,7 @@ $nonce = uniqid();
                     console.log(e)
                     Swal.fire(
                         {
-                            title: '<?php echo __('Login failed') ?>',
+                            title: '<?= __('Login failed') ?>',
                             text: e.message,
                             icon: 'error'
                         }
@@ -306,23 +306,23 @@ $nonce = uniqid();
                 <div class="col-sm-4">
                     <div class="card mt-5">
                         <div class="card-header">
-                            <h4 class="card-title"><?php echo __('Login') ?></h4>
-                            <p class="card-title-desc"><?php echo __('Please generate and save admin password') ?></p>
+                            <h4 class="card-title"><?= __('Login') ?></h4>
+                            <p class="card-title-desc"><?= __('Please generate and save admin password') ?></p>
                         </div>
                         <div class="card-body p-4">
                             <div class="row">
                                 <div class="col-lg-12">
                                     <form method="post" action="">
                                         <div class="mb-3">
-                                            <label class="form-label" for="password"><?php echo __('Enter password') ?>:</label>
+                                            <label class="form-label" for="password"><?= __('Enter password') ?>:</label>
                                             <input type="password" class="form-control" id="password" name="password" value="" required/>
                                         </div>
                                         <div class="mb-3">
-                                            <label class="form-label" for="password2"><?php echo __('Repeat password') ?>:</label>
+                                            <label class="form-label" for="password2"><?= __('Repeat password') ?>:</label>
                                             <input type="password" class="form-control" id="password2" name="password2" value="" required/>
                                         </div>
                                         <div class="mt-4">
-                                            <button type="submit" class="btn btn-primary w-md"><?php echo __('Generate') ?></button>
+                                            <button type="submit" class="btn btn-primary w-md"><?= __('Generate') ?></button>
                                         </div>
                                         <input type="hidden" name="action" value="generate">
                                     </form>
@@ -343,20 +343,20 @@ $nonce = uniqid();
                 <div class="col-sm-4">
                     <div class="card mt-5">
                         <div class="card-header">
-                            <h4 class="card-title"><?php echo __('Login') ?></h4>
-                            <p class="card-title-desc"><?php echo __('Login and administer your node server') ?></p>
+                            <h4 class="card-title"><?= __('Login') ?></h4>
+                            <p class="card-title-desc"><?= __('Login and administer your node server') ?></p>
                         </div>
                         <div class="card-body p-4">
                             <div class="row">
                                 <div class="col-lg-12">
                                     <form method="post" action="">
                                         <div class="mb-3">
-                                            <label class="form-label" for="password"><?php echo __('Node password') ?></label>
-                                            <input type="text" class="d-none" id="username" value="<?php echo $_config['hostname'] ?>">
+                                            <label class="form-label" for="password"><?= __('Node password') ?></label>
+                                            <input type="text" class="d-none" id="username" value="<?= $_config['hostname'] ?>">
                                             <input type="password" class="form-control" id="password" name="password" value="" required/>
                                         </div>
                                         <div class="mt-4">
-                                            <button type="submit" class="btn btn-primary w-md"><?php echo __('Login') ?></button>
+                                            <button type="submit" class="btn btn-primary w-md"><?= __('Login') ?></button>
                                         </div>
                                         <input type="hidden" name="action" value="login">
                                     </form>
@@ -378,43 +378,43 @@ $nonce = uniqid();
 
     <ul class="nav nav-tabs mb-3" role="tablist">
         <li class="nav-item">
-            <a class="nav-link <?php if ($view == "server") { ?>active<?php } ?>" href="<?php echo APP_URL ?>/?view=server" role="tab" aria-selected="false">
-                <span><?php echo __('Server info') ?></span>
+            <a class="nav-link <?php if ($view == "server") { ?>active<?php } ?>" href="<?= APP_URL ?>/?view=server" role="tab" aria-selected="false">
+                <span><?= __('Server info') ?></span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link <?php if ($view == "php") { ?>active<?php } ?>" href="<?php echo APP_URL ?>/?view=php" role="tab" aria-selected="false">
-                <span><?php echo __('PHP info') ?></span>
+            <a class="nav-link <?php if ($view == "php") { ?>active<?php } ?>" href="<?= APP_URL ?>/?view=php" role="tab" aria-selected="false">
+                <span><?= __('PHP info') ?></span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link <?php if ($view == "db") { ?>active<?php } ?>" href="<?php echo APP_URL ?>/?view=db" role="tab" aria-selected="false">
-                <span><?php echo __('DB info') ?></span>
+            <a class="nav-link <?php if ($view == "db") { ?>active<?php } ?>" href="<?= APP_URL ?>/?view=db" role="tab" aria-selected="false">
+                <span><?= __('DB info') ?></span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link <?php if ($view == "utils") { ?>active<?php } ?>" href="<?php echo APP_URL ?>/?view=utils" role="tab" aria-selected="false">
-                <span><?php echo __('Utils') ?></span>
+            <a class="nav-link <?php if ($view == "utils") { ?>active<?php } ?>" href="<?= APP_URL ?>/?view=utils" role="tab" aria-selected="false">
+                <span><?= __('Utils') ?></span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link <?php if ($view == "peers") { ?>active<?php } ?>" href="<?php echo APP_URL ?>/?view=peers" role="tab" aria-selected="false">
-                <span><?php echo __('Peers') ?></span>
+            <a class="nav-link <?php if ($view == "peers") { ?>active<?php } ?>" href="<?= APP_URL ?>/?view=peers" role="tab" aria-selected="false">
+                <span><?= __('Peers') ?></span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link <?php if ($view == "mempool") { ?>active<?php } ?>" href="<?php echo APP_URL ?>/?view=mempool" role="tab" aria-selected="false">
-                <span><?php echo __('Mempool') ?></span>
+            <a class="nav-link <?php if ($view == "mempool") { ?>active<?php } ?>" href="<?= APP_URL ?>/?view=mempool" role="tab" aria-selected="false">
+                <span><?= __('Mempool') ?></span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link <?php if ($view == "config") { ?>active<?php } ?>" href="<?php echo APP_URL ?>/?view=config" role="tab" aria-selected="false">
-                <span><?php echo __('Config') ?></span>
+            <a class="nav-link <?php if ($view == "config") { ?>active<?php } ?>" href="<?= APP_URL ?>/?view=config" role="tab" aria-selected="false">
+                <span><?= __('Config') ?></span>
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link <?php if ($view == "log") { ?>active<?php } ?>" href="<?php echo APP_URL ?>/?view=log" role="tab" aria-selected="false">
-                <span><?php echo __('Log') ?></span>
+            <a class="nav-link <?php if ($view == "log") { ?>active<?php } ?>" href="<?= APP_URL ?>/?view=log" role="tab" aria-selected="false">
+                <span><?= __('Log') ?></span>
             </a>
         </li>
     </ul>
@@ -448,32 +448,32 @@ $nonce = uniqid();
                 <div class="col-lg-4 col-sm-6">
                     <?php if (!$blockchain_valid) { ?>
                         <div class="alert alert-danger">
-                            <?php echo __('Blockchain is invalid.') ?>
+                            <?= __('Blockchain is invalid.') ?>
                             <br/>
-                            <?php echo __('Blocks') ?>: <?php echo $count ?> - <?php echo __('Max height') ?>: <?php echo $max ?> - <?php echo __('Invalid height') ?>: <?php echo $invalid_height ?>
+                            <?= __('Blocks') ?>: <?= $count ?> - <?= __('Max height') ?>: <?= $max ?> - <?= __('Invalid height') ?>: <?= $invalid_height ?>
                         </div>
                     <?php } ?>
                     <div class="flex-row d-flex justify-content-between flex-wrap">
-                        <label><?php echo __('Connection') ?>:</label>
-                        <div><?php echo $dbData['connection'] ?></div>
+                        <label><?= __('Connection') ?>:</label>
+                        <div><?= $dbData['connection'] ?></div>
                     </div>
                     <div class="flex-row d-flex justify-content-between flex-wrap">
-                        <label><?php echo __('Server') ?>:</label>
-                        <div><?php echo $dbData['server'] ?></div>
+                        <label><?= __('Server') ?>:</label>
+                        <div><?= $dbData['server'] ?></div>
                     </div>
                     <div class="flex-row d-flex justify-content-between flex-wrap">
-                        <label><?php echo __('DB Name') ?>:</label>
-                        <div><?php echo $dbData['db_name'] ?></div>
+                        <label><?= __('DB Name') ?>:</label>
+                        <div><?= $dbData['db_name'] ?></div>
                     </div>
                     <div class="flex-row d-flex justify-content-between flex-wrap">
-                        <label><?php echo __('DB version') ?>:</label>
-                        <div><?php echo $dbData['dbversion'] ?></div>
+                        <label><?= __('DB version') ?>:</label>
+                        <div><?= $dbData['dbversion'] ?></div>
                     </div>
                     <hr/>
                     <?php foreach ($dbData['tables'] as $table => $rows) { ?>
                         <div class="flex-row d-flex justify-content-between flex-wrap">
-                            <label><?php echo $table ?>:</label>
-                            <div><?php echo $rows ?></div>
+                            <label><?= $table ?>:</label>
+                            <div><?= $rows ?></div>
                         </div>
                     <?php } ?>
                 </div>
@@ -493,46 +493,46 @@ $nonce = uniqid();
                 <form class="row gx-3 gy-2 align-items-center" method="post" action="">
                     <input type="hidden" name="action" value="add_peer">
                     <div class="col-sm-2">
-                        <input type="text" class="form-control" id="peer" name="peer" placeholder="<?php echo __('Peer address') ?>" required="required">
+                        <input type="text" class="form-control" id="peer" name="peer" placeholder="<?= __('Peer address') ?>" required="required">
                     </div>
                     <div class="col-sm-2">
-                        <button type="submit" class="btn btn-success"><?php echo __('Add Peer') ?></button>
+                        <button type="submit" class="btn btn-success"><?= __('Add Peer') ?></button>
                     </div>
                 </form>
             </div>
 
             <hr/>
 
-            <?php echo __('Total') ?>: <?php echo $total ?>
+            <?= __('Total') ?>: <?= $total ?>
 
-            <?php echo __('Blacklisted') ?>: <?php echo $blacklisted ?>
+            <?= __('Blacklisted') ?>: <?= $blacklisted ?>
 
-            <?php echo __('Live') ?>: <?php echo $live ?>
+            <?= __('Live') ?>: <?= $live ?>
 
 
-            <h4><?php echo __('Peers') ?></h4>
+            <h4><?= __('Peers') ?></h4>
             <div class="table-responsive">
                 <table class="table table-sm table-striped dataTable">
                     <thead class="table-light">
                     <tr>
-                        <th><?php echo __('Action') ?></th>
-                        <?php echo sort_column("/apps/admin/index.php?view=peers", $dm, 'id', __('ID') ,'') ?>
-                        <?php echo sort_column("/apps/admin/index.php?view=peers", $dm, 'hostname', __('Hostname') ,'') ?>
-	                    <?php echo sort_column("/apps/admin/index.php?view=peers", $dm, 'blacklisted', __('Blacklisted') ,'') ?>
-	                    <?php echo sort_column("/apps/admin/index.php?view=peers", $dm, 'ping', __('Ping') ,'') ?>
-	                    <?php echo sort_column("/apps/admin/index.php?view=peers", $dm, 'height', __('Height') ,'') ?>
-                        <th><?php echo __('Block') ?></th>
-                        <th><?php echo __('Ip') ?></th>
-	                    <?php echo sort_column("/apps/admin/index.php?view=peers", $dm, 'version', __('Version') ,'') ?>
-	                    <?php echo sort_column("/apps/admin/index.php?view=peers", $dm, 'fails', __('Fails') ,'') ?>
-                        <th><?php echo __('Stuckfail') ?></th>
-                        <th><?php echo __('Reason') ?></th>
-                        <th><?php echo __('Miner') ?></th>
-                        <th><?php echo __('Generator') ?></th>
-                        <th><?php echo __('Masternode') ?></th>
-	                    <?php echo sort_column("/apps/admin/index.php?view=peers", $dm, 'response_time', __('Response time') ,'') ?>
-	                    <?php echo sort_column("/apps/admin/index.php?view=peers", $dm, 'response_cnt', __('Response count') ,'') ?>
-	                    <?php echo sort_column("/apps/admin/index.php?view=peers", $dm, 'response_time/response_cnt', __('Response avg') ,'') ?>
+                        <th><?= __('Action') ?></th>
+                        <?= sort_column("/apps/admin/index.php?view=peers", $dm, 'id', __('ID') ,'') ?>
+                        <?= sort_column("/apps/admin/index.php?view=peers", $dm, 'hostname', __('Hostname') ,'') ?>
+	                    <?= sort_column("/apps/admin/index.php?view=peers", $dm, 'blacklisted', __('Blacklisted') ,'') ?>
+	                    <?= sort_column("/apps/admin/index.php?view=peers", $dm, 'ping', __('Ping') ,'') ?>
+	                    <?= sort_column("/apps/admin/index.php?view=peers", $dm, 'height', __('Height') ,'') ?>
+                        <th><?= __('Block') ?></th>
+                        <th><?= __('Ip') ?></th>
+	                    <?= sort_column("/apps/admin/index.php?view=peers", $dm, 'version', __('Version') ,'') ?>
+	                    <?= sort_column("/apps/admin/index.php?view=peers", $dm, 'fails', __('Fails') ,'') ?>
+                        <th><?= __('Stuckfail') ?></th>
+                        <th><?= __('Reason') ?></th>
+                        <th><?= __('Miner') ?></th>
+                        <th><?= __('Generator') ?></th>
+                        <th><?= __('Masternode') ?></th>
+	                    <?= sort_column("/apps/admin/index.php?view=peers", $dm, 'response_time', __('Response time') ,'') ?>
+	                    <?= sort_column("/apps/admin/index.php?view=peers", $dm, 'response_cnt', __('Response count') ,'') ?>
+	                    <?= sort_column("/apps/admin/index.php?view=peers", $dm, 'response_time/response_cnt', __('Response avg') ,'') ?>
                     </tr>
                     </thead>
                     <tbody>
@@ -540,37 +540,37 @@ $nonce = uniqid();
                         $live = time() - $peer['ping'] < Peer::PEER_PING_MAX_MINUTES*60;
                         $table_class = $peer['blacklisted'] > time() ? "table-danger" : ($live ? "table-success" : "");
                         ?>
-                        <tr  class="<?php echo $table_class ?>">
+                        <tr  class="<?= $table_class ?>">
                             <td class="text-nowrap">
-                                <a class="btn btn-danger btn-xs" href="<?php echo APP_URL ?>/?action=delete_peer&id=<?php echo $peer['id']  ?>" onclick="if(!confirm('<?php echo __('Delete peer?') ?>')) return false;"><?php echo __('Delete') ?></a>
-                                <a class="btn btn-warning btn-xs" href="<?php echo APP_URL ?>/?action=repeer&id=<?php echo $peer['id']  ?>&peer=<?php echo $peer['hostname'] ?>"><?php echo __('Re-peer') ?></a>
+                                <a class="btn btn-danger btn-xs" href="<?= APP_URL ?>/?action=delete_peer&id=<?= $peer['id']  ?>" onclick="if(!confirm('<?= __('Delete peer?') ?>')) return false;"><?= __('Delete') ?></a>
+                                <a class="btn btn-warning btn-xs" href="<?= APP_URL ?>/?action=repeer&id=<?= $peer['id']  ?>&peer=<?= $peer['hostname'] ?>"><?= __('Re-peer') ?></a>
                             </td>
-                            <td><?php echo $peer['id'] ?></td>
+                            <td><?= $peer['id'] ?></td>
                             <td>
-                                <a href="<?php echo $peer['hostname'] ?>" target="_blank">
-                                    <?php echo $peer['hostname'] ?>
+                                <a href="<?= $peer['hostname'] ?>" target="_blank">
+                                    <?= $peer['hostname'] ?>
                                 </a>
                             </td>
                             <td nowrap="nowrap">
-                                <?php echo display_date($peer['blacklisted']) ?>
+                                <?= display_date($peer['blacklisted']) ?>
                                 <?php if($peer['blacklisted'] > time()) {
                                     echo " | " .durationFormat($peer['blacklisted'] - time());
 
                                 }?>
                             </td>
-                            <td nowrap="nowrap"><?php echo display_date($peer['ping']) . " | " . durationFormat(time() - $peer['ping']) ?></td>
-                            <td><?php echo $peer['height'] ?></td>
-                            <td><?php echo $peer['block_id'] ?></td>
-                            <td><?php echo $peer['ip'] ?></td>
-                            <td><?php echo $peer['version'] ?></td>
-                            <td><?php echo $peer['fails'] ?></td>
-                            <td><?php echo $peer['stuckfail'] ?></td>
-                            <td><?php echo $peer['blacklist_reason'] ?></td>
-                            <td><?php echo $peer['miner'] ?></td>
-                            <td><?php echo $peer['generator'] ?></td>
-                            <td><?php echo $peer['masternode'] ?></td>
-                            <td><?php echo $peer['response_time'] ?></td>
-                            <td><?php echo $peer['response_cnt'] ?></td>
+                            <td nowrap="nowrap"><?= display_date($peer['ping']) . " | " . durationFormat(time() - $peer['ping']) ?></td>
+                            <td><?= $peer['height'] ?></td>
+                            <td><?= $peer['block_id'] ?></td>
+                            <td><?= $peer['ip'] ?></td>
+                            <td><?= $peer['version'] ?></td>
+                            <td><?= $peer['fails'] ?></td>
+                            <td><?= $peer['stuckfail'] ?></td>
+                            <td><?= $peer['blacklist_reason'] ?></td>
+                            <td><?= $peer['miner'] ?></td>
+                            <td><?= $peer['generator'] ?></td>
+                            <td><?= $peer['masternode'] ?></td>
+                            <td><?= $peer['response_time'] ?></td>
+                            <td><?= $peer['response_cnt'] ?></td>
                             <td>
                                 <?php
                                 $total = $peer['response_time'];
@@ -579,14 +579,14 @@ $nonce = uniqid();
                                     $avg = round($total / $cnt,3);
                                 }
                                 ?>
-                                <span title="total=<?php echo $total ?> cnt=<?php echo $cnt ?>"><?php echo $avg ?></span>
+                                <span title="total=<?= $total ?> cnt=<?= $cnt ?>"><?= $avg ?></span>
                             </td>
                         </tr>
                     <?php } ?>
                     </tbody>
                 </table>
             </div>
-            <a class="btn btn-danger" href="<?php echo APP_URL ?>/?action=delete_peers" onclick="if(!confirm('<?php echo __('Delete all?') ?>')) return false"><?php echo __('Delete all') ?></a>
+            <a class="btn btn-danger" href="<?= APP_URL ?>/?action=delete_peers" onclick="if(!confirm('<?= __('Delete all?') ?>')) return false"><?= __('Delete all') ?></a>
 
 
 		<?php } ?>
@@ -600,14 +600,14 @@ $nonce = uniqid();
 
 	        ?>
 
-            <h3><?php echo __('Config') ?></h3>
+            <h3><?= __('Config') ?></h3>
 
             <div class="row">
                 <div class="col-sm-7">
                     <table class="table table-sm">
 		                <?php foreach($display_config as $key=>$val) { ?>
                             <tr>
-                                <td><?php echo $key ?></td>
+                                <td><?= $key ?></td>
                                 <td style="word-break: break-all">
                                     <?php
                                         if(is_array($val)) {
@@ -625,25 +625,25 @@ $nonce = uniqid();
 
                     <div class="form-check form-switch form-switch-lg mb-3" dir="ltr">
                         <input type="checkbox" class="form-check-input" id="customSwitchsizelg" <?php echo $_config['enable_logging'] ? 'checked=""' : '' ?>
-                               onchange="document.location.href='<?php echo APP_URL ?>/?action=logging&value=<?php echo $_config['enable_logging'] ? 0 : 1 ?>'">
-                        <label class="form-check-label" for="customSwitchsizelg"><?php echo __('Logging') ?></label>
+                               onchange="document.location.href='<?= APP_URL ?>/?action=logging&value=<?= $_config['enable_logging'] ? 0 : 1 ?>'">
+                        <label class="form-check-label" for="customSwitchsizelg"><?= __('Logging') ?></label>
                     </div>
 
                     <div class="form-check form-switch form-switch-lg mb-3" dir="ltr">
                         <input type="checkbox" class="form-check-input" id="customSwitchsizelg" <?php echo $_config['offline'] ? 'checked=""' : '' ?>
-                               onchange="document.location.href='<?php echo APP_URL ?>/?action=offline&value=<?php echo $_config['offline'] ? 0 : 1 ?>'">
-                        <label class="form-check-label" for="customSwitchsizelg"><?php echo __('Offline') ?></label>
+                               onchange="document.location.href='<?= APP_URL ?>/?action=offline&value=<?= $_config['offline'] ? 0 : 1 ?>'">
+                        <label class="form-check-label" for="customSwitchsizelg"><?= __('Offline') ?></label>
                     </div>
 
                     <div class="mt-4">
-                        <h3 class="font-size-16 mb-2"><i class="mdi mdi-arrow-right text-primary me-1"></i><?php echo __('Hostname') ?></h3>
+                        <h3 class="font-size-16 mb-2"><i class="mdi mdi-arrow-right text-primary me-1"></i><?= __('Hostname') ?></h3>
                         <form class="row gx-3 gy-2 align-items-center" method="post" action="">
                             <input type="hidden" name="action" value="set_hostname"/>
                             <div class="col-sm-8">
-                                <input type="text" value="<?php echo $_config['hostname'] ?>" class="form-control" id="hostname" name="hostname" placeholder="" required="required">
+                                <input type="text" value="<?= $_config['hostname'] ?>" class="form-control" id="hostname" name="hostname" placeholder="" required="required">
                             </div>
                             <div class="col-sm-auto">
-                                <button type="submit" class="btn btn-info"><?php echo __('Set') ?></button>
+                                <button type="submit" class="btn btn-info"><?= __('Set') ?></button>
                             </div>
                         </form>
                     </div>
@@ -657,35 +657,35 @@ $nonce = uniqid();
             <table class="table table-sm">
                 <tr>
                     <td>
-                        <label><?php echo __('Apps hash (calculated)') ?>:</label>
+                        <label><?= __('Apps hash (calculated)') ?>:</label>
                     </td>
                     <td>
-                        <?php echo $updateData['appsHash']['calculated'] ?>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label><?php echo __('Apps hash (stored)') ?>:</label>
-                    </td>
-                    <td>
-                        <?php echo $updateData['appsHash']['stored'] ?>
+                        <?= $updateData['appsHash']['calculated'] ?>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <label><?php echo __('Apps hash (valid)') ?>:</label>
+                        <label><?= __('Apps hash (stored)') ?>:</label>
                     </td>
                     <td>
-                        <?php echo $updateData['appsHash']['valid'] ?>
+                        <?= $updateData['appsHash']['stored'] ?>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label><?= __('Apps hash (valid)') ?>:</label>
+                    </td>
+                    <td>
+                        <?= $updateData['appsHash']['valid'] ?>
                     </td>
                 </tr>
             </table>
 
             <?php if ($updateData['appsHash']['calculated'] != $updateData['appsHash']['valid']) { ?>
-                <a href="<?php echo APP_URL ?>/?action=update" class="btn btn-success"><?php echo __('Update apps') ?></a>
+                <a href="<?= APP_URL ?>/?action=update" class="btn btn-success"><?= __('Update apps') ?></a>
             <?php } ?>
             <?php if ($repoServer) {?>
-                <a href="<?php echo APP_URL ?>/?action=propagate_update" class="btn btn-success"><?php echo __('Propagate') ?></a>
+                <a href="<?= APP_URL ?>/?action=propagate_update" class="btn btn-success"><?= __('Propagate') ?></a>
             <?php } ?>
 
 
@@ -696,17 +696,17 @@ $nonce = uniqid();
             ?>
             <table class="table table-sm mt-5">
                 <tr>
-                    <td><label><?php echo __('Node version') ?></label></td>
-                    <td><?php echo $gitRev?></td>
+                    <td><label><?= __('Node version') ?></label></td>
+                    <td><?= $gitRev?></td>
                 </tr>
                 <tr>
-                    <td><label><?php echo __('Latest git version') ?></label></td>
-                    <td><?php echo $remoteRev?></td>
+                    <td><label><?= __('Latest git version') ?></label></td>
+                    <td><?= $remoteRev?></td>
                 </tr>
             </table>
 
             <?php if ($gitRev != $remoteRev) {?>
-                <?php echo __('Update node') ?>:
+                <?= __('Update node') ?>:
                 <pre>
                     git reset --hard HEAD
                     git pull
@@ -717,9 +717,9 @@ $nonce = uniqid();
 
         <?php } ?>
 	    <?php if($view == "log") { ?>
-            <h3><?php echo __('Log') ?></h3>
+            <h3><?= __('Log') ?></h3>
             <hr/>
-            <pre style="white-space: pre-line"><?php echo $logData ?></pre>
+            <pre style="white-space: pre-line"><?= $logData ?></pre>
 		<?php } ?>
 
         <?php

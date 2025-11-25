@@ -73,27 +73,27 @@ global $btcPrice, $usdPrice;
                 <div class="row align-items-start">
                     <div class="col-6">
                         <i class="fas fa-database me-1 h4"></i>
-                        <span class="text-muted mb-3 lh-1 text-truncate h4"><?php echo __('Blocks') ?></span>
+                        <span class="text-muted mb-3 lh-1 text-truncate h4"><?= __('Blocks') ?></span>
                         <h2 class="my-2">
-                            <?php echo $blockCount  ?>
+                            <?= $blockCount  ?>
                         </h2>
                         <div class="">
-                            <span class="text-muted font-size-13"><?php echo __('Last block before') ?> <strong><?php echo $elapsed ?></strong> <?php echo __('seconds') ?></span>
+                            <span class="text-muted font-size-13"><?= __('Last block before') ?> <strong><?= $elapsed ?></strong> <?= __('seconds') ?></span>
                         </div>
                     </div>
                     <?php if(FEATURE_SMART_CONTRACTS) { ?>
                         <div class="col-6">
                             <i class="fas fa-exchange-alt me-1 h4"></i>
                             <span class="text-muted mb-3 lh-1 text-truncate h4">
-                                <a href="/apps/explorer/txs.php"><?php echo __('Transactions') ?></a>
+                                <a href="/apps/explorer/txs.php"><?= __('Transactions') ?></a>
                             </span>
                             <h2 class="my-2">
-                                ~<?php echo $txCount  ?>
+                                ~<?= $txCount  ?>
                             </h2>
                             <div class="text-nowrap">
-                                <strong><?php echo $mempoolCount ?></strong> in <a href="/apps/explorer/mempool.php"><?php echo __('mempool') ?></a>
+                                <strong><?= $mempoolCount ?></strong> in <a href="/apps/explorer/mempool.php"><?= __('mempool') ?></a>
                                 <br/>
-                                <span class="text-muted font-size-13"><?php echo __('Fee') ?> <?php echo number_format($fee,5) ?></span>
+                                <span class="text-muted font-size-13"><?= __('Fee') ?> <?= number_format($fee,5) ?></span>
                             </div>
                         </div>
                     <?php } ?>
@@ -110,23 +110,23 @@ global $btcPrice, $usdPrice;
                     <div class="col-12">
                         <i class="fas fa-clock me-1 h4"></i>
                         <span class="text-muted mb-3 lh-1 text-truncate h4">
-                            <?php echo __('Average Block time') ?>
+                            <?= __('Average Block time') ?>
                         </span>
                     </div>
                     <div class="col-6">
                         <h2 class="my-2">
-                            <span><?php echo $avgBlockTime10 ?></span>
+                            <span><?= $avgBlockTime10 ?></span>
                         </h2>
                         <div class="text-nowrap">
-                            <span class="text-muted font-size-13"><?php echo __('last 10 blocks') ?></span>
+                            <span class="text-muted font-size-13"><?= __('last 10 blocks') ?></span>
                         </div>
                     </div>
                     <div class="col-6">
                         <h2 class="my-2">
-                            <span><?php echo $avgBlockTime100 ?></span>
+                            <span><?= $avgBlockTime100 ?></span>
                         </h2>
                         <div class="text-nowrap">
-                            <span class="text-muted font-size-13"><?php echo __('last 100 blocks') ?></span>
+                            <span class="text-muted font-size-13"><?= __('last 100 blocks') ?></span>
                         </div>
                     </div>
                 </div>
@@ -141,23 +141,23 @@ global $btcPrice, $usdPrice;
                     <div class="col-12">
                         <i class="fas fa-hammer me-1 h4"></i>
                         <span class="text-muted mb-3 lh-1 text-truncate h4">
-                            <?php echo __('Hash rate') ?>
+                            <?= __('Hash rate') ?>
                         </span>
                     </div>
                     <div class="col-6">
                         <h2 class="my-2">
-                            <span><?php echo $hashRate10 ?></span>
+                            <span><?= $hashRate10 ?></span>
                         </h2>
                         <div class="text-nowrap">
-                            <span class="text-muted font-size-13"><?php echo __('last 10 blocks') ?></span>
+                            <span class="text-muted font-size-13"><?= __('last 10 blocks') ?></span>
                         </div>
                     </div>
                     <div class="col-6">
                         <h2 class="my-2">
-                            <span><?php echo $hashRate100 ?></span>
+                            <span><?= $hashRate100 ?></span>
                         </h2>
                         <div class="text-nowrap">
-                            <span class="text-muted font-size-13"><?php echo __('last 100 blocks') ?></span>
+                            <span class="text-muted font-size-13"><?= __('last 100 blocks') ?></span>
                         </div>
                     </div>
                 </div>
@@ -172,17 +172,17 @@ global $btcPrice, $usdPrice;
                     <div class="col-12">
                         <i class="fas fa-coins me-1 h4"></i>
                         <span class="text-muted mb-3 lh-1 text-truncate h4">
-                            <?php echo __('Current supply') ?>
+                            <?= __('Current supply') ?>
                         </span>
                         <h2 class="my-2">
-                            <span><?php echo num($circulation) ?></span>
+                            <span><?= num($circulation) ?></span>
                         </h2>
                     </div>
                 </div>
                 <div class="text-nowrap">
-                    <span class="text-muted font-size-13"><?php echo __('Total supply') ?> <strong><?php echo num(Blockchain::getTotalSupply()) ?></strong></span>
+                    <span class="text-muted font-size-13"><?= __('Total supply') ?> <strong><?= num(Blockchain::getTotalSupply()) ?></strong></span>
                     <br/>
-                    <span class="text-muted font-size-13"><?php echo __('Burned') ?>: <strong><?php echo num(Transaction::getBurnedAmount()) ?></strong></span>
+                    <span class="text-muted font-size-13"><?= __('Burned') ?>: <strong><?= num(Transaction::getBurnedAmount()) ?></strong></span>
                 </div>
             </div>
         </div>
@@ -196,22 +196,22 @@ global $btcPrice, $usdPrice;
                         <div class="col-6">
                             <i class="fas fa-exchange-alt me-1 h4"></i>
                             <span class="text-muted mb-3 lh-1 text-truncate h4">
-                                <a href="/apps/explorer/txs.php"><?php echo __('Transactions') ?></a>
+                                <a href="/apps/explorer/txs.php"><?= __('Transactions') ?></a>
                             </span>
                             <h2 class="my-2">
-                                ~<?php echo $txCount  ?>
+                                ~<?= $txCount  ?>
                             </h2>
                             <div class="text-nowrap">
-                                <span class="text-muted font-size-13"><?php echo __('Fee') ?> <?php echo number_format($fee,5) ?></span>
+                                <span class="text-muted font-size-13"><?= __('Fee') ?> <?= number_format($fee,5) ?></span>
                             </div>
                         </div>
                         <div class="col-6">
                             <i class="fas fa-hourglass-start  me-1 h4"></i>
                             <span class="text-muted mb-3 lh-1 text-truncate h4">
-                                <a href="/apps/explorer/mempool.php"><?php echo __('Mempool') ?></a>
+                                <a href="/apps/explorer/mempool.php"><?= __('Mempool') ?></a>
                             </span>
                             <h2 class="my-2">
-                                <?php echo $mempoolCount ?>
+                                <?= $mempoolCount ?>
                             </h2>
                         </div>
                     </div>
@@ -228,19 +228,19 @@ global $btcPrice, $usdPrice;
                         <div class="col-6">
                             <i class="fas fa-file-code  me-1 h4"></i>
                             <span class="text-muted mb-3 lh-1 text-truncate h4">
-                                        <a href="/apps/explorer/smart_contracts.php" style="letter-spacing: -1.5px"><?php echo __('Smart Contracts') ?></a>
+                                        <a href="/apps/explorer/smart_contracts.php" style="letter-spacing: -1.5px"><?= __('Smart Contracts') ?></a>
                                     </span>
                             <h2 class="my-2">
-                                <?php echo $scCount ?>
+                                <?= $scCount ?>
                             </h2>
                         </div>
                         <div class="col-6">
                             <i class="fas fa-money-bill me-1 h4"></i>
                             <span class="text-muted mb-3 lh-1 text-truncate h4">
-                                        <a href="/apps/explorer/tokens/list.php"><?php echo __('Tokens') ?></a>
+                                        <a href="/apps/explorer/tokens/list.php"><?= __('Tokens') ?></a>
                                     </span>
                             <h2 class="my-2">
-                                <?php echo $tokensCount ?>
+                                <?= $tokensCount ?>
                             </h2>
                         </div>
                     </div>
@@ -256,17 +256,17 @@ global $btcPrice, $usdPrice;
                     <div class="col-9">
                         <i class="fas fa-dollar-sign  me-1 h4"></i>
                         <span class="text-muted mb-3 lh-1 text-truncate h4">
-                            <a href="https://klingex.io/trade/PHP-USDT?ref=3436CA42" target="_blank"><?php echo __('Price') ?></a>
+                            <a href="https://klingex.io/trade/PHP-USDT?ref=3436CA42" target="_blank"><?= __('Price') ?></a>
                         </span>
                         <h2 class="my-2">
-                            <?php echo empty(floatval($btcPrice)) ? "-" : $btcPrice ?> ₿
+                            <?= empty(floatval($btcPrice)) ? "-" : $btcPrice ?> ₿
                         </h2>
                         <div class="text-nowrap">
-                            <span class="text-muted font-size-13"><?php echo empty(floatval($usdPrice)) ? "-" : $usdPrice ?> $</span>
+                            <span class="text-muted font-size-13"><?= empty(floatval($usdPrice)) ? "-" : $usdPrice ?> $</span>
                         </div>
                     </div>
                     <div class="col-3">
-                        <?php echo __('Trade on') ?>
+                        <?= __('Trade on') ?>
                         <a href="https://klingex.io/trade/PHP-USDT?ref=3436CA42" target="_blank">
                             <img src="https://klingex.io/symbol.svg" style="width:50px;height:50px"/>
                         </a>
@@ -284,19 +284,19 @@ global $btcPrice, $usdPrice;
                     <div class="col-6">
                         <i class="fas fa-users  me-1 h4"></i>
                         <span class="text-muted mb-3 lh-1 text-truncate h4">
-                            <a href="/apps/explorer/accounts.php"><?php echo __('Accounts') ?></a>
+                            <a href="/apps/explorer/accounts.php"><?= __('Accounts') ?></a>
                         </span>
                         <h2 class="my-2">
-                            <?php echo $addressAccount  ?>
+                            <?= $addressAccount  ?>
                         </h2>
                     </div>
                     <div class="col-6">
                         <i class="fas fa-network-wired me-1 h4"></i>
                         <span class="text-muted mb-3 lh-1 text-truncate h4">
-                            <a href="/apps/explorer/peers.php"><?php echo __('Peers') ?></a>
+                            <a href="/apps/explorer/peers.php"><?= __('Peers') ?></a>
                         </span>
                         <h2 class="my-2">
-			                <?php echo $peersCount ?>
+			                <?= $peersCount ?>
                         </h2>
                     </div>
                 </div>
@@ -312,32 +312,32 @@ global $btcPrice, $usdPrice;
                         <div class="col-6">
                             <i class="fas fa-boxes me-1 h4"></i>
                             <span class="text-muted mb-3 lh-1 text-truncate h4">
-                                <a href="/apps/explorer/masternodes.php"><?php echo __('Masternodes') ?></a>
+                                <a href="/apps/explorer/masternodes.php"><?= __('Masternodes') ?></a>
                             </span>
                             <h2 class="my-2">
-                                <?php echo $masternodeActiveCount ?>
+                                <?= $masternodeActiveCount ?>
                             </h2>
                             <div class="text-nowrap">
                                 <span class="text-muted font-size-13">
-                                    <?php echo __('Total') ?> <strong><?php echo $masternodesCount ?></strong> <?php echo __('masternodes') ?>
+                                    <?= __('Total') ?> <strong><?= $masternodesCount ?></strong> <?= __('masternodes') ?>
                                     <br/>
-                                    <?php echo __('Verified') ?> <strong><?php echo $masternodesVerifiedCount ?></strong>
+                                    <?= __('Verified') ?> <strong><?= $masternodesVerifiedCount ?></strong>
                                 </span>
                             </div>
                         </div>
                         <div class="col-6">
                             <i class=" fas fa-hand-holding-usd me-1 h4"></i>
                             <span class="text-muted mb-3 lh-1 text-truncate h4">
-                                <?php echo __('Collateral') ?>
+                                <?= __('Collateral') ?>
                             </span>
                             <h2 class="my-2">
-		                        <?php echo $collateral ?>
+		                        <?= $collateral ?>
                             </h2>
                             <div class="text-nowrap">
                                 <span class="text-muted font-size-13">
-                                    <?php echo __('Next collateral') ?>: <strong><?php echo $next_collateral ?></strong>
+                                    <?= __('Next collateral') ?>: <strong><?= $next_collateral ?></strong>
                                     <br/>
-                                    <?php echo __('at block') ?> <strong><?php echo $next_collateral_height ?></strong>
+                                    <?= __('at block') ?> <strong><?= $next_collateral_height ?></strong>
                                 </span>
                             </div>
                         </div>
@@ -355,43 +355,43 @@ global $btcPrice, $usdPrice;
 
 <?php } ?>
 
-    <h3><?php echo __('Blocks') ?></h3>
+    <h3><?= __('Blocks') ?></h3>
     <div class="table-responsive">
     <table class="table table-striped table-sm table-hover">
         <thead class="table-light">
             <tr>
-                <th><?php echo __('Height') ?></th>
-                <th><?php echo __('ID') ?></th>
-                <th><?php echo __('Generator') ?></th>
-                <th><?php echo __('Miner') ?></th>
+                <th><?= __('Height') ?></th>
+                <th><?= __('ID') ?></th>
+                <th><?= __('Generator') ?></th>
+                <th><?= __('Miner') ?></th>
                 <?php if ($mnEnabled) { ?>
-                    <th><?php echo __('Masternode') ?></th>
+                    <th><?= __('Masternode') ?></th>
                 <?php } ?>
-                <th><?php echo __('Date') ?></th>
-                <th><?php echo __('Difficulty') ?></th>
-                <th><?php echo __('Transactions') ?></th>
-                <th><?php echo __('Version') ?></th>
-                <th><?php echo __('Block time') ?></th>
+                <th><?= __('Date') ?></th>
+                <th><?= __('Difficulty') ?></th>
+                <th><?= __('Transactions') ?></th>
+                <th><?= __('Version') ?></th>
+                <th><?= __('Block time') ?></th>
             </tr>
         </thead>
         <tbody>
             <?php foreach($blocks as $i => $block) { ?>
                 <tr>
                     <td>
-                        <a href="/apps/explorer/block.php?height=<?php echo $block['height'] ?>">
-                            <?php echo $block['height'] ?>
+                        <a href="/apps/explorer/block.php?height=<?= $block['height'] ?>">
+                            <?= $block['height'] ?>
                         </a>
                     </td>
-                    <td><?php echo truncate_hash($block['id']) ?></td>
-                    <td><?php echo explorer_address_link2($block['generator'], true) ?></td>
-                    <td><?php echo explorer_address_link2($block['miner'], true) ?></td>
+                    <td><?= truncate_hash($block['id']) ?></td>
+                    <td><?= explorer_address_link2($block['generator'], true) ?></td>
+                    <td><?= explorer_address_link2($block['miner'], true) ?></td>
 	                <?php if ($mnEnabled) { ?>
-                        <td><?php echo explorer_address_link2($block['masternode'], true) ?></td>
+                        <td><?= explorer_address_link2($block['masternode'], true) ?></td>
                     <?php } ?>
-                    <td><?php echo display_date($block['date']) ?></td>
-                    <td><?php echo $block['difficulty'] ?></td>
-                    <td><?php echo $block['transactions'] ?></td>
-                    <td><?php echo $block['version'] ?></td>
+                    <td><?= display_date($block['date']) ?></td>
+                    <td><?= $block['difficulty'] ?></td>
+                    <td><?= $block['transactions'] ?></td>
+                    <td><?= $block['version'] ?></td>
                     <td>
                         <?php
                         if($block['height']>1) {
@@ -421,29 +421,29 @@ global $btcPrice, $usdPrice;
             <?php if ($page > 1) { ?>
                 <li class="page-item">
                     <a class="page-link" href="/apps/explorer/?page=1" aria-label="Previous">
-                        <span aria-hidden="true"><?php echo __('First') ?></span>
+                        <span aria-hidden="true"><?= __('First') ?></span>
                     </a>
                 <li>
                 <li class="page-item">
                     <a class="page-link" href="/apps/explorer/?page=<?php echo $page - 1 ?>" aria-label="Previous">
-                        <span aria-hidden="true"><?php echo __('Previous') ?></span>
+                        <span aria-hidden="true"><?= __('Previous') ?></span>
                     </a>
                 </li>
             <?php } ?>
             <?php for ($i=$startPage; $i<=$endPage; $i++) { ?>
                 <li class="page-item <?php if ($i == $page) { ?>active<?php } ?>">
-                    <a class="page-link" href="/apps/explorer/?page=<?php echo $i ?>"><?php echo $i ?></a>
+                    <a class="page-link" href="/apps/explorer/?page=<?php echo $i ?>"><?= $i ?></a>
                 </li>
             <?php } ?>
             <?php if ($page < $pages) { ?>
                 <li class="page-item">
                     <a class="page-link" href="/apps/explorer/?page=<?php echo $page + 1 ?>" aria-label="Next">
-                        <span aria-hidden="true"><?php echo __('Next') ?></span>
+                        <span aria-hidden="true"><?= __('Next') ?></span>
                     </a>
                 <li>
                 <li class="page-item">
                     <a class="page-link" href="/apps/explorer/?page=<?php echo $pages?>" aria-label="Next">
-                        <span aria-hidden="true"><?php echo __('Last') ?></span>
+                        <span aria-hidden="true"><?= __('Last') ?></span>
                     </a>
                 </li>
             <?php } ?>

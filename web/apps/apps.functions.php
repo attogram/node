@@ -14,10 +14,10 @@ if (!isset($_SESSION['lang'])) {
     $_SESSION['lang'] = 'en';
 }
 
-function __($key) {
+function __($original_key) {
     $lang = $_SESSION['lang'] ?? 'en';
     $langFile = ROOT . '/web/lang/' . $lang . '.php';
-    $key = strtolower(str_replace(' ', '_', $key));
+    $key = strtolower(str_replace(' ', '_', $original_key));
 
     if (!file_exists($langFile)) {
         $langFile = ROOT . '/web/lang/en.php';
@@ -28,7 +28,7 @@ function __($key) {
     if (isset($translations[$key]) && !empty($translations[$key])) {
         return $translations[$key];
     } else {
-        return $key;
+        return $original_key;
     }
 }
 

@@ -1,1 +1,4 @@
--bash: php: command not found
+[Mon Nov 24 20:17:27 2025] PHP 8.3.6 Development Server (http://localhost:8000) started
+[Mon Nov 24 20:17:29 2025] [::1]:50062 Accepted
+[Mon Nov 24 20:17:29 2025] [::1]:50062 [200]: GET /apps/explorer/
+[Mon Nov 24 20:17:29 2025] [::1]:50062 Closing
