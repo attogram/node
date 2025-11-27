@@ -1,6 +1,5 @@
-[PHPCoin](../../README.md) > [Docs](../README.md) > [API](README.md) > API Reference
+[PHPCoin](../../) > [Docs](../) > [API](./) > API Reference
 
-[Up](README.md) | [Table of Contents](../README.md)
 
 ---
 

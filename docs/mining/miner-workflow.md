@@ -1,6 +1,5 @@
-[PHPCoin](../../README.md) > [Docs](../README.md) > [Mining](README.md) > Mining Workflows
+[PHPCoin](../../) > [Docs](../) > [Mining](./) > Mining Workflows
 
-[Up](README.md) | [Table of Contents](../README.md)
 
 ---
 
@@ -11,6 +10,9 @@ This document outlines the complete step-by-step workflows for the different min
 ## CLI Miner Workflow
 
 This section describes the process for the standalone command-line miner, executed via `utils/miner.php`.
+
+<!-- Diagram placeholder: An SVG diagram illustrating the CLI miner workflow, from initialization to block submission -->
+[Image: CLI Miner Workflow]
 
 ### Initialization
 

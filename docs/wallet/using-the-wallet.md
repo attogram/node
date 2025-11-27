@@ -1,6 +1,5 @@
-[PHPCoin](../../README.md) > [Docs](../README.md) > [Wallet](README.md) > Using the Wallet
+[PHPCoin](../../) > [Docs](../) > [Wallet](./) > Using the Wallet
 
-[Up](README.md) | [Table of Contents](../README.md)
 
 ---
 
