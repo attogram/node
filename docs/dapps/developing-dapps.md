@@ -1,5 +1,7 @@
 [PHPCoin](../../README.md) > [Docs](../README.md) > [dApps](README.md) > Developing Dapps
 
+[Up](README.md) | [Table of Contents](../README.md)
+
 ---
 
 # Developing Dapps

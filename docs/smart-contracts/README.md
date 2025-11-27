@@ -1,5 +1,7 @@
 [PHPCoin](../../README.md) > [Docs](../README.md) > Smart Contracts
 
+[Up](../README.md) | [Table of Contents](../README.md)
+
 ---
 
 # Smart Contracts
