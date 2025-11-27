@@ -3,6 +3,7 @@ Welcome to the official documentation for PHPCoin. This documentation provides a
 * **[Introduction](introduction/)** - A high-level overview of PHPCoin, its features, and its purpose.
 * **[What is PHPCoin?](introduction/what-is-phpcoin.md)** - A detailed explanation of the PHPCoin project.
 * **[Features](introduction/features.md)** - A list of the key features of PHPCoin.
+* **[White Paper](white-paper/README.md)** - The official PHPCoin whitepaper.
 * **[Getting Started](getting-started/)** - Step-by-step guides for installing and running a PHPCoin node.
 * **[Installation](getting-started/installation.md)** - A guide on how to install a PHPCoin node.
 * **[Running a Node](getting-started/running-a-node.md)** - Instructions on how to run a PHPCoin node.
