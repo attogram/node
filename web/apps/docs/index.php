@@ -67,6 +67,7 @@ if(!empty($_GET['doc'])) {
         $file = $baseDir . $link . 'README.md';
     }
 } else {
+    $link = '';
     $file = $baseDir . 'README.md';
 }
 
@@ -98,7 +99,11 @@ if ($extension === 'png') {
     exit;
 }
 
-$docPath = dirname($link);
+$relativePath = str_replace($baseDir, '', $file);
+$docPath = dirname($relativePath);
+if ($docPath == ".") {
+	$docPath = "";
+}
 $pd = new ParsedownExt($docPath);
 $pd->setSafeMode(true);
 $text = file_get_contents($file);
