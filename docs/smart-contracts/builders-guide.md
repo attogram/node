@@ -1,6 +1,5 @@
-[PHPCoin](../../README.md) > [Docs](../README.md) > [Smart Contracts](README.md) > Smart Contract Builder's Guide
+[PHPCoin](../../) > [Docs](../) > [Smart Contracts](./) > Smart Contract Builder's Guide
 
-[Up](README.md) | [Table of Contents](../README.md)
 
 ---
 

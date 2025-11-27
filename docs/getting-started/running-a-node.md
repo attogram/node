@@ -1,6 +1,5 @@
-[PHPCoin](../../README.md) > [Docs](../README.md) > [Getting Started](README.md) > Running a Node
+[PHPCoin](../../) > [Docs](../) > [Getting Started](./) > Running a Node
 
-[Up](README.md) | [Table of Contents](../README.md)
 
 ---
 
