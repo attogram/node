@@ -17,7 +17,9 @@ class ParsedownExt extends Parsedown {
         }
 
         // Don't rewrite links to non-markdown files
-        if (pathinfo($href, PATHINFO_EXTENSION) && pathinfo($href, PATHINFO_EXTENSION) != 'md') {
+        $allowedExtensions = ['md', 'png', 'pdf'];
+        $extension = pathinfo($href, PATHINFO_EXTENSION);
+        if ($extension && !in_array(strtolower($extension), $allowedExtensions)) {
              return $link;
         }
 
@@ -30,8 +32,12 @@ $docsDir = dirname(dirname(dirname(__DIR__)));
 $baseDir = $docsDir.'/docs/';
 
 $link = '';
-if (isset($_SERVER['PATH_INFO'])) {
-    $link = ltrim($_SERVER['PATH_INFO'], '/');
+if (isset($_SERVER['REQUEST_URI'])) {
+    $urlPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    $pathPrefix = '/apps/docs/index.php/';
+    if (strpos($urlPath, $pathPrefix) === 0) {
+        $link = substr($urlPath, strlen($pathPrefix));
+    }
 }
 
 if(!empty($link)) {
@@ -48,10 +54,27 @@ $realFile = realpath($file);
 $realBaseDir = realpath($baseDir);
 
 if ($realFile === false || strpos($realFile, $realBaseDir) !== 0) {
-    // on attack, default to main readme
-    $file = $realBaseDir . '/README.md';
+    define("PAGE", "Docs - Not Found");
+    define("APP_NAME", "Docs");
+    http_response_code(404);
+    require_once __DIR__. '/../common/include/top.php';
+    echo "<h1>404 Docs Not Found</h1>";
+    require_once __DIR__ . '/../common/include/bottom.php';
+    exit;
 } else {
     $file = $realFile;
+}
+
+$extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+
+if ($extension === 'png') {
+    header('Content-Type: image/png');
+    readfile($file);
+    exit;
+} elseif ($extension === 'pdf') {
+    header('Content-Type: application/pdf');
+    readfile($file);
+    exit;
 }
 
 $pd = new ParsedownExt();
