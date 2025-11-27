@@ -1,6 +1,5 @@
-[PHPCoin](../../README.md) > [Docs](../README.md) > [Getting Started](README.md) > Installation
+[PHPCoin](../../) > [Docs](../) > [Getting Started](./) > Installation
 
-[Up](README.md) | [Table of Contents](../README.md)
 
 ---
 
@@ -42,3 +41,17 @@ The installation script performs the following steps:
 7.  **Starts Services:** Starts the Nginx and MariaDB services.
 
 Once the installation is complete, you can access your PHPcoin node by opening the provided URL in your web browser.
+
+<!-- Screenshot placeholder: A screenshot of the web interface after a successful installation -->
+[Image: Successful Installation]
+
+---
+
+## Troubleshooting
+
+If you encounter any issues during the installation, here are some common problems and their solutions:
+
+*   **Script Fails to Run:** Ensure that you have `curl` installed and that you are running the command with `sudo` or as the root user.
+*   **Port Conflict:** If another service is using port 80 (for mainnet) or 81 (for testnet), the Nginx service may fail to start. You can check for port conflicts using the `sudo netstat -tulpn | grep LISTEN` command.
+*   **Database Connection Issues:** Verify that the MariaDB service is running and that the database credentials in `config/config.inc.php` are correct.
+*   **Firewall Issues:** If you are unable to access the web interface, ensure that your server's firewall is configured to allow traffic on the appropriate port (80 or 81).

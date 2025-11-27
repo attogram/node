@@ -1,6 +1,5 @@
-[PHPCoin](../../README.md) > [Docs](../README.md) > [Mining](README.md) > How to Mine
+[PHPCoin](../../) > [Docs](../) > [Mining](./) > How to Mine
 
-[Up](README.md) | [Table of Contents](../README.md)
 
 ---
 

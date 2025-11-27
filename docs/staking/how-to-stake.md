@@ -1,6 +1,5 @@
-[PHPCoin](../../README.md) > [Docs](../README.md) > [Staking](README.md) > How to Stake
+[PHPCoin](../../) > [Docs](../) > [Staking](./) > How to Stake
 
-[Up](README.md) | [Table of Contents](../README.md)
 
 ---
 

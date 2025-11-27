@@ -1,6 +1,5 @@
-[PHPCoin](../../README.md) > [Docs](../README.md) > [Introduction](README.md) > Features
+[PHPCoin](../../) > [Docs](../) > [Introduction](./) > Features
 
-[Up](README.md) | [Table of Contents](../README.md)
 
 ---
 

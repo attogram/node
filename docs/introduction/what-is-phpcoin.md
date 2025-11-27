@@ -1,6 +1,5 @@
-[PHPCoin](../../README.md) > [Docs](../README.md) > [Introduction](README.md) > What is PHPCoin?
+[PHPCoin](../../) > [Docs](../) > [Introduction](./) > What is PHPCoin?
 
-[Up](README.md) | [Table of Contents](../README.md)
 
 ---
 

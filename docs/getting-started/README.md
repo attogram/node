@@ -1,6 +1,5 @@
-[PHPCoin](../../README.md) > [Docs](../README.md) > Getting Started
+[PHPCoin](../../) > [Docs](../) > Getting Started
 
-[Up](../README.md) | [Table of Contents](../README.md)
 
 ---
 
@@ -8,5 +7,6 @@
 
 This section provides guides to help you get started with PHPCoin.
 
-* [Installation](installation.md)
+* [Quick Installation](quick-installation.md)
+* [Manual Installation](manual-installation.md)
 * [Running a Node](running-a-node.md)
