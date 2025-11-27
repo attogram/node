@@ -1,3 +1,3 @@
 # PHPCoin White Paper
 
-* [PHPCoin White Paper](index.md)
+* [PHPCoin White Paper](white-paper.md)

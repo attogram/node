@@ -12,6 +12,18 @@
 
 **http://phpcoin.net**
 
+## Changes
+
+| Date       | Version | Changes                                                     |
+|------------|---------|-------------------------------------------------------------|
+| 07.05.2021 | 1.0     | - Initial version                                           |
+| 22.09.2021 | 1.1     | - Added new images                                          |
+| 27.09.2021 | 1.2     | - Updated images                                            |
+| 23.02.2022 | 1.3     | - Added masternode concept                                  |
+| 04.11.2022 | 1.4     | - Added sections with decentralized apps and Smart Contracts |
+| 22.11.2022 | 1.5     | - Update image for miner (added Chain ID)                   |
+| 08.02.2023 | 1.6     | - Corrected some points, added staking and swap sections    |
+
 ## Introduction
 
 In the world of many different crypto coins which are mostly copy-paste (fork) there are a small number of them written in different languages than c++. With evolving blockchain technologies it has become easier to understand the philosophy behind it and adapt to other programming languages. That's how phpcoin was born.
@@ -93,8 +105,6 @@ Gui wallet also has an integrated standalone miner.
 Every node on the network holds a full web wallet as a Decentralized app.
 
 Users register and login with their private key and can access wallet and other services.
-
-![Account](image-001.png)
 
 ### Account
 
