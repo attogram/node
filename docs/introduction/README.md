@@ -1,4 +1,4 @@
-[PHPCoin](../../) > [Docs](../) > Introduction
+[PHPCoin Docs](../) > Introduction
 
 
 ---
@@ -7,5 +7,5 @@
 
 This section provides a general introduction to PHPCoin.
 
-* [What is PHPCoin?](what-is-phpcoin.md)
-* [Features](features.md)
+* [What is PHPCoin?](./what-is-phpcoin.md)
+* [Features](./features.md)

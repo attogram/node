@@ -1,4 +1,4 @@
-[PHPCoin](../../) > [Docs](../) > [Introduction](./) > Features
+[PHPCoin Docs](../) > [Introduction](./) > Features
 
 
 ---

@@ -1,4 +1,4 @@
-[PHPCoin](../../) > [Docs](../) > [ePoW](./)
+[PHPCoin Docs](../) > [ePoW](./)
 
 
 ---

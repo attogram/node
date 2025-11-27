@@ -1,4 +1,4 @@
-[PHPCoin](../../README.md) > [Docs](../README.md) > [White Paper](README.md) > PHPCoin White Paper
+[PHPCoin Docs](../) > [White Paper](./) > PHPCoin White Paper
 
 [Up](README.md) | [Table of Contents](../README.md)
 

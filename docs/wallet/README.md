@@ -1,4 +1,4 @@
-[PHPCoin](../../) > [Docs](../) > Wallet
+[PHPCoin Docs](../) > Wallet
 
 
 ---
@@ -7,4 +7,4 @@
 
 This section provides instructions on how to use the PHPCoin wallet.
 
-* [Using the Wallet](using-the-wallet.md)
+* [Using the Wallet](./using-the-wallet.md)

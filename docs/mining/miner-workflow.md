@@ -1,4 +1,4 @@
-[PHPCoin](../../) > [Docs](../) > [Mining](./) > Mining Workflows
+[PHPCoin Docs](../) > [Mining](./) > Mining Workflows
 
 
 ---

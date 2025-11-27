@@ -1,4 +1,4 @@
-[PHPCoin](../../) > [Docs](../) > [Getting Started](./) > Running a Node
+[PHPCoin Docs](../) > [Getting Started](./) > Running a Node
 
 
 ---

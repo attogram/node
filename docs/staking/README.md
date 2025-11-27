@@ -1,4 +1,4 @@
-[PHPCoin](../../) > [Docs](../) > Staking
+[PHPCoin Docs](../) > Staking
 
 
 ---
@@ -7,4 +7,4 @@
 
 This section explains how to stake your PHPCoin holdings.
 
-* [How to Stake](how-to-stake.md)
+* [How to Stake](./how-to-stake.md)

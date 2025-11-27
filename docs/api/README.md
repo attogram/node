@@ -1,4 +1,4 @@
-[PHPCoin](../../) > [Docs](../) > API
+[PHPCoin Docs](../) > API
 
 
 ---
@@ -7,4 +7,4 @@
 
 This section contains the API reference for PHPCoin.
 
-* [API Reference](api-reference.md)
+* [API Reference](./api-reference.md)

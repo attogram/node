@@ -1,4 +1,4 @@
-[PHPCoin](../../) > [Docs](../) > [dApps](./) > Developing Dapps
+[PHPCoin Docs](../) > [dApps](./) > Developing Dapps
 
 
 ---

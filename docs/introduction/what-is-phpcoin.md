@@ -1,4 +1,4 @@
-[PHPCoin](../../) > [Docs](../) > [Introduction](./) > What is PHPCoin?
+[PHPCoin Docs](../) > [Introduction](./) > What is PHPCoin?
 
 
 ---
