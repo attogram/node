@@ -1,5 +1,7 @@
 [PHPCoin](../../README.md) > [Docs](../README.md) > [Masternodes](README.md) > Setting up a Masternode
 
+[Up](README.md) | [Table of Contents](../README.md)
+
 ---
 
 # Setting up a Masternode
