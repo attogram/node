@@ -1,5 +1,7 @@
 [PHPCoin](../../README.md) > [Docs](../README.md) > API
 
+[Up](../README.md) | [Table of Contents](../README.md)
+
 ---
 
 # API Documentation

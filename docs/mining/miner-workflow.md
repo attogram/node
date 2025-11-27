@@ -1,3 +1,9 @@
+[PHPCoin](../../README.md) > [Docs](../README.md) > [Mining](README.md) > Mining Workflows
+
+[Up](README.md) | [Table of Contents](../README.md)
+
+---
+
 # Mining Workflows
 
 This document outlines the complete step-by-step workflows for the different mining processes in PHPCoin.

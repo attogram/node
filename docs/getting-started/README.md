@@ -1,5 +1,7 @@
 [PHPCoin](../../README.md) > [Docs](../README.md) > Getting Started
 
+[Up](../README.md) | [Table of Contents](../README.md)
+
 ---
 
 # Getting Started

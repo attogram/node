@@ -1,5 +1,7 @@
 [PHPCoin](../../README.md) > [Docs](../README.md) > [Getting Started](README.md) > Installation
 
+[Up](README.md) | [Table of Contents](../README.md)
+
 ---
 
 # Installation

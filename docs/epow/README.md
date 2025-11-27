@@ -1,3 +1,9 @@
+[PHPCoin](../../README.md) > [Docs](../README.md) > ePoW
+
+[Up](../README.md) | [Table of Contents](../README.md)
+
+---
+
 # ePoW (Elapsed Proof of Work)
 
 ## Table of Contents
