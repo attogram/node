@@ -23,7 +23,7 @@ class ParsedownExt extends Parsedown {
              return $link;
         }
 
-        $link['element']['attributes']['href'] = "/apps/docs/index.php/".ltrim($href, './');
+        $link['element']['attributes']['href'] = "/apps/docs/index.php?doc=".ltrim($href, './');
         return $link;
     }
 }
@@ -31,10 +31,8 @@ class ParsedownExt extends Parsedown {
 $docsDir = dirname(dirname(dirname(__DIR__)));
 $baseDir = $docsDir.'/docs/';
 
-$urlPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-$link = ltrim(substr($urlPath, strlen($_SERVER['SCRIPT_NAME'])), '/');
-
-if(!empty($link)) {
+if(!empty($_GET['doc'])) {
+    $link = $_GET['doc'];
     $file = $baseDir . $link;
     if (is_dir($file)) {
         $file .= 'README.md';
