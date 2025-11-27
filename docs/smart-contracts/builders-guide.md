@@ -1,4 +1,4 @@
-[PHPCoin](../../) > [Docs](../) > [Smart Contracts](./) > Smart Contract Builder's Guide
+[PHPCoin Docs](../) > [Smart Contracts](./) > Smart Contract Builder's Guide
 
 
 ---

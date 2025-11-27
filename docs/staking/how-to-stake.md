@@ -1,4 +1,4 @@
-[PHPCoin](../../) > [Docs](../) > [Staking](./) > How to Stake
+[PHPCoin Docs](../) > [Staking](./) > How to Stake
 
 
 ---

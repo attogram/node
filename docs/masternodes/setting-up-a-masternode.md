@@ -1,4 +1,4 @@
-[PHPCoin](../../) > [Docs](../) > [Masternodes](./) > Setting up a Masternode
+[PHPCoin Docs](../) > [Masternodes](./) > Setting up a Masternode
 
 
 ---

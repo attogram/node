@@ -6,10 +6,22 @@ require_once './Parsedown.php';
 //ini_set('display_errors', 1);
 
 class ParsedownExt extends Parsedown {
-    function inlineLink($Excerpt)
+    protected function inlineLink($Excerpt)
     {
         $link = parent::inlineLink($Excerpt);
-        $link['element']['attributes']['href'] = "/apps/docs/index.php?link=".urlencode($link['element']['attributes']['href']);
+        $href = $link['element']['attributes']['href'];
+
+        // Don't rewrite external links, mailto links, or anchors
+        if (preg_match('/^(https?:\/\/|mailto:|#)/', $href)) {
+            return $link;
+        }
+
+        // Don't rewrite links to non-markdown files
+        if (pathinfo($href, PATHINFO_EXTENSION) && pathinfo($href, PATHINFO_EXTENSION) != 'md') {
+             return $link;
+        }
+
+        $link['element']['attributes']['href'] = "/apps/docs/index.php/".ltrim($href, './');
         return $link;
     }
 }
@@ -17,9 +29,16 @@ class ParsedownExt extends Parsedown {
 $docsDir = dirname(dirname(dirname(__DIR__)));
 $baseDir = $docsDir.'/docs/';
 
-if(isset($_GET['link'])) {
-    $link = $_GET['link'];
+$link = '';
+if (isset($_SERVER['PATH_INFO'])) {
+    $link = ltrim($_SERVER['PATH_INFO'], '/');
+}
+
+if(!empty($link)) {
     $file = $baseDir . $link;
+    if (is_dir($file)) {
+        $file .= 'README.md';
+    }
 } else {
     $file = $baseDir . 'README.md';
 }
@@ -47,9 +66,6 @@ define("APP_NAME", "Docs");
 require_once __DIR__. '/../common/include/top.php';
 ?>
 
-<ol class="breadcrumb m-0 ps-0 h4">
-    <li class="breadcrumb-item"><a href="/apps/docs">Home</a></li>
-</ol>
 <?php echo $pd->text($text); ?>
 
 <?php

@@ -1,4 +1,4 @@
-[PHPCoin](../../) > [Docs](../) > ePoW
+[PHPCoin Docs](../) > ePoW
 
 ---
 
@@ -6,4 +6,4 @@
 
 This section provides a detailed explanation of PHPCoin's unique consensus algorithm, ePoW (Elapsed Proof of Work).
 
-* [Technical Explanation](technical-explanation.md)
+* [Technical Explanation](./technical-explanation.md)

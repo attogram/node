@@ -1,4 +1,4 @@
-[PHPCoin](../../) > [Docs](../) > dApps
+[PHPCoin Docs](../) > dApps
 
 
 ---
@@ -7,4 +7,4 @@
 
 This section explains how to develop decentralized applications (Dapps) on the PHPCoin platform.
 
-* [Developing Dapps](developing-dapps.md)
+* [Developing Dapps](./developing-dapps.md)

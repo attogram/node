@@ -1,4 +1,4 @@
-[PHPCoin](../../) > [Docs](../) > [Mining](./) > How to Mine
+[PHPCoin Docs](../) > [Mining](./) > How to Mine
 
 
 ---

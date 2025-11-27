@@ -1,4 +1,4 @@
-[PHPCoin](../../) > [Docs](../) > [Getting Started](./) > Installation
+[PHPCoin Docs](../) > [Getting Started](./) > Installation
 
 
 ---

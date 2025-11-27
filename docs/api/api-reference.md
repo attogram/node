@@ -1,4 +1,4 @@
-[PHPCoin](../../) > [Docs](../) > [API](./) > API Reference
+[PHPCoin Docs](../) > [API](./) > API Reference
 
 
 ---

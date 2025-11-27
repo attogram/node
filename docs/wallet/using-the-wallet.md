@@ -1,4 +1,4 @@
-[PHPCoin](../../) > [Docs](../) > [Wallet](./) > Using the Wallet
+[PHPCoin Docs](../) > [Wallet](./) > Using the Wallet
 
 
 ---
