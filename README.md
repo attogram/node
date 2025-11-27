@@ -1,8 +1,8 @@
 # The PHPCoin (PHP) cryptocurrency node.
 
-## Documentation
+For detailed information on installation, usage, and development, please see the [PHPCoin Documentation](./docs/).
 
-For detailed information on installation, usage, and development, please see the [PHPCoin Documentation](./docs/README.md).
+--
 
 Name: PHPCoin
 
