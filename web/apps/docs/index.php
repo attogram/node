@@ -31,14 +31,8 @@ class ParsedownExt extends Parsedown {
 $docsDir = dirname(dirname(dirname(__DIR__)));
 $baseDir = $docsDir.'/docs/';
 
-$link = '';
-if (isset($_SERVER['REQUEST_URI'])) {
-    $urlPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-    $pathPrefix = '/apps/docs/index.php/';
-    if (strpos($urlPath, $pathPrefix) === 0) {
-        $link = substr($urlPath, strlen($pathPrefix));
-    }
-}
+$urlPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$link = ltrim(substr($urlPath, strlen($_SERVER['SCRIPT_NAME'])), '/');
 
 if(!empty($link)) {
     $file = $baseDir . $link;
