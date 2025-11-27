@@ -6,6 +6,13 @@ require_once './Parsedown.php';
 //ini_set('display_errors', 1);
 
 class ParsedownExt extends Parsedown {
+    private $docPath;
+
+    public function __construct($docPath)
+    {
+        $this->docPath = $docPath;
+    }
+
     protected function inlineLink($Excerpt)
     {
         $link = parent::inlineLink($Excerpt);
@@ -23,8 +30,27 @@ class ParsedownExt extends Parsedown {
              return $link;
         }
 
-        $link['element']['attributes']['href'] = "/apps/docs/index.php?doc=".ltrim($href, './');
+        $newDoc = $this->docPath . '/' . $href;
+        $newDoc = $this->normalizePath($newDoc);
+        $link['element']['attributes']['href'] = "/apps/docs/index.php?doc=".$newDoc;
         return $link;
+    }
+
+    private function normalizePath($path) {
+        if (empty($path)) {
+            return '';
+        }
+        $parts = explode('/', $path);
+        $absolutes = array();
+        foreach ($parts as $part) {
+            if ('.' == $part || '' == $part) continue;
+            if ('..' == $part) {
+                array_pop($absolutes);
+            } else {
+                $absolutes[] = $part;
+            }
+        }
+        return implode('/', $absolutes);
     }
 }
 
@@ -35,7 +61,10 @@ if(!empty($_GET['doc'])) {
     $link = $_GET['doc'];
     $file = $baseDir . $link;
     if (is_dir($file)) {
-        $file .= 'README.md';
+        if (substr($link, -1) !== '/') {
+            $link .= '/';
+        }
+        $file = $baseDir . $link . 'README.md';
     }
 } else {
     $file = $baseDir . 'README.md';
@@ -69,7 +98,8 @@ if ($extension === 'png') {
     exit;
 }
 
-$pd = new ParsedownExt();
+$docPath = dirname($link);
+$pd = new ParsedownExt($docPath);
 $pd->setSafeMode(true);
 $text = file_get_contents($file);
 
