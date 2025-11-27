@@ -1,9 +1,8 @@
-[PHPCoin](../../README.md) > [Docs](../README.md) > Mining
+# Mining Documentation
 
----
+This section contains documentation related to mining PHPCoin.
 
-# Mining
+## Documents
 
-This section provides instructions and information on how to mine PHPCoin.
-
-* [How to Mine](how-to-mine.md)
+*   [**How to Mine**](./how-to-mine.md) - A guide on how to get started with mining.
+*   [**Mining Workflows**](./miner-workflow.md) - A detailed, technical step-by-step breakdown of the different mining processes.
