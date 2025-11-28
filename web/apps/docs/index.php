@@ -5,26 +5,21 @@ set_time_limit(5);
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-define("PHPCOIN_DOCS_VIEWER_VERSION", "0.0.4");
+define('PHPCOIN_DOCS_VIEWER_VERSION', '0.0.5');
 
-require_once dirname(__DIR__)."/apps.inc.php";
+require_once dirname(__DIR__) . '/apps.inc.php';
 require_once './Parsedown.php';
 
-register_shutdown_function('timeout_handler');
+register_shutdown_function('shutdown_handler');
 
-function timeout_handler() {
-    $error = error_get_last();
-    //if ($error !== NULL) && $error['type'] === E_ERROR) { // && strpos($error['message'], 'Maximum execution time') !== false) {
+function shutdown_handler() {
+	print '<p>DEBUG: shutdown_handler @ ' . time() . '</p>';
+	$error = error_get_last();
 	if (! empty($error)) {
-        //http_response_code(404);
-        $doc = !empty($_GET['doc']) ? $_GET['doc'] : 'README.md';
-        echo "<h1>404 - Docs Error</h1>";
-        echo "<p>Error processing file: " . htmlspecialchars($doc) . "</p>";
-        echo "<p>Error info:<br /><pre>" . htmlespecialchars(print_r($error, true)( . "</pre></p>";
-        exit();
-    }
+		print '<pre>' . print_r($error, true) . '</pre>';
+	}
+	print '<hr /><br><br><br>';
 }
-
 
 
 class ParsedownExt extends Parsedown {
