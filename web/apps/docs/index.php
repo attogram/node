@@ -1,7 +1,19 @@
 <?php
+set_time_limit(5);
 define("VERSION", "0.0.1");
 require_once dirname(__DIR__)."/apps.inc.php";
 require_once './Parsedown.php';
+
+register_shutdown_function('timeout_handler');
+
+function timeout_handler() {
+    http_response_code(404);
+    $doc = !empty($_GET['doc']) ? $_GET['doc'] : 'README.md';
+    echo "<h1>404 - Server Timeout</h1>";
+    echo "<p>The server took too long to process the request for the document: <strong>".htmlspecialchars($doc)."</strong>.</p>";
+    echo "<p>This is likely due to a complex markdown file that could not be parsed within the time limit of 5 seconds.</p>";
+    exit();
+}
 
 //error_reporting(E_ALL);
 //ini_set('display_errors', 1);
