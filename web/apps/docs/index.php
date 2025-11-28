@@ -32,25 +32,46 @@ class ParsedownExt extends Parsedown {
 
         $newDoc = $this->docPath . '/' . $href;
         $newDoc = $this->normalizePath($newDoc);
+
+        if (strpos($newDoc, '../') === 0 || $newDoc === '..') {
+            // This is an invalid link, pointing outside the docs directory.
+            // Let's make it a dead link and style it to indicate it's broken.
+            $link['element']['attributes']['href'] = '#';
+            if (isset($link['element']['attributes']['class'])) {
+                $link['element']['attributes']['class'] .= ' broken-link';
+            } else {
+                $link['element']['attributes']['class'] = 'broken-link';
+            }
+            $link['element']['attributes']['title'] = 'Invalid link (points outside of documentation)';
+            return $link;
+        }
+
         $link['element']['attributes']['href'] = "/apps/docs/index.php?doc=".$newDoc;
         return $link;
     }
 
-    private function normalizePath($path) {
+    private function normalizePath($path)
+    {
         if (empty($path)) {
             return '';
         }
         $parts = explode('/', $path);
         $absolutes = array();
+        $num_dots = 0;
         foreach ($parts as $part) {
             if ('.' == $part || '' == $part) continue;
             if ('..' == $part) {
-                array_pop($absolutes);
+                if (count($absolutes) > 0) {
+                    array_pop($absolutes);
+                } else {
+                    $num_dots++;
+                }
             } else {
                 $absolutes[] = $part;
             }
         }
-        return implode('/', $absolutes);
+        $prefix = str_repeat('../', $num_dots);
+        return $prefix . implode('/', $absolutes);
     }
 }
 
