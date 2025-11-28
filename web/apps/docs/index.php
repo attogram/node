@@ -1,4 +1,5 @@
 <?php
+define("VERSION", "0.0.1");
 require_once dirname(__DIR__)."/apps.inc.php";
 require_once './Parsedown.php';
 
@@ -51,9 +52,13 @@ class ParsedownExt extends Parsedown {
             return $link;
         }
 
-        $newDoc = substr($realFile, strlen($realBaseDir) + 1);
-        if (is_dir($realFile)) {
-            $newDoc .= '/';
+        if ($realFile == $realBaseDir) {
+            $newDoc = '';
+        } else {
+            $newDoc = substr($realFile, strlen($realBaseDir) + 1);
+            if (is_dir($realFile)) {
+                $newDoc .= '/';
+            }
         }
 
         $link['element']['attributes']['href'] = "/apps/docs/index.php?doc=".$newDoc;
@@ -124,6 +129,16 @@ require_once __DIR__. '/../common/include/top.php';
 ?>
 
 <?php echo $pd->text($text); ?>
+
+<div class="container-fluid">
+    <hr>
+    <div class="row">
+        <div class="col-sm-6">
+            PHPCoin Docs Viewer v<?php echo VERSION ?>
+        </div>
+    </div>
+</div>
+
 
 <?php
 require_once __DIR__ . '/../common/include/bottom.php';
