@@ -4,7 +4,8 @@
 set_time_limit(5);
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-define("VERSION", "0.0.4");
+
+define("PHPCOIN_DOCS_VIEWER_VERSION", "0.0.4");
 
 require_once dirname(__DIR__)."/apps.inc.php";
 require_once './Parsedown.php';
@@ -18,8 +19,8 @@ function timeout_handler() {
         //http_response_code(404);
         $doc = !empty($_GET['doc']) ? $_GET['doc'] : 'README.md';
         echo "<h1>404 - Docs Error</h1>";
-        echo "<p>Error processing file: <strong>" . htmlspecialchars($doc) . "</strong>.</p>";
-        echo "<p>Error info:<br /><pre>" . htmlespecialchars(print_r($error, true)( . "</p>";
+        echo "<p>Error processing file: " . htmlspecialchars($doc) . "</p>";
+        echo "<p>Error info:<br /><pre>" . htmlespecialchars(print_r($error, true)( . "</pre></p>";
         exit();
     }
 }
@@ -155,7 +156,7 @@ require_once __DIR__. '/../common/include/top.php';
     <hr>
     <div class="row">
         <div class="col-sm-6">
-            PHPCoin Docs Viewer v<?php echo VERSION ?>
+            PHPCoin Docs Viewer v<?php echo PHPCOIN_DOCS_VIEWER_VERSION ?>
         </div>
     </div>
 </div>
