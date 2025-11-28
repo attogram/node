@@ -1,6 +1,11 @@
 <?php
+// PHPCoin Docs Viewer
+
 set_time_limit(5);
-define("VERSION", "0.0.1");
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+define("VERSION", "0.0.4");
+
 require_once dirname(__DIR__)."/apps.inc.php";
 require_once './Parsedown.php';
 
@@ -8,10 +13,9 @@ register_shutdown_function('timeout_handler');
 
 function timeout_handler() {
     $error = error_get_last();
-    // Check if an error occurred, if it was a fatal error (E_ERROR),
-    // and if the error message contains the specific timeout string.
-    if ($error !== NULL && $error['type'] === E_ERROR) { // && strpos($error['message'], 'Maximum execution time') !== false) {
-        http_response_code(404);
+    //if ($error !== NULL) && $error['type'] === E_ERROR) { // && strpos($error['message'], 'Maximum execution time') !== false) {
+	if (! empty($error)) {
+        //http_response_code(404);
         $doc = !empty($_GET['doc']) ? $_GET['doc'] : 'README.md';
         echo "<h1>404 - Docs Error</h1>";
         echo "<p>Error processing file: <strong>" . htmlspecialchars($doc) . "</strong>.</p>";
@@ -20,8 +24,7 @@ function timeout_handler() {
     }
 }
 
-//error_reporting(E_ALL);
-//ini_set('display_errors', 1);
+
 
 class ParsedownExt extends Parsedown {
     private $docPath;
