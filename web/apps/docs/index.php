@@ -7,10 +7,12 @@ require_once './Parsedown.php';
 
 class ParsedownExt extends Parsedown {
     private $docPath;
+    private $baseDir;
 
-    public function __construct($docPath)
+    public function __construct($docPath, $baseDir)
     {
         $this->docPath = $docPath;
+        $this->baseDir = $baseDir;
     }
 
     protected function inlineLink($Excerpt)
@@ -30,10 +32,13 @@ class ParsedownExt extends Parsedown {
              return $link;
         }
 
-        $newDoc = $this->docPath . '/' . $href;
-        $newDoc = $this->normalizePath($newDoc);
+        $currentDocDir = $this->baseDir . ($this->docPath ? $this->docPath . '/' : '');
+        $file = $currentDocDir . $href;
 
-        if (strpos($newDoc, '../') === 0 || $newDoc === '..') {
+        $realFile = realpath($file);
+        $realBaseDir = realpath($this->baseDir);
+
+        if ($realFile === false || strpos($realFile, $realBaseDir) !== 0) {
             // This is an invalid link, pointing outside the docs directory.
             // Let's make it a dead link and style it to indicate it's broken.
             $link['element']['attributes']['href'] = '#';
@@ -46,32 +51,13 @@ class ParsedownExt extends Parsedown {
             return $link;
         }
 
+        $newDoc = substr($realFile, strlen($realBaseDir) + 1);
+        if (is_dir($realFile)) {
+            $newDoc .= '/';
+        }
+
         $link['element']['attributes']['href'] = "/apps/docs/index.php?doc=".$newDoc;
         return $link;
-    }
-
-    private function normalizePath($path)
-    {
-        if (empty($path)) {
-            return '';
-        }
-        $parts = explode('/', $path);
-        $absolutes = array();
-        $num_dots = 0;
-        foreach ($parts as $part) {
-            if ('.' == $part || '' == $part) continue;
-            if ('..' == $part) {
-                if (count($absolutes) > 0) {
-                    array_pop($absolutes);
-                } else {
-                    $num_dots++;
-                }
-            } else {
-                $absolutes[] = $part;
-            }
-        }
-        $prefix = str_repeat('../', $num_dots);
-        return $prefix . implode('/', $absolutes);
     }
 }
 
@@ -125,7 +111,7 @@ $docPath = dirname($relativePath);
 if ($docPath == ".") {
 	$docPath = "";
 }
-$pd = new ParsedownExt($docPath);
+$pd = new ParsedownExt($docPath, $baseDir);
 $pd->setSafeMode(true);
 $text = file_get_contents($file);
 
