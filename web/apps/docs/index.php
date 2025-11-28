@@ -7,12 +7,17 @@ require_once './Parsedown.php';
 register_shutdown_function('timeout_handler');
 
 function timeout_handler() {
-    http_response_code(404);
-    $doc = !empty($_GET['doc']) ? $_GET['doc'] : 'README.md';
-    echo "<h1>404 - Server Timeout</h1>";
-    echo "<p>The server took too long to process the request for the document: <strong>".htmlspecialchars($doc)."</strong>.</p>";
-    echo "<p>This is likely due to a complex markdown file that could not be parsed within the time limit of 5 seconds.</p>";
-    exit();
+    $error = error_get_last();
+    // Check if an error occurred, if it was a fatal error (E_ERROR),
+    // and if the error message contains the specific timeout string.
+    if ($error !== NULL && $error['type'] === E_ERROR) { // && strpos($error['message'], 'Maximum execution time') !== false) {
+        http_response_code(404);
+        $doc = !empty($_GET['doc']) ? $_GET['doc'] : 'README.md';
+        echo "<h1>404 - Docs Error</h1>";
+        echo "<p>Error processing file: <strong>" . htmlspecialchars($doc) . "</strong>.</p>";
+        echo "<p>Error info:<br /><pre>" . htmlespecialchars(print_r($error, true)( . "</p>";
+        exit();
+    }
 }
 
 //error_reporting(E_ALL);
