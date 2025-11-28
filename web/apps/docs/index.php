@@ -9,11 +9,13 @@ require_once './Parsedown.php';
 class ParsedownExt extends Parsedown {
     private $docPath;
     private $baseDir;
+    private $realBaseDir;
 
     public function __construct($docPath, $baseDir)
     {
         $this->docPath = $docPath;
         $this->baseDir = $baseDir;
+        $this->realBaseDir = realpath($this->baseDir);
     }
 
     protected function inlineLink($Excerpt)
@@ -37,9 +39,8 @@ class ParsedownExt extends Parsedown {
         $file = $currentDocDir . $href;
 
         $realFile = realpath($file);
-        $realBaseDir = realpath($this->baseDir);
 
-        if ($realFile === false || strpos($realFile, $realBaseDir) !== 0) {
+        if ($realFile === false || strpos($realFile, $this->realBaseDir) !== 0) {
             // This is an invalid link, pointing outside the docs directory.
             // Let's make it a dead link and style it to indicate it's broken.
             $link['element']['attributes']['href'] = '#';
@@ -52,10 +53,10 @@ class ParsedownExt extends Parsedown {
             return $link;
         }
 
-        if ($realFile == $realBaseDir) {
+        if ($realFile == $this->realBaseDir) {
             $newDoc = '';
         } else {
-            $newDoc = substr($realFile, strlen($realBaseDir) + 1);
+            $newDoc = substr($realFile, strlen($this->realBaseDir) + 1);
             if (is_dir($realFile)) {
                 $newDoc .= '/';
             }
