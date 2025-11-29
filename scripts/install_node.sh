@@ -2,24 +2,13 @@
 # setup node on ubuntu server 21.04, 20.04, 18.04
 # one liner: curl -s https://phpcoin.net/scripts/install_node.sh | bash -s -- --network testnet
 
-NETWORK="mainnet" # Default network
 DOCKER=false
 
 function parse_arguments() {
     while (( "$#" )); do
         case "$1" in
-            --network)
-                if [ -n "$2" ] && [ ${2:0:1} != "-" ]; then
-                    NETWORK="$2"
-                    shift 2
-                else
-                    echo "Error: Argument for --network is missing" >&2
-                    exit 1
-                fi
-                ;;
             --help)
-                echo "Usage: ./install_node.sh [--network <network_name>]"
-                echo "network_name: testnet or mainnet. If not provided, mainnet is used by default."
+                echo "Usage: ./install_node.sh"
                 exit 0
                 ;;
 	    --docker)
@@ -33,14 +22,16 @@ function parse_arguments() {
                 ;;
         esac
     done
-    # Check if network is valid (either mainnet or testnet)
-    if [[ "$NETWORK" != "mainnet" && "$NETWORK" != "testnet" ]]; then
-        echo "Error: Invalid network specified. Network should be either 'mainnet' or 'testnet'." >&2
-        exit 1
-    fi
 }
 
 parse_arguments "$@" # Call the function and pass all arguments
+
+if [ -f "chain_id" ]; then
+    CHAIN_ID=$(cat chain_id)
+else
+    echo "00" > chain_id
+    CHAIN_ID="00"
+fi
 
 # Rest of your script here
 
@@ -78,15 +69,15 @@ find_best_server() {
     best_server_result=$best_server
 }
 
-echo "PHPCoin $NETWORK node Installation"
+echo "PHPCoin node Installation for chain_id $CHAIN_ID"
 echo "==================================================================================================="
 echo "PHPCoin: define db user and pass"
 echo "==================================================================================================="
 export DEBIAN_FRONTEND=noninteractive
-export DB_NAME=phpcoin$NETWORK
+export DB_NAME=phpcoin_$CHAIN_ID
 export DB_USER=phpcoin
 export DB_PASS=phpcoin
-export NODE_DIR=/var/www/phpcoin-$NETWORK
+export NODE_DIR=/var/www/phpcoin-$CHAIN_ID
 
 if [ "$DOCKER" = true ]; then
   NODE_DIR=/var/www/phpcoin
@@ -124,11 +115,7 @@ if [ "$DOCKER" = true ]; then
     git remote add origin ${git_urls[$best_server_result]}
     git fetch origin
     git add .
-    if [ "$NETWORK" = "mainnet" ]; then
-      git pull origin main
-    else
-      git pull origin test
-    fi
+    git pull origin main
     git restore --staged .
   fi
 fi
@@ -136,13 +123,7 @@ fi
 if [ ! -d "$NODE_DIR" ]; then
   mkdir $NODE_DIR
   cd $NODE_DIR
-  if [ "$NETWORK" = "mainnet" ]
-  then
-    git clone ${git_urls[$best_server_result]} .
-  elif [ "$NETWORK" = "testnet" ]
-  then
-    git clone ${git_urls[$best_server_result]} --branch test .
-  fi
+  git clone ${git_urls[$best_server_result]} .
 fi
 
 
@@ -154,7 +135,7 @@ export IP=$(curl -s http://whatismyip.akamai.com/)
 PORT=""
 HOSTNAME=""
 BLOCKCHAIN_SNAPSHOT=""
-if [ "$NETWORK" = "mainnet" ]
+if [ "$CHAIN_ID" = "00" ]
 then
   PORT="80"
   HOSTNAME="http://$IP"
@@ -162,7 +143,7 @@ then
     HOSTNAME="http://$IP:$EXT_PORT"
   fi
   BLOCKCHAIN_SNAPSHOT="blockchain"
-elif [ "$NETWORK" = "testnet" ]
+elif [ "$CHAIN_ID" = "01" ]
 then
   PORT="81"
   HOSTNAME="http://$IP:$PORT"
@@ -170,14 +151,14 @@ then
     PORT="80"
     HOSTNAME="http://$IP:$EXT_PORT"
   fi
-  BLOCKCHAIN_SNAPSHOT="blockchain-$NETWORK"
+  BLOCKCHAIN_SNAPSHOT="blockchain-testnet"
 fi
 
 git config core.fileMode false
 
 echo "PHPCoin: Configure nginx"
 echo "==================================================================================================="
-cat << EOF > /etc/nginx/sites-available/phpcoin-$NETWORK
+cat << EOF > /etc/nginx/sites-available/phpcoin-$CHAIN_ID
 server {
     listen $PORT;
     server_name _;
@@ -199,7 +180,7 @@ server {
 }
 EOF
 rm /etc/nginx/sites-enabled/default
-ln -sr /etc/nginx/sites-available/phpcoin-$NETWORK /etc/nginx/sites-enabled/phpcoin-$NETWORK
+ln -sr /etc/nginx/sites-available/phpcoin-$CHAIN_ID /etc/nginx/sites-enabled/phpcoin-$CHAIN_ID
 service nginx restart
 service php8.1-fpm start
 
@@ -207,10 +188,8 @@ echo "PHPCoin: setup config file"
 echo "==================================================================================================="
 CONFIG_FILE=config/config.inc.php
 if [ ! -f "$CONFIGFILE" ]; then
-  cp config/config-sample.inc.php config/config.inc.php
-  sed -i "s/ENTER-DB-NAME/$DB_NAME/g" config/config.inc.php
-  sed -i "s/ENTER-DB-USER/$DB_USER/g" config/config.inc.php
-  sed -i "s/ENTER-DB-PASS/$DB_PASS/g" config/config.inc.php
+  echo "<?php
+" > config/config.inc.php
 fi
 echo "PHPCoin: configure node"
 echo "==================================================================================================="
