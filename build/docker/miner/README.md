@@ -1,30 +1,18 @@
-Docker image for running PHPCoin miner.
+# PHPCoin miner on docker
 
-Start with command:
-```
-docker run -itd --name phpcoin-miner \
--e NETWORK=<NETWORK> \
--e NODE=<NODE> \
--e ADDRESS=<ADDRESS> \
--e CPU=<CPU> \
+You can run the phpcoin miner using docker.
+
+-e ADDRESS=<YOUR_ADDRESS> \
+-e NODE=<NODE_URL> \
+-e CPU=<CPU_PERCENT> \
 -e THREADS=<THREADS> \
-phpcoin/miner
-```
+-v /path/to/your/phpcoin/chain_id:/phpcoin/chain_id \
+phpcoin-miner
 
+Explanation of parameters:
 
-Options:
-
-NETWORK: mainnet(default) or testnet
-
-NODE: specify mining node or use default network nodes
-
-ADDRESS: address where mining rewards goes
-
-CPU: maximum usage of single CPU (default 100%)
-
-THREADS: number of CPU threads to use (default all)
-
-Check miner status
-```
-docker logs -f phpcoin-miner
-```
+ADDRESS: your address where you will receive the mining reward
+NODE: the url of the node where you are mining
+CPU: the percent of cpu to be used for mining
+THREADS: number of threads to be used for mining
+/path/to/your/phpcoin/chain_id: the path to your `chain_id` file. This is used to determine whether to mine on mainnet or testnet.

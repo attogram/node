@@ -217,7 +217,6 @@ function peer_post($url, $data = [], $timeout = 30, &$err= null, $info = null, &
             'data' => json_encode($data),
             "coin" => COIN,
 	        "version"=>VERSION,
-	        "network"=>NETWORK,
 	        "chain_id"=>CHAIN_ID,
 	        "requestId" => uniqid(),
 	        "info"=>empty($info) ? Peer::getInfo() : $info
@@ -285,7 +284,7 @@ function peer_post($url, $data = [], $timeout = 30, &$err= null, $info = null, &
     $res = json_decode($result, true);
 
     // the function will return false if something goes wrong
-    if (!$res ||  $res['status'] != "ok" || $res['coin'] != COIN || (isset($res['network']) && $res['network'] != NETWORK && $res['chain_id'] != CHAIN_ID)) {
+    if (!$res ||  $res['status'] != "ok" || $res['coin'] != COIN || (isset($res['chain_id']) && $res['chain_id'] != CHAIN_ID)) {
     	_log("Peer response to $url not ok res=".json_encode($result), 5);
 	    $err = $res['data'];
         return false;

@@ -108,16 +108,14 @@ echo "PHPCoin: download node"
 echo "==================================================================================================="
 
 
-if [ "$DOCKER" = true ]; then
-  if [ -d "$NODE_DIR/config" ]; then
-    cd $NODE_DIR
-    git init
-    git remote add origin ${git_urls[$best_server_result]}
-    git fetch origin
-    git add .
-    git pull origin main
-    git restore --staged .
-  fi
+if [ -d "$NODE_DIR/config" ]; then
+  cd $NODE_DIR
+  git init
+  git remote add origin ${git_urls[$best_server_result]}
+  git fetch origin
+  git add .
+  git pull origin main
+  git restore --staged .
 fi
 
 if [ ! -d "$NODE_DIR" ]; then

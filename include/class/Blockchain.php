@@ -200,7 +200,7 @@ class Blockchain
     }
 
     static function getSmartContractExecFee($height=null) {
-        if(NETWORK == "testnet") {
+        if(CHAIN_ID == "01") {
             return 0.01;
         } else {
             return 1;
