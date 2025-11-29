@@ -3,14 +3,14 @@
 FILE=/first-run
 if test -f "$FILE"; then
     echo "First run node"
+    if [ "$CHAIN_ID" = "01" ]; then
+        echo "01" > /var/www/phpcoin/chain_id
+    else
+        echo "00" > /var/www/phpcoin/chain_id
+    fi
     wget https://phpcoin.net/scripts/install_node.sh -O /install_node.sh
     chmod +x install_node.sh
-    if [ "$NETWORK" = "mainnet" ]
-    then
-      /install_node.sh --docker
-    else
-      /install_node.sh --docker --network testnet
-    fi
+    /install_node.sh --docker
     rm $FILE
     rm /install_node.sh
 else

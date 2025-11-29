@@ -184,7 +184,7 @@ class Blockchain
         if($height >= UPDATE_12_STAKING_DYNAMIC_THRESHOLD) {
             $collateral = Block::getMasternodeCollateral($height);
             return 2 * $collateral;
-        } else if(NETWORK == "testnet" && $height >= UPDATE_11_STAKING_MATURITY_REDUCE) {
+        } else if(CHAIN_ID == "01" && $height >= UPDATE_11_STAKING_MATURITY_REDUCE) {
             return 10000;
         } else {
             return 100;
@@ -192,7 +192,7 @@ class Blockchain
     }
 
     static function getSmartContractCreateFee($height=null) {
-        if(NETWORK == "testnet") {
+        if(CHAIN_ID == "01") {
             return 100;
         } else {
             return 1000;
@@ -200,7 +200,7 @@ class Blockchain
     }
 
     static function getSmartContractExecFee($height=null) {
-        if(NETWORK == "testnet") {
+        if(CHAIN_ID == "01") {
             return 0.01;
         } else {
             return 1;

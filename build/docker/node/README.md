@@ -1,16 +1,18 @@
-This is docker image for PHPCoin node (mainnet and testnet).
+# PHPCoin node on docker
 
-On first run container will download install script, install node and restore latest blockchain database
+You can run your own phpcoin node using docker.
 
-In order to preserve config file with private keys you should create volume and start container with volume:
+This will run a full node, with miner enabled, open api, and admin panel.
 
-```
-docker volume create phpcoin-config
-docker run -itd --name phpcoin -p 81:80 -e EXT_PORT=81 -v phpcoin-config:/var/www/phpcoin/config phpcoin/node
-```
+To run a mainnet node:
+docker run -itd --name phpcoin-main -p 80:80 -e EXT_PORT=80 -e CHAIN_ID=00 -v phpcoin-config-main:/var/www/phpcoin/config phpcoin/node
 
-For running testnet node run container with other parameters:
-```
-docker volume create phpcoin-config-test
-docker run -itd --name phpcoin-test -p 91:80 -e EXT_PORT=91 -e NETWORK=testnet -v phpcoin-config-test:/var/www/phpcoin/config phpcoin/node
-```
+To run a testnet node:
+docker run -itd --name phpcoin-test -p 91:80 -e EXT_PORT=91 -e CHAIN_ID=01 -v phpcoin-config-test:/var/www/phpcoin/config phpcoin/node
+
+This will map the config folder to a volume, so you can keep the node configuration.
+You can check the node logs by running:
+docker logs -f phpcoin-main
+
+To enter the node shell, run:
+docker exec -it phpcoin-main bash
