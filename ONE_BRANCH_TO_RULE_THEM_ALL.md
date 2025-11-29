@@ -12,6 +12,58 @@ This branch refactors the PHPCoin codebase to support multiple networks (mainnet
 *   **Updated scripts:** The `install_node.sh`, `build/docker/miner/start.sh`, and `build/docker/node/docker_start.sh` scripts have been updated to be driven by the `chain_id` file.
 *   **Safe defaults:** The system now safely defaults to mainnet if the `chain_id` file is missing or invalid.
 
+## Updating Existing Installations
+
+### From `main` (mainnet)
+
+1.  **Move the installation directory:**
+    ```bash
+    sudo mv /var/www/phpcoin-mainnet /var/www/phpcoin
+    ```
+2.  **Update the code:**
+    ```bash
+    cd /var/www/phpcoin
+    git pull origin one_branch_to_rule_them_all
+    ```
+3.  **Rename the database:**
+    ```bash
+    sudo mysql -e "RENAME DATABASE phpcoin TO phpcoin_00;"
+    ```
+4.  **Create the `chain_id` file:**
+    ```bash
+    echo "00" > chain_id
+    ```
+5.  **Re-run the install script to update configurations:**
+    ```bash
+    cd ~
+    curl -s https://phpcoin.net/scripts/install_node.sh | bash
+    ```
+
+### From `test` (testnet)
+
+1.  **Move the installation directory:**
+    ```bash
+    sudo mv /var/www/phpcoin-testnet /var/www/phpcoin
+    ```
+2.  **Update the code:**
+    ```bash
+    cd /var/www/phpcoin
+    git pull origin one_branch_to_rule_them_all
+    ```
+3.  **Rename the database:**
+    ```bash
+    sudo mysql -e "RENAME DATABASE phpcoin TO phpcoin_01;"
+    ```
+4.  **Create the `chain_id` file:**
+    ```bash
+    echo "01" > chain_id
+    ```
+5.  **Re-run the install script to update configurations:**
+    ```bash
+    cd ~
+    curl -s https://phpcoin.net/scripts/install_node.sh | bash
+    ```
+
 ## What needs to be tested
 
 ### 1. Installation

@@ -77,10 +77,9 @@ export DEBIAN_FRONTEND=noninteractive
 export DB_NAME=phpcoin_$CHAIN_ID
 export DB_USER=phpcoin
 export DB_PASS=phpcoin
-export NODE_DIR=/var/www/phpcoin-$CHAIN_ID
+export NODE_DIR=/var/www/phpcoin
 
 if [ "$DOCKER" = true ]; then
-  NODE_DIR=/var/www/phpcoin
   DB_NAME=phpcoin
 fi
 
@@ -156,7 +155,7 @@ git config core.fileMode false
 
 echo "PHPCoin: Configure nginx"
 echo "==================================================================================================="
-cat << EOF > /etc/nginx/sites-available/phpcoin-$CHAIN_ID
+cat << EOF > /etc/nginx/sites-available/phpcoin
 server {
     listen $PORT;
     server_name _;
@@ -178,7 +177,7 @@ server {
 }
 EOF
 rm /etc/nginx/sites-enabled/default
-ln -sr /etc/nginx/sites-available/phpcoin-$CHAIN_ID /etc/nginx/sites-enabled/phpcoin-$CHAIN_ID
+ln -sr /etc/nginx/sites-available/phpcoin /etc/nginx/sites-enabled/phpcoin
 service nginx restart
 service php8.1-fpm start
 

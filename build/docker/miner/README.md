@@ -2,12 +2,13 @@
 
 You can run the phpcoin miner using docker.
 
+docker run -itd --name phpcoin-miner \
 -e ADDRESS=<YOUR_ADDRESS> \
 -e NODE=<NODE_URL> \
 -e CPU=<CPU_PERCENT> \
 -e THREADS=<THREADS> \
 -v /path/to/your/phpcoin/chain_id:/phpcoin/chain_id \
-phpcoin-miner
+phpcoin/miner
 
 Explanation of parameters:
 
