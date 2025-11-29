@@ -195,7 +195,6 @@ echo "Installation complete!"
 echo "You can now access your node at: ${HOSTNAME}"
 
 <!-- Screenshot placeholder: A screenshot of the web interface after a successful installation -->
-[Image: Successful Installation]
 
 ---
 

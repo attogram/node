@@ -43,7 +43,6 @@ The installation script performs the following steps:
 Once the installation is complete, you can access your PHPcoin node by opening the provided URL in your web browser.
 
 <!-- Screenshot placeholder: A screenshot of the web interface after a successful installation -->
-[Image: Successful Installation]
 
 ---
 

@@ -12,7 +12,6 @@ This document outlines the complete step-by-step workflows for the different min
 This section describes the process for the standalone command-line miner, executed via `utils/miner.php`.
 
 <!-- Diagram placeholder: An SVG diagram illustrating the CLI miner workflow, from initialization to block submission -->
-[Image: CLI Miner Workflow]
 
 ### Initialization
 

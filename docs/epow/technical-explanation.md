@@ -35,7 +35,6 @@ This has two key effects:
 In short, ePoW is a more responsive version of PoW that uses the "elapsed time" between blocks to regulate the network's block time and difficulty. This helps to maintain a fair and stable environment for all participants in the phpcoin network.
 
 <!-- Diagram placeholder: An SVG diagram illustrating the relationship between elapsed time and mining difficulty -->
-[Image: ePoW Difficulty Adjustment]
 
 ---
 
