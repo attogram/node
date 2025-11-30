@@ -8,7 +8,13 @@ require_once './Parsedown.php';
 class ParsedownExt extends Parsedown {
     function inlineLink($Excerpt)
     {
+        if (!isset($Excerpt['text'])) {
+            return null;
+        }
         $link = parent::inlineLink($Excerpt);
+        if (!isset($link['element']['attributes']['href'])) {
+            return $link;
+        }
         $link['element']['attributes']['href'] = "/apps/docs/index.php?link=".urlencode($link['element']['attributes']['href']);
         return $link;
     }

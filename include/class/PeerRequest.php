@@ -150,7 +150,7 @@ class PeerRequest
 		$res = Peer::getSingle($hostname, $ip);
 		if ($res == 1) {
 			_log("$hostname is already in peer db",3);
-			if ($data['repeer'] == 1) {
+			if (isset($data['repeer']) && $data['repeer'] == 1) {
 				$res = peer_post($hostname."/peer.php?q=peer", ["hostname" => $_config['hostname']], 30, $err);
 				if ($res !== false) {
 					api_echo("re-peer-ok");
@@ -169,7 +169,7 @@ class PeerRequest
             Peer::updatePeerInfo($ip, $_REQUEST['info']);
         }
 		// re-peer to make sure the peer is valid
-		if ($data['repeer'] == 1) {
+		if (isset($data['repeer']) && $data['repeer'] == 1) {
 			_log("Repeer to $hostname",3);
 			$res = peer_post($hostname . "/peer.php?q=peer", ["hostname" => $_config['hostname']], 30, $err);
 			_log("peer response " . print_r($res,1),4);

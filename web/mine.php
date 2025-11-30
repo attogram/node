@@ -60,6 +60,9 @@ function readGeneratorStat() {
             'reject-reasons'=>[]
         ];
     }
+	if (!isset($generator_stat['miners'])) {
+		$generator_stat['miners'] = [];
+	}
 	return $generator_stat;
 }
 
@@ -347,7 +350,7 @@ if ($q == "info") {
 			_log("Accepted block from miner $ip address=$address block_height=$height elapsed=$elapsed block_id=" . $block->id);
 			_logf(" ACCEPTED", 0);
 			$generator_stat['accepted']++;
-			$generator_stat['miners'][$address]++;
+			$generator_stat['miners'][$address] = ($generator_stat['miners'][$address] ?? 0) + 1;
 			saveGeneratorStat($generator_stat);
 			api_echo("accepted");
 		} else {
