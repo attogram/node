@@ -716,7 +716,7 @@ class Transaction
 		    //genesis transaction
 		    $mining_end_block = Block::getMnStartHeight();
 		    if($this->publicKey==GENESIS_DATA['public_key'] && $this->type==TX_TYPE_SEND && $height <= $mining_end_block
-                && NETWORK == "testnet") {
+                && CHAIN_ID == "01") {
 			    throw new Exception("Genesis can not spend before locked height");
 		    }
 
@@ -796,7 +796,7 @@ class Transaction
 	            }
 	            $src = Account::getAddress($this->publicKey);
 	            if($src==$this->dst) {
-                    if(NETWORK == "testnet") {
+                    if(CHAIN_ID == "01") {
                         if($this->id != "9RyNs6AUnByz4iuWfVAz6mTMCGiPUuqZ6c6nxQZzYEXh") {
                             throw new Exception("{$this->id} - Invalid source address");
                         }

@@ -26,12 +26,6 @@ class PeerRequest
 			_logf("Invalid coin request=".json_encode($_REQUEST)." server=".json_encode($_SERVER));
 			api_err("Invalid coin ".json_encode($_REQUEST), 3);
 		}
-		if(isset($_POST['network'])) {
-			if($_POST['network'] != NETWORK) {
-				_logf("Invalid network");
-				api_err("Invalid network ".$_POST['network']);
-			}
-		}
 		if(isset($_POST['chain_id']) && strlen($_POST['chain_id'])>0) {
 			if($_POST['chain_id'] != CHAIN_ID) {
 				_logf("Invalid chain ID");
