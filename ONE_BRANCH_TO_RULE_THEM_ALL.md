@@ -102,3 +102,7 @@ This branch refactors the PHPCoin codebase to support multiple networks (mainnet
         *   `include/class/Transaction.php`
         *   `web/apps/common/include/top.php`
         *   `web/apps/explorer/address.php`
+
+## Auto-update
+
+The auto-update feature is compatible with the One Branch system. The `chain_id` of the node will be preserved during the auto-update process.
