@@ -22,7 +22,7 @@ class PeerRequest
 			$data = json_decode(trim($_POST['data']), true);
 		}
 		global $_config;
-		if ($_POST['coin'] != COIN) {
+		if (!isset($_POST['coin']) || $_POST['coin'] != COIN) {
 			_logf("Invalid coin request=".json_encode($_REQUEST)." server=".json_encode($_SERVER));
 			api_err("Invalid coin ".json_encode($_REQUEST), 3);
 		}
@@ -40,7 +40,7 @@ class PeerRequest
 		}
 		$ip = Nodeutil::getRemoteAddr();
 
-		if(version_compare($_POST['version'], MIN_VERSION) < 0) {
+		if(!isset($_POST['version']) || version_compare($_POST['version'], MIN_VERSION) < 0) {
 			$peer = Peer::findByIp($ip);
 			if($peer) {
 				Peer::blacklist($peer['id'], "Invalid version ".$_POST['version']);
@@ -49,12 +49,14 @@ class PeerRequest
 			_logf("Invalid version ".$_POST['version']);
 			api_err("Invalid version ".$_POST['version']);
 		}
-		$requestId = $_POST['requestId'];
-		_log("Peer request from IP = $ip requestId=$requestId q=".$_GET['q']." chainId=".$_POST['chain_id'] ,4);
+		$requestId = $_POST['requestId'] ?? null;
+		$q = $_GET['q'] ?? null;
+		$chain_id = $_POST['chain_id'] ?? null;
+		_log("Peer request from IP = $ip requestId=$requestId q=".$q." chainId=".$chain_id ,4);
 
-		_logp("q=".$_GET['q']);
+		_logp("q=".$q);
 
-		$info = $_POST['info'];
+		$info = $_POST['info'] ?? null;
 
 		$ip = Peer::validateIp($ip);
 		_log("Filtered IP = $ip",4);
@@ -150,7 +152,7 @@ class PeerRequest
 		$res = Peer::getSingle($hostname, $ip);
 		if ($res == 1) {
 			_log("$hostname is already in peer db",3);
-			if ($data['repeer'] == 1) {
+			if (isset($data['repeer']) && $data['repeer'] == 1) {
 				$res = peer_post($hostname."/peer.php?q=peer", ["hostname" => $_config['hostname']], 30, $err);
 				if ($res !== false) {
 					api_echo("re-peer-ok");
@@ -169,7 +171,7 @@ class PeerRequest
             Peer::updatePeerInfo($ip, $_REQUEST['info']);
         }
 		// re-peer to make sure the peer is valid
-		if ($data['repeer'] == 1) {
+		if (isset($data['repeer']) && $data['repeer'] == 1) {
 			_log("Repeer to $hostname",3);
 			$res = peer_post($hostname . "/peer.php?q=peer", ["hostname" => $_config['hostname']], 30, $err);
 			_log("peer response " . print_r($res,1),4);
