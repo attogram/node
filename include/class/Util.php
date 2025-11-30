@@ -847,7 +847,7 @@ class Util
 		$branch = @trim($argv[2]);
 		$force = @trim($argv[3]);
 		if(empty($branch)) {
-            $branch = GIT_BRANCH;
+            $branch = trim(shell_exec("git rev-parse --abbrev-ref HEAD"));
 		}
         $currentVersion = BUILD_VERSION;
 		echo "Checking node branch=$branch force=$force update current version = ".BUILD_VERSION.PHP_EOL;
