@@ -38,29 +38,23 @@ An address is recognized as a staking address after it has been the destination 
 
 ### 2. Staking Requirements
 
-#### Coin Maturity
+#### Current Requirements (Block 290,000+)
 
-Your coins must be held for a certain number of blocks before they are considered "mature" for staking.
+For all blocks at or after block 290,000 (including the current mainnet at over 1,250,000 blocks), the requirements are:
 
-*   **Before block 290,000:** 600 blocks.
-*   **At or after block 290,000:** **60 blocks**.
+*   **Coin Maturity:** **60 blocks**. Your coins must be held for at least 60 blocks before they are eligible for staking.
+*   **Minimum Balance:** The minimum balance changes with block height:
+    *   **Block 290,001 - 1,000,000:** The minimum balance increased in stages, from 30,000 to 140,000 PHPCoin.
+    *   **Block 1,000,001 and onward:** The minimum staking balance is **160,000 PHPCoin**.
 
-*   **Code Reference:** This logic is implemented in the `getStakingMaturity()` function in `include/class/Blockchain.php`. The block height for this change is controlled by the `UPDATE_11_STAKING_MATURITY_REDUCE` constant, which is defined with the value `290000` in `include/coinspec.inc.php`.
+*   **Code References:**
+    *   **Maturity:** The `getStakingMaturity()` function in `include/class/Blockchain.php`, controlled by the `UPDATE_11_STAKING_MATURITY_REDUCE` constant (value `290000`) in `include/coinspec.inc.php`.
+    *   **Minimum Balance:** The `getStakingMinBalance()` function in `include/class/Blockchain.php`, controlled by the `UPDATE_12_STAKING_DYNAMIC_THRESHOLD` constant (value `290000`) in `include/coinspec.inc.php`. The specific amounts are derived from the `REWARD_SCHEME` constant in `include/rewards.inc.php`.
 
-#### Minimum Balance
+#### Historical Requirements (Before Block 290,000)
 
-You must hold a minimum number of coins to be eligible for staking. This amount changes at specific block heights.
-
-##### Current Requirement (Block 1,000,001+)
-
-**For the current mainnet (at over 1,250,000 blocks), the minimum staking balance is 160,000 PHPCoin.** This value is fixed for all blocks from 1,000,001 onward.
-
-##### Historical Requirements
-
-*   **Before block 290,000:** 100 PHPCoin.
-*   **Block 290,001 - 1,000,000:** The minimum balance increased in stages, starting from 30,000 PHPCoin.
-
-*   **Code Reference:** The `getStakingMinBalance()` function in `include/class/Blockchain.php` determines the minimum balance. The switch to a dynamic balance occurs at block 290,000, which is defined by the `UPDATE_12_STAKING_DYNAMIC_THRESHOLD` constant (value `290000`) in `include/coinspec.inc.php`. After this block, the function calculates the minimum as twice the masternode collateral value, which is defined in the `REWARD_SCHEME` constant in `include/rewards.inc.php`.
+*   **Coin Maturity:** 600 blocks.
+*   **Minimum Balance:** 100 PHPCoin.
 
 ### 3. Stake Winner Selection
 
