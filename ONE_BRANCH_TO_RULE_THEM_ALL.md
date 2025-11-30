@@ -16,52 +16,82 @@ This branch refactors the PHPCoin codebase to support multiple networks (mainnet
 
 ### From `main` (mainnet)
 
-1.  **Move the installation directory:**
+1.  **Back up the database:**
+    ```bash
+    sudo mysqldump phpcoin > phpcoin_backup.sql
+    ```
+2.  **Back up the application directory:**
+    ```bash
+    sudo cp -a /var/www/phpcoin-mainnet /var/www/phpcoin-mainnet.bak
+    ```
+3.  **Move the installation directory:**
     ```bash
     sudo mv /var/www/phpcoin-mainnet /var/www/phpcoin
     ```
-2.  **Update the code:**
+4.  **Update the code:**
     ```bash
     cd /var/www/phpcoin
     git pull origin one_branch_to_rule_them_all
     ```
-3.  **Rename the database:**
+5.  **Rename the database:**
     ```bash
     sudo mysql -e "RENAME DATABASE phpcoin TO phpcoin_00;"
     ```
-4.  **Create the `chain_id` file:**
+6.  **Create the `chain_id` file:**
     ```bash
     echo "00" > chain_id
     ```
-5.  **Re-run the install script to update configurations:**
+7.  **Handle the configuration file:**
     ```bash
-    cd ~
-    curl -s https://phpcoin.net/scripts/install_node.sh | bash
+    cd /var/www/phpcoin
+    mv config/config.inc.php config/config.inc.php.bak
+    cp config/config-sample.inc.php config/config.inc.php
+    ```
+    *After this, you will need to manually copy your old settings from `config.inc.php.bak` to the new `config.inc.php`.*
+8.  **Re-run the install script to update configurations:**
+    ```bash
+    cd /var/www/phpcoin
+    sudo bash scripts/install_node.sh
     ```
 
 ### From `test` (testnet)
 
-1.  **Move the installation directory:**
+1.  **Back up the database:**
+    ```bash
+    sudo mysqldump phpcoin > phpcoin_backup.sql
+    ```
+2.  **Back up the application directory:**
+    ```bash
+    sudo cp -a /var/www/phpcoin-testnet /var/www/phpcoin-testnet.bak
+    ```
+3.  **Move the installation directory:**
     ```bash
     sudo mv /var/www/phpcoin-testnet /var/www/phpcoin
     ```
-2.  **Update the code:**
+4.  **Update the code:**
     ```bash
     cd /var/www/phpcoin
     git pull origin one_branch_to_rule_them_all
     ```
-3.  **Rename the database:**
+5.  **Rename the database:**
     ```bash
     sudo mysql -e "RENAME DATABASE phpcoin TO phpcoin_01;"
     ```
-4.  **Create the `chain_id` file:**
+6.  **Create the `chain_id` file:**
     ```bash
     echo "01" > chain_id
     ```
-5.  **Re-run the install script to update configurations:**
+7.  **Handle the configuration file:**
     ```bash
-    cd ~
-    curl -s https://phpcoin.net/scripts/install_node.sh | bash
+    cd /var/www/phpcoin
+    mv config/config.inc.php config/config.inc.php.bak
+    cp config/config-sample.inc.php config/config.inc.php
+    ```
+    *After this, you will need to manually copy your old settings from `config.inc.php.bak` to the new `config.inc.php`.*
+8.  **Re-run the install script to update configurations:**
+    ```bash
+    cd /var/www/phpcoin
+    sudo bash scripts/install_node.sh
     ```
 
 ## What needs to be tested
@@ -102,3 +132,7 @@ This branch refactors the PHPCoin codebase to support multiple networks (mainnet
         *   `include/class/Transaction.php`
         *   `web/apps/common/include/top.php`
         *   `web/apps/explorer/address.php`
+
+## Auto-update
+
+The auto-update feature is compatible with the One Branch system. The `chain_id` of the node will be preserved during the auto-update process.
