@@ -21,8 +21,9 @@ if($action=="sync") {
     exit;
 }
 
+$checkBlocksResponse = false;
 if($action == "check_blocks") {
-    $peer = $_POST['peer'];
+    $peer = $_POST['peer'] ?? null;
     $invalid_block = Nodeutil::checkBlocksWithPeer($peer);
     $checkBlocksResponse = true;
 }
@@ -32,14 +33,16 @@ if($action == "accounts-hash") {
 }
 
 if($action == 'clear_blocks') {
-    $height = $_POST['height'];
+    $height = $_POST['height'] ?? null;
     Nodeutil::deleteFromHeight($height);
     header("location: ".APP_URL."/?view=utils");
     exit;
 }
 
+$accountsHash = false;
+$blocksHash = false;
 if($action == "blocks-hash") {
-    $height = $_POST['height'];
+    $height = $_POST['height'] ?? null;
     $blocksHash = Nodeutil::calculateBlocksHash($height);
 }
 

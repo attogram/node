@@ -2,9 +2,9 @@
 require_once dirname(__DIR__)."/apps.inc.php";
 
 if(isset($_GET['action']) && $_GET['action']=="login-link") {
-	$login_code = $_GET['login_code'];
-	$public_key = $_GET['public_key'];
-	$login_key = $_GET['login_key'];
+	$login_code = $_GET['login_code'] ?? null;
+	$public_key = $_GET['public_key'] ?? null;
+	$login_key = $_GET['login_key'] ?? null;
 
 	if(empty($login_code) || empty($public_key) || empty($login_key)) {
 		$_SESSION['msg']=[['icon'=>'warning', 'text'=>'Invalid data received']];

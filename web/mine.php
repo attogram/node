@@ -26,7 +26,7 @@ OR OTHER DEALINGS IN THE SOFTWARE.
 */
 require_once dirname(__DIR__).'/include/init.inc.php';
 set_time_limit(360);
-$q = $_GET['q'];
+$q = $_GET['q'] ?? null;
 
 if(!Nodeutil::miningEnabled()) {
 	api_err("mining-not-enabled");
@@ -72,8 +72,8 @@ function saveGeneratorStat($generator_stat) {
 }
 
 function checkVersion() {
-    $version = $_POST['version'];
-    $minerInfo = $_POST['minerInfo'];
+    $version = $_POST['version'] ?? null;
+    $minerInfo = $_POST['minerInfo'] ?? null;
     $version_ok = version_compare($version, MIN_MINER_VERSION)>=0;
     _log("checkVersion q=".$_GET['q']. " version=".$version. " MIN_VERSION=".MIN_MINER_VERSION. " minerInfo=$minerInfo version_ok=$version_ok");
     return $version_ok;
@@ -198,8 +198,8 @@ if ($q == "info") {
 		api_err("no-live-peers");
 	}
 
-	$address = san($_POST['address']);
-	$height = san($_POST['height']);
+	$address = san($_POST['address'] ?? null);
+	$height = san($_POST['height'] ?? null);
 
 	if(empty($height) || empty($address)) {
 		_logf("rejected: missing-parameters height=$height address=$address", 0);
@@ -216,12 +216,12 @@ if ($q == "info") {
 
 	_logp(" minerInfo=$minerInfo ");
 
-	$nonce = san($_POST['nonce']);
+	$nonce = san($_POST['nonce'] ?? null);
 	$version = Block::versionCode($height);
-	$address = san($_POST['address']);
-	$elapsed = intval($_POST['elapsed']);
-	$difficulty = san($_POST['difficulty']);
-	$argon = $_POST['argon'];
+	$address = san($_POST['address'] ?? null);
+	$elapsed = intval($_POST['elapsed'] ?? 0);
+	$difficulty = san($_POST['difficulty'] ?? null);
+	$argon = $_POST['argon'] ?? null;
 
 	_logp(" height=$height address=$address elapsed=$elapsed argon=$argon");
 
