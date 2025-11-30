@@ -6,18 +6,13 @@
 
 ## Introduction
 
-Staking is the process of holding PHPCoin in your wallet to support the blockchain network. In return for holding coins, you receive rewards in the form of new PHPCoin. It's a great way to earn passive income while helping to secure the network.
+Staking is the process of holding PHPCoin in your wallet to support the blockchain network. In return for holding coins, you receive rewards in the form of new PHPCoin.
 
 ## How Staking Works
 
 PHPcoin uses a Proof-of-Stake (PoS) system to reward coin holders. Unlike miners or block generators, **stakers do not create or validate blocks**. Instead, for each block created, the network automatically chooses a "stake winner" from all eligible participants to receive a reward.
 
-To be eligible for staking rewards, you must meet two main requirements:
-
-*   **Minimum Balance:** You must hold a specific minimum amount of PHPCoin.
-*   **Coin Maturity:** Your coins must have been held in your wallet for a certain number of blocks without being spent.
-
-If you meet these requirements, your address is automatically entered into a lottery for each new block. The winner is chosen based on a "weight" calculated from your balance and the maturity of your coins. The higher your weight, the higher your chance of winning the staking reward.
+To be eligible for staking rewards, you must meet two main requirements: a minimum balance and a coin maturity period.
 
 ## How to Start Staking
 
@@ -33,44 +28,49 @@ To become eligible for staking rewards, you must first send a special "stake" tr
 
     Replace `<your-address>` with your own wallet address. The `0` is the amount to send (this special transaction is free), and `"stake"` is the message that activates your address for staking.
 
-Once this transaction is confirmed, your address will be eligible to receive staking rewards as long as your balance and coin maturity meet the network requirements.
-
 ## Technical Details
 
-### Staking Requirements
+### 1. Activating an Address for Staking
 
-The requirements to be eligible for staking rewards change as the blockchain grows.
+An address is recognized as a staking address after it has been the destination of a transaction with the message `"stake"`.
 
-#### 1. Coin Maturity
+*   **Code Reference:** The `getAddressTypes` function in `include/class/Block.php` checks for this condition with the following SQL query:
+    ```php
+    $sql="select 1 from transactions t where t.dst = :address and t.type = 0 and t.message = 'stake' limit 1";
+    ```
+
+### 2. Staking Requirements
+
+#### Coin Maturity
 
 Your coins must be held for a certain number of blocks before they are considered "mature" for staking.
 
-*   **Before block 290,000:** 600 blocks
-*   **At or after block 290,000:** 60 blocks
+*   **Code Reference:** The `getStakingMaturity` function in `include/class/Blockchain.php` determines this value.
+    *   Before block 290,000, it returns `600`.
+    *   At or after block 290,000 (defined by the `UPDATE_11_STAKING_MATURITY_REDUCE` constant in `include/coinspec.inc.php`), it returns `60`.
 
-#### 2. Minimum Balance
+#### Minimum Balance
 
-You must hold a minimum number of coins to be eligible for staking. This amount changes at specific block heights according to network rules.
+You must hold a minimum number of coins to be eligible for staking.
 
-*   **Before block 290,000:** 100 PHPCoin
-*   **Block 290,001 - 300,000:** 30,000 PHPCoin
-*   **Block 300,001 - 400,000:** 40,000 PHPCoin
-*   **Block 400,001 - 500,000:** 50,000 PHPCoin
-*   **Block 500,001 - 600,000:** 60,000 PHPCoin
-*   **Block 600,001 - 700,000:** 80,000 PHPCoin
-*   **Block 700,001 - 800,000:** 100,000 PHPCoin
-*   **Block 800,001 - 900,000:** 120,000 PHPCoin
-*   **Block 900,001 - 1,000,000:** 140,000 PHPCoin
-*   **After block 1,000,000:** 160,000 PHPCoin
+*   **Code Reference:** The `getStakingMinBalance` function in `include/class/Blockchain.php` determines this value.
+    *   Before block 290,000, it returns `100`.
+    *   At or after block 290,000 (defined by the `UPDATE_12_STAKING_DYNAMIC_THRESHOLD` constant in `include/coinspec.inc.php`), the minimum balance is calculated as twice the current masternode collateral, which is retrieved via the `Block::getMasternodeCollateral` function. The collateral values are defined in the `REWARD_SCHEME` constant in `include/rewards.inc.php`. This results in the following minimum balances:
+        *   **Block 290,001 - 300,000:** 30,000 PHPCoin (2 * 15,000)
+        *   **Block 300,001 - 400,000:** 40,000 PHPCoin (2 * 20,000)
+        *   **And so on, as defined in `rewards.inc.php`.**
 
-### Winner Selection
+### 3. Stake Winner Selection
 
-For each block, a stake winner is selected from all eligible accounts based on a `weight` calculated as follows:
+For each block, a single stake winner is selected from all eligible accounts.
 
-`weight = (current_block_height - last_transaction_height) * account_balance`
+*   **Code Reference:** The `getStakeWinner` function in `include/class/Account.php` handles this process.
+    *   It queries the `accounts` table for all addresses that meet the maturity and minimum balance requirements.
+    *   It calculates a `weight` for each eligible account using the formula: `weight = (current_block_height - last_transaction_height) * account_balance`.
+    *   The account with the highest weight is selected as the winner.
 
-The account with the highest weight is chosen as the winner. This process is handled by the `getStakeWinner` function in `include/class/Account.php`.
+### 4. Staking Rewards
 
-### Staking Rewards
+The staking reward amount is determined by the current block height.
 
-The staking rewards are defined in the `include/rewards.inc.php` file and change at different block heights. For example, between blocks 20,001 and 200,000, the staking reward is 2 PHPCoin per block.
+*   **Code Reference:** The `reward` function in `include/class/Block.php` reads from the `REWARD_SCHEME` constant in `include/rewards.inc.php`. This constant defines the reward structure for different block height ranges. For example, for blocks 20,001 to 200,000, the `staker` reward is defined as `2`.
