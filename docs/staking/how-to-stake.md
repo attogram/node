@@ -34,44 +34,42 @@ To become eligible for staking rewards, you must first send a special "stake" tr
 
 An address is recognized as a staking address after it has been the destination of a transaction with the message `"stake"`.
 
-*   **Code Reference:** The `getAddressTypes` function in `include/class/Block.php` checks for this condition with the following SQL query:
-    ```php
-    $sql="select 1 from transactions t where t.dst = :address and t.type = 0 and t.message = 'stake' limit 1";
-    ```
+*   **Code Reference:** The `getAddressTypes` function in `include/class/Block.php`.
 
 ### 2. Staking Requirements
 
 #### Coin Maturity
 
-Your coins must be held for a certain number of blocks before they are considered "mature" for staking. The required maturity period was reduced significantly at block height 290,000.
+Your coins must be held for a certain number of blocks before they are considered "mature" for staking.
 
-*   **Before block 290,000:** The maturity requirement was **600 blocks**.
-*   **At or after block 290,000:** The maturity requirement is **60 blocks**.
+*   **Before block 290,000:** 600 blocks.
+*   **At or after block 290,000:** **60 blocks**.
 
-*   **Code Reference:** This logic is implemented in the `getStakingMaturity` function in `include/class/Blockchain.php`. The block height for this change is defined by the `UPDATE_11_STAKING_MATURITY_REDUCE` constant in `include/coinspec.inc.php`.
+*   **Code Reference:** This logic is implemented in the `getStakingMaturity()` function in `include/class/Blockchain.php`. The block height for this change is controlled by the `UPDATE_11_STAKING_MATURITY_REDUCE` constant, which is defined with the value `290000` in `include/coinspec.inc.php`.
 
 #### Minimum Balance
 
-You must hold a minimum number of coins to be eligible for staking.
+You must hold a minimum number of coins to be eligible for staking. This amount changes at specific block heights.
 
-*   **Code Reference:** The `getStakingMinBalance` function in `include/class/Blockchain.php` determines this value.
-    *   Before block 290,000, it returns `100`.
-    *   At or after block 290,000 (defined by the `UPDATE_12_STAKING_DYNAMIC_THRESHOLD` constant in `include/coinspec.inc.php`), the minimum balance is calculated based on network parameters. The specific values are:
-        *   **Block 290,001 - 300,000:** 30,000 PHPCoin
-        *   **Block 300,001 - 400,000:** 40,000 PHPCoin
-        *   **And so on, as defined in `include/rewards.inc.php`.**
+##### Current Requirement (Block 1,000,001+)
+
+**For the current mainnet (at over 1,250,000 blocks), the minimum staking balance is 160,000 PHPCoin.** This value is fixed for all blocks from 1,000,001 onward.
+
+##### Historical Requirements
+
+*   **Before block 290,000:** 100 PHPCoin.
+*   **Block 290,001 - 1,000,000:** The minimum balance increased in stages, starting from 30,000 PHPCoin.
+
+*   **Code Reference:** The `getStakingMinBalance()` function in `include/class/Blockchain.php` determines the minimum balance. The switch to a dynamic balance occurs at block 290,000, which is defined by the `UPDATE_12_STAKING_DYNAMIC_THRESHOLD` constant (value `290000`) in `include/coinspec.inc.php`. After this block, the function calculates the minimum as twice the masternode collateral value, which is defined in the `REWARD_SCHEME` constant in `include/rewards.inc.php`.
 
 ### 3. Stake Winner Selection
 
-For each block, a single stake winner is selected from all eligible accounts.
+For each block, a single stake winner is selected from all eligible accounts based on a `weight`.
 
-*   **Code Reference:** The `getStakeWinner` function in `include/class/Account.php` handles this process.
-    *   It queries the `accounts` table for all addresses that meet the maturity and minimum balance requirements.
-    *   It calculates a `weight` for each eligible account using the formula: `weight = (current_block_height - last_transaction_height) * account_balance`.
-    *   The account with the highest weight is selected as the winner.
+*   **Code Reference:** The `getStakeWinner` function in `include/class/Account.php` calculates this `weight` using the formula: `(current_block_height - last_transaction_height) * account_balance`. The account with the highest weight wins.
 
 ### 4. Staking Rewards
 
-The staking reward amount is determined by the current block height.
+The reward amount is determined by the block height.
 
-*   **Code Reference:** The `reward` function in `include/class/Block.php` reads from the `REWARD_SCHEME` constant in `include/rewards.inc.php`. This constant defines the reward structure for different block height ranges. For example, for blocks 20,001 to 200,000, the `staker` reward is defined as `2`.
+*   **Code Reference:** The `reward` function in `include/class/Block.php` reads the reward structure from the `REWARD_SCHEME` constant in `include/rewards.inc.php`.
