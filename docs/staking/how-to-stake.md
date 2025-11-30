@@ -43,11 +43,12 @@ An address is recognized as a staking address after it has been the destination 
 
 #### Coin Maturity
 
-Your coins must be held for a certain number of blocks before they are considered "mature" for staking.
+Your coins must be held for a certain number of blocks before they are considered "mature" for staking. The required maturity period was reduced significantly at block height 290,000.
 
-*   **Code Reference:** The `getStakingMaturity` function in `include/class/Blockchain.php` determines this value.
-    *   Before block 290,000, it returns `600`.
-    *   At or after block 290,000 (defined by the `UPDATE_11_STAKING_MATURITY_REDUCE` constant in `include/coinspec.inc.php`), it returns `60`.
+*   **Before block 290,000:** The maturity requirement was **600 blocks**.
+*   **At or after block 290,000:** The maturity requirement is **60 blocks**.
+
+*   **Code Reference:** This logic is implemented in the `getStakingMaturity` function in `include/class/Blockchain.php`. The block height for this change is defined by the `UPDATE_11_STAKING_MATURITY_REDUCE` constant in `include/coinspec.inc.php`.
 
 #### Minimum Balance
 
@@ -55,10 +56,10 @@ You must hold a minimum number of coins to be eligible for staking.
 
 *   **Code Reference:** The `getStakingMinBalance` function in `include/class/Blockchain.php` determines this value.
     *   Before block 290,000, it returns `100`.
-    *   At or after block 290,000 (defined by the `UPDATE_12_STAKING_DYNAMIC_THRESHOLD` constant in `include/coinspec.inc.php`), the minimum balance is calculated as twice the current masternode collateral, which is retrieved via the `Block::getMasternodeCollateral` function. The collateral values are defined in the `REWARD_SCHEME` constant in `include/rewards.inc.php`. This results in the following minimum balances:
-        *   **Block 290,001 - 300,000:** 30,000 PHPCoin (2 * 15,000)
-        *   **Block 300,001 - 400,000:** 40,000 PHPCoin (2 * 20,000)
-        *   **And so on, as defined in `rewards.inc.php`.**
+    *   At or after block 290,000 (defined by the `UPDATE_12_STAKING_DYNAMIC_THRESHOLD` constant in `include/coinspec.inc.php`), the minimum balance is calculated based on network parameters. The specific values are:
+        *   **Block 290,001 - 300,000:** 30,000 PHPCoin
+        *   **Block 300,001 - 400,000:** 40,000 PHPCoin
+        *   **And so on, as defined in `include/rewards.inc.php`.**
 
 ### 3. Stake Winner Selection
 
