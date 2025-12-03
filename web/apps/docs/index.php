@@ -78,7 +78,7 @@ class ParsedownExt extends Parsedown {
             }
         }
 
-        $link['element']['attributes']['href'] = "/apps/docs/index.php?doc=".$newDoc;
+        $link['element']['attributes']['href'] = "/apps/docs/?doc=".$newDoc;
         return $link;
     }
 }
@@ -139,6 +139,7 @@ $text = file_get_contents($file);
 
 define("PAGE", "Docs");
 define("APP_NAME", "Docs");
+define("HEAD_CSS", "/apps/docs/docs.css");
 
 ?>
 <?php
