@@ -156,6 +156,11 @@ $redirect=$_SERVER['REQUEST_URI'];
             max-height: 80vh;
             overflow-y: auto;
         }
+        .docs-viewer table,
+        .docs-viewer th,
+        .docs-viewer td {
+            border: 1px solid black;
+        }
     </style>
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -173,7 +178,7 @@ $redirect=$_SERVER['REQUEST_URI'];
 
 
 
-<body class="phpcoin" data-layout="horizontal" data-layout-mode="<?php echo $theme ?>">
+<body class="phpcoin <?php if (defined("APP_NAME") && APP_NAME == "Docs") { echo "docs-viewer"; } ?>" data-layout="horizontal" data-layout-mode="<?php echo $theme ?>">
 
 <!--    layout-wrapper-->
     <div id="layout-wrapper">
