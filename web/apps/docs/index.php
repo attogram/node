@@ -78,7 +78,7 @@ class ParsedownExt extends Parsedown {
             }
         }
 
-        $link['element']['attributes']['href'] = "/apps/docs/index.php?doc=".$newDoc;
+        $link['element']['attributes']['href'] = "/apps/docs/?doc=".$newDoc;
         return $link;
     }
 }
