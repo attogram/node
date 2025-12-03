@@ -180,5 +180,72 @@ To customize your node's configuration, copy the relevant settings from `config.
 ## Homepage Customization
 
 ### `homepage_apps`
--   **Description**: An array that controls the clickable application blocks on the node's homepage. Full details on how to customize this are provided in the "Homepage Configuration" section of this guide.
--   **Default**: An array containing "Explorer", "Miner", "Dapps", "Exchange", and "Docs".
+
+This setting allows you to fully customize the clickable application blocks on your node's homepage. It is an associative array where each key is a unique identifier for an app, and the value is another array containing the app's properties.
+
+To customize the apps, you should copy the entire `homepage_apps` array from `config.default.php` into your `config.inc.php` file and then make your modifications.
+
+#### App Properties
+
+Each app in the array supports the following properties:
+
+-   `title`: (string, required) The text displayed on the app block.
+-   `url`: (string, required) The URL the app block links to.
+-   `icon_type`: (string, required) The type of icon. Supported values are:
+    -   `'fa'`: For a Font Awesome icon.
+    -   `'img'`: For an image URL.
+-   `icon`: (string, required) The icon identifier.
+    -   If `icon_type` is `'fa'`, this should be the Font Awesome class (e.g., `fas fa-binoculars`).
+    -   If `icon_type` is `'img'`, this should be the full URL to the image.
+-   `condition`: (mixed, required) Determines if the app block is displayed.
+    -   `true`: The app is always displayed.
+    -   `'miner_enabled'`: The app is displayed only if mining is enabled on the node (`$_config['miner']` is true).
+    -   `'dapps_enabled'`: The app is displayed only if Dapps are enabled (`$_config['dapps']` is true and a public key is set).
+-   `target`: (string, optional) The `target` attribute for the link. Use `'_blank'` to open the link in a new tab.
+-   `tooltip`: (string, optional) Text to display as a tooltip when the user hovers over the app block.
+
+#### Customization Examples
+
+**1. Adding a New App**
+
+To add a new link, simply add a new key-value pair to the array in your `config.inc.php`.
+
+```php
+$_config['homepage_apps']['my-explorer'] = [
+    "title" => "My Explorer",
+    "url" => "https://my-custom-explorer.com",
+    "icon_type" => "fa",
+    "icon" => "fas fa-search",
+    "condition" => true,
+    "target" => "_blank"
+];
+```
+
+**2. Removing an App**
+
+To remove an app, you can either delete its entry from the array in your `config.inc.php` or comment it out.
+
+```php
+$_config['homepage_apps'] = [
+    "explorer" => [
+        // ... explorer config
+    ],
+    // The "Exchange" app is now disabled
+    // "exchange" => [
+    //     "title" => "Exchange",
+    //     "url" => "https://klingex.io/trade/PHP-USDT?ref=3436CA42",
+    //     "icon_type" => "img",
+    //     "icon" => "https://klingex.io/symbol.svg",
+    //     "target" => "_blank",
+    //     "condition" => true,
+    //     "tooltip" => "Exchange"
+    // ],
+    "docs" => [
+        // ... docs config
+    ]
+];
+```
+
+**3. Reordering Apps**
+
+The apps appear in the order they are defined in the array. To change the order, simply rearrange the blocks of code in your `config.inc.php`.
