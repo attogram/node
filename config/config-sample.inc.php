@@ -71,3 +71,25 @@ $_config['dapps_public_key']="";
 $_config['dapps_private_key']="";
 $_config['dapps_anonymous']=false;
 $_config['dapps_disable_auto_propagate']=true;
+
+/**
+ * Homepage Customization
+ */
+/*
+$_config['homepage_apps'] = [
+    "explorer" => [
+        "title" => "Explorer",
+        "url" => "/apps/explorer",
+        "icon_type" => "fa",
+        "icon" => "fas fa-binoculars",
+        "condition" => true
+    ],
+    "docs" => [
+        "title" => "Docs",
+        "url" => "/apps/docs",
+        "icon_type" => "fa",
+        "icon" => "fas fa-file-alt",
+        "condition" => true
+    ]
+];
+*/
