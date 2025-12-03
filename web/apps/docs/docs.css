@@ -1,4 +1,39 @@
+/*
+ * Documentation Table Styles
+ */
 
-table, th, td {
-  border: 1px solid black;
+/* General table styling */
+table {
+  width: 100%;
+  border-collapse: collapse; /* Cleaner borders */
+  margin: 1.5em 0;
+  font-size: 1rem;
+  box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+  border: 1px solid #ddd;
+}
+
+/* Table header styling */
+th {
+  background-color: #5156be; /* A primary color from the site */
+  color: #ffffff;
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid #404496;
+}
+
+/* Table cell styling */
+td {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+}
+
+/* Zebra-striping for table rows */
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+/* Hover effect for rows */
+tr:hover {
+  background-color: #f1f1f1;
 }
