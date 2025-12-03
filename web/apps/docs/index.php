@@ -139,6 +139,7 @@ $text = file_get_contents($file);
 
 define("PAGE", "Docs");
 define("APP_NAME", "Docs");
+define("HEAD_CSS", "/apps/docs/docs.css");
 
 ?>
 <?php
