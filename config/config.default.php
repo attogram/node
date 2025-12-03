@@ -104,3 +104,44 @@ $_config['dapps_disable_auto_propagate']=true;
 
 // set server to maintenance mode
 //$_config['maintenance']=1;
+
+$_config['homepage_apps'] = [
+    "explorer" => [
+        "title" => "Explorer",
+        "url" => "/apps/explorer",
+        "icon_type" => "fa",
+        "icon" => "fas fa-binoculars",
+        "condition" => true
+    ],
+    "miner" => [
+        "title" => "Miner",
+        "url" => "/apps/miner",
+        "icon_type" => "fa",
+        "icon" => "fas fa-hammer",
+        "condition" => "miner_enabled"
+    ],
+    "dapps" => [
+        "title" => "Dapps",
+        "url" => "/dapps.php?url={dapps_id}",
+        "icon_type" => "fa",
+        "icon" => "fas fa-cubes",
+        "condition" => "dapps_enabled",
+        "tooltip" => "Decentralized apps"
+    ],
+    "exchange" => [
+        "title" => "Exchange",
+        "url" => "https://klingex.io/trade/PHP-USDT?ref=3436CA42",
+        "icon_type" => "img",
+        "icon" => "https://klingex.io/symbol.svg",
+        "target" => "_blank",
+        "condition" => true,
+        "tooltip" => "Exchange"
+    ],
+    "docs" => [
+        "title" => "Docs",
+        "url" => "/apps/docs",
+        "icon_type" => "fa",
+        "icon" => "fas fa-file-alt",
+        "condition" => true
+    ]
+];
