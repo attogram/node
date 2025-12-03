@@ -120,6 +120,7 @@ global $_config;
                         "explorer" => [
                             "title" => "Explorer",
                             "url" => "/apps/explorer",
+                            "icon_type" => "fa",
                             "icon" => "fas fa-binoculars",
                             "condition" => true
                         ]
