@@ -124,8 +124,8 @@ require_once __DIR__. '/../common/include/top.php';
 
 <ol class="breadcrumb m-0 ps-0 h4">
 	<li class="breadcrumb-item"><a href="/apps/explorer">Explorer</a></li>
-	<li class="breadcrumb-item"><?php echo $type ?></li>
-	<li class="breadcrumb-item active"><?php echo $address ?></li>
+	<li class="breadcrumb-item"><?php echo safeDisplay($type) ?></li>
+	<li class="breadcrumb-item active"><?php echo safeDisplay($address) ?></li>
 </ol>
 
 <table class="table table-sm table-striped">

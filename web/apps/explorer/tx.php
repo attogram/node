@@ -120,7 +120,7 @@ require_once __DIR__. '/../common/include/top.php';
         </tr>
         <tr>
             <td>Message</td>
-            <td><?php echo $tx['message'] ?></td>
+            <td><?php echo safeDisplay($tx['message']) ?></td>
         </tr>
         <tr>
             <td>Public key</td>
@@ -195,7 +195,7 @@ require_once __DIR__. '/../common/include/top.php';
                 </tr>
                 <tr>
                     <td>Params</td>
-                    <td><?php echo implode("<br/>", $sc_data['params']) ?></td>
+                    <td><?php echo implode("<br/>", array_map('safeDisplay', $sc_data['params'])) ?></td>
                 </tr>
             </table>
         </div>

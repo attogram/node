@@ -317,7 +317,7 @@ global $loggedIn;
                                 <?php if(@$property['type']=="map") { ?>
                                     <input class="form-control w-auto d-inline form-control-sm" type="text"
                                            name="sc_property_key[<?php echo $property['name'] ?>]"
-                                           value="<?php echo $_REQUEST['sc_property_key'][$property['name']] ?>" placeholder="Key">
+                                           value="<?php echo safeDisplay($_REQUEST['sc_property_key'][$property['name']] ?? '') ?>" placeholder="Key">
                                 <?php } ?>
                                 <button type="button" onclick="runAction('sc_get_property_read',['<?php echo $property['name'] ?>'])"
                                         name="sc_get_property_read" value="<?php echo $property['name'] ?>" class="btn btn-sm btn-soft-primary">Read</button>
@@ -444,7 +444,7 @@ global $loggedIn;
                                     ?>
                                     <input type="text" class="form-control form-control-sm d-inline w-auto"
                                            name="sc_view_params[<?php echo $view['name'] ?>][<?php echo $name ?>]"
-                                           value="<?php echo $_REQUEST['sc_view_params'][$view['name']][$name] ?>" placeholder="<?php echo $name ?>">
+                                           value="<?php echo safeDisplay($_REQUEST['sc_view_params'][$view['name']][$name] ?? '') ?>" placeholder="<?php echo $name ?>">
                                 <?php } ?>
                                 <button type="button" onclick="runAction('sc_view', ['<?php echo $view['name'] ?>'])" class="btn btn-sm btn-soft-primary"
                                         name="sc_view" value="<?php echo $view['name'] ?>">Call</button>
@@ -598,7 +598,7 @@ if($ajaxAction) {
 <script type="text/javascript">
     function runAction(action, params) {
         event.preventDefault();
-        fetch("/apps/explorer/smart_contract.php?id=<?= $id ?>", {
+        fetch("/apps/explorer/smart_contract.php?id=<?php echo safeDisplay($id) ?>", {
             method: "POST",
             headers: {
                 'ajax-action' : action,
