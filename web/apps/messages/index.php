@@ -10,9 +10,7 @@ function getAddressesWithMessages($limit) {
     global $db;
     $current_height = Block::getHeight();
     $start_height = $current_height - $limit;
-    $sql = "SELECT src AS address FROM transactions WHERE type = 1 AND message != '' AND height >= :start_height AND src IS NOT NULL AND src != ''
-            UNION
-            SELECT dst AS address FROM transactions WHERE type = 1 AND message != '' AND height >= :start_height AND dst IS NOT NULL AND dst != ''
+    $sql = "SELECT DISTINCT dst AS address FROM transactions WHERE type = 1 AND message != '' AND height >= :start_height AND dst IS NOT NULL AND dst != ''
             ORDER BY address ASC";
     $rows = $db->run($sql, [":start_height" => $start_height]);
     return array_column($rows, 'address');
