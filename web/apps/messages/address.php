@@ -12,7 +12,7 @@ function getAddressMessages($address) {
         return [];
     }
     $sql = "SELECT * FROM transactions
-            WHERE type = 1 AND message != '' AND (src = :address OR dst = :address)
+            WHERE type = 1 AND message != '' AND dst = :address
             ORDER BY height DESC";
     return $db->run($sql, [":address" => $address]);
 }
