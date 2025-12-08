@@ -2,9 +2,19 @@
 
 ## Introduction
 
-The transaction `data` field provides flexibility for various transaction types, most notably for smart contract deployment and execution. In the database, the `transactions` table includes a `data` column to store this information. The column type appears to be a text or blob variant, designed to accommodate sizable inputs, such as the base64-encoded source code for a smart contract.
+The transaction model includes a `data` field to support complex operations like smart contract interactions. The database schema, defined in `include/schema.inc.php`, creates the `transactions` table with the `data` column specified as `text`:
 
-However, the lack of robust validation on this field creates a vector for several security vulnerabilities. This document examines two primary abuses: "Blockchain Bloat" and "Transaction Malleability," based on an analysis of the current codebase.
+```sql
+create table transactions (
+    ...
+    data text null,
+    ...
+);
+```
+
+In the underlying database engine (MySQL/MariaDB), the `TEXT` data type imposes a maximum size limit of 65,535 bytes (64 KB). While this is a database-level constraint, the application logic in `Transaction::check()` (in `include/class/Transaction.php`) performs no validation on the size of this field before it is accepted into the mempool and written to the database.
+
+This large, unchecked data field creates a vector for several security vulnerabilities. This document examines two primary abuses: "Blockchain Bloat" and "Transaction Malleability," based on an analysis of the current codebase.
 
 ## 1. Blockchain Bloat
 
