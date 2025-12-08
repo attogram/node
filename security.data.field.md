@@ -40,7 +40,7 @@ All participants in the network, particularly those running full nodes.
 
 ---
 
-## Attack 2: Denial-of-Service
+## Attack 2: Resource Exhaustion & Service Degradation
 
 ### Malicious Actor
 A malicious miner who can create and broadcast blocks.
@@ -50,15 +50,15 @@ All nodes in the network.
 
 ### Attack Vector
 1.  **Craft Oversized Transaction:** The attacker creates a transaction where the `data` field's size *exceeds* the 64 KB limit of the database's `TEXT` column.
-2.  **Mine Malicious Block:** The attacker, acting as a miner, directly includes this oversized transaction in a new block they are mining. Because the `Transaction::check()` method lacks a size check, this transaction is considered valid at the application layer.
+2.  **Mine Malicious Block:** The attacker, acting as a miner, directly includes this oversized transaction in a new block they are mining. Because the `Transaction::check()` method lacks a size check, this transaction is considered valid during the initial phases of block validation.
 3.  **Broadcast Malicious Block:** The attacker successfully mines the block and broadcasts it to the network.
-4.  **Node Rejection:** When a receiving node attempts to process the block, it will try to insert the oversized transaction into its database.
-5.  **Database Error:** The database will reject the insertion with a "Data too long for column" error, causing the `Transaction::add()` method to throw an exception.
-6.  **Block Rejection:** The exception is caught, and the entire block is rejected as invalid.
-7.  **Wasted Resources:** The attacker has forced the entire network to expend CPU and I/O resources processing an invalid block, achieving a Denial-of-Service. By repeating this process, the attacker can disrupt the network and interfere with consensus.
+4.  **Target the Slow Path:** When a receiving node processes the block, it passes the faster cryptographic checks. The validation fails only at one of the most resource-intensive steps: writing the transaction to the database. The `Transaction::add()` method attempts to commit the transaction, which also involves updating account balances and other database operations.
+5.  **Database Error:** The database rejects the insertion with a "Data too long for column" error, causing the `Transaction::add()` method to throw an exception.
+6.  **Block Rejection:** The exception is caught, and the entire block is rejected as invalid, but only after significant resources have been consumed.
+7.  **Degrade Service:** The attacker has forced the entire network to expend disproportionate CPU and I/O resources processing an invalid block. While this does not crash the nodes, a malicious miner with sufficient hash power could periodically inject these blocks to keep the rest of the network tied up processing junk, delaying the propagation and acceptance of valid blocks and degrading the overall quality of service.
 
 ### Mitigations
-The primary mitigation for this is to **impose an application-level size limit in `Transaction::check()`**. When a node receives a new block from a peer, it *must* validate every transaction in that block using the same `Transaction::check()` logic before attempting to insert it into the database. A check here would cause the node to immediately reject the oversized transaction and, therefore, the entire block, preventing the database error and mitigating the DoS vector.
+The primary mitigation is to **impose an application-level size limit in `Transaction::check()`**. When a node receives a new block from a peer, it *must* validate every transaction in that block using `Transaction::check()` *before* attempting any database writes. This "fail-fast" approach ensures the oversized transaction is rejected during the earliest, least resource-intensive phase of validation, completely mitigating this attack vector.
 
 ---
 
