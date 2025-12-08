@@ -2,7 +2,9 @@
 
 ## Introduction
 
-The transaction `data` field provides flexibility for various transaction types, most notably for smart contract deployment and execution. However, if not properly constrained, this field can be a vector for several security vulnerabilities. This document examines two primary abuses: "Blockchain Bloat" and "Transaction Malleability," based on an analysis of the current codebase.
+The transaction `data` field provides flexibility for various transaction types, most notably for smart contract deployment and execution. In the database, the `transactions` table includes a `data` column to store this information. The column type appears to be a text or blob variant, designed to accommodate sizable inputs, such as the base64-encoded source code for a smart contract.
+
+However, the lack of robust validation on this field creates a vector for several security vulnerabilities. This document examines two primary abuses: "Blockchain Bloat" and "Transaction Malleability," based on an analysis of the current codebase.
 
 ## 1. Blockchain Bloat
 
