@@ -50,16 +50,15 @@ All nodes in the network.
 
 ### Attack Vector
 1.  **Craft Oversized Transaction:** The attacker creates a transaction where the `data` field's size *exceeds* the 64 KB limit of the database's `TEXT` column.
-2.  **Bypass Mempool:** The attacker does not submit this transaction to the mempool, as it would likely be rejected by nodes running `Transaction::check()` (assuming a size limit mitigation is in place).
-3.  **Mine Malicious Block:** The attacker, acting as a miner, directly includes this oversized transaction in a new block they are mining.
-4.  **Broadcast Malicious Block:** The attacker successfully mines the block and broadcasts it to the network.
-5.  **Node Rejection:** When a receiving node attempts to process the block, it will try to insert the oversized transaction into its database.
-6.  **Database Error:** The database will reject the insertion with a "Data too long for column" error, causing the `Transaction::add()` method to throw an exception.
-7.  **Block Rejection:** The exception is caught, and the entire block is rejected as invalid.
-8.  **Wasted Resources:** The attacker has forced the entire network to expend CPU and I/O resources processing an invalid block, achieving a Denial-of-Service. By repeating this process, the attacker can disrupt the network and interfere with consensus.
+2.  **Mine Malicious Block:** The attacker, acting as a miner, directly includes this oversized transaction in a new block they are mining. Because the `Transaction::check()` method lacks a size check, this transaction is considered valid at the application layer.
+3.  **Broadcast Malicious Block:** The attacker successfully mines the block and broadcasts it to the network.
+4.  **Node Rejection:** When a receiving node attempts to process the block, it will try to insert the oversized transaction into its database.
+5.  **Database Error:** The database will reject the insertion with a "Data too long for column" error, causing the `Transaction::add()` method to throw an exception.
+6.  **Block Rejection:** The exception is caught, and the entire block is rejected as invalid.
+7.  **Wasted Resources:** The attacker has forced the entire network to expend CPU and I/O resources processing an invalid block, achieving a Denial-of-Service. By repeating this process, the attacker can disrupt the network and interfere with consensus.
 
 ### Mitigations
-The primary mitigation for this is the same as for the bloat attack: **impose an application-level size limit in `Transaction::check()`**. While a malicious miner can bypass the mempool, an honest miner creating a new block will validate transactions from the mempool using this method. More importantly, when a node receives a new block from a peer, it *must* validate every transaction in that block using the same `Transaction::check()` logic before accepting it. A check here would cause the node to immediately reject the oversized transaction and, therefore, the entire block, preventing the database error and mitigating the DoS vector.
+The primary mitigation for this is to **impose an application-level size limit in `Transaction::check()`**. When a node receives a new block from a peer, it *must* validate every transaction in that block using the same `Transaction::check()` logic before attempting to insert it into the database. A check here would cause the node to immediately reject the oversized transaction and, therefore, the entire block, preventing the database error and mitigating the DoS vector.
 
 ---
 
