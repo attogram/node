@@ -68,31 +68,35 @@ The primary mitigation is to **impose an application-level size limit in `Transa
 A malicious node on the network, particularly a block-producing miner.
 
 ### Target
-Any user submitting a transaction that relies on the integrity of the `data` field.
+Any user submitting a transaction that relies on the integrity of the `data` field for any purpose.
 
 ### Attack Vector
 The fundamental issue is that the `Transaction::getSignatureBase()` method does not include the `data` field when generating the hash for the signature. This allows a malicious intermediary to alter the `data` field of a signed transaction without invalidating the signature. The workflow is as follows:
 
-1.  **Craft Transaction:** A legitimate user creates a transaction that uses the `data` field.
+1.  **Craft Transaction:** A legitimate user creates any type of transaction and includes information in the `data` field (e.g., a memo for a `TX_TYPE_SEND` transaction).
 2.  **Sign and Broadcast:** The user signs the transaction, generating a signature based on the value, fee, destination, message, type, public key, and date. The `data` field is ignored in this process. The transaction is broadcast to the network.
 3.  **Intercept Transaction:** A malicious node receives the transaction before it is mined.
-4.  **Alter Data:** The node modifies the `data` field.
+4.  **Alter Data:** The node modifies the `data` field (e.g., changing the memo).
 5.  **Preserve Signature:** Because the `data` field was never part of the signature base, the original signature remains valid.
-6.  **Include in Block:** A miner (potentially the malicious node) includes the altered transaction in a new block. The network accepts the block because the transaction's signature is still valid.
-
-**Important Note:** This attack vector is **NOT** effective for smart contract deployment (`TX_TYPE_SC_CREATE`). As shown in `include/class/SmartContract.php`, these transactions undergo an additional, application-level check. A signature of the `data` field is required to be in the `msg` field, and this is verified by the `checkCreateSmartContractTransaction()` function. Any alteration to `data` would invalidate this secondary signature, causing the transaction to be rejected.
+6.  **Include in Block:** A miner includes the altered transaction in a new block. The network accepts the block because the transaction's signature is still valid, and the modified `data` is now permanently part of the blockchain record.
 
 ### Vulnerable Transaction Types
-The vulnerability applies to any transaction type that uses the `data` field but does not implement a secondary, application-level signature check like the one for `TX_TYPE_SC_CREATE`. Based on the current codebase, this includes:
+This vulnerability applies in principle to **all transaction types**, as the `data` field is universally available but excluded from the signature base. The only exception is `TX_TYPE_SC_CREATE`.
 
-*   **`TX_TYPE_SC_EXEC`**: For executing smart contract methods.
-*   **`TX_TYPE_SC_SEND`**: For sending funds from a smart contract.
+*   **Mitigated:**
+    *   **`TX_TYPE_SC_CREATE`**: Smart contract deployments are **not** vulnerable. As shown in `include/class/SmartContract.php`, these transactions require a signature of the `data` field to be placed in the `msg` field. The `checkCreateSmartContractTransaction()` function verifies this secondary signature, preventing any tampering.
 
-While these transactions currently use the `msg` field for passing parameters, if they were to use the `data` field for more complex inputs, that data would be malleable.
+*   **Potentially Vulnerable:**
+    *   All other transaction types, including but not limited to:
+        *   `TX_TYPE_SEND`
+        *   `TX_TYPE_BURN`
+        *   `TX_TYPE_MN_CREATE` / `TX_TYPE_MN_REMOVE`
+        *   `TX_TYPE_SC_EXEC` / `TX_TYPE_SC_SEND`
+    *   The risk is theoretical for types that do not currently have a defined use for the `data` field, but the vulnerability exists should they be used. For example, if a `TX_TYPE_SEND` transaction were to use the `data` field for an unencrypted memo or invoice reference, that data could be maliciously altered en route to the blockchain.
 
 ### Mitigations
-1.  **Application-Level Mitigation (Existing):** The most critical use case, smart contract deployment, is already protected. The `checkCreateSmartContractTransaction()` function requires a signature of the `data` field to be present in the `msg` field, effectively binding the contract code to the transaction.
-2.  **Consensus-Level Mitigation (Proposed):** The only robust mitigation for all other transaction types is to include the `data` field in the transaction's signature base. This ensures that the `data` is cryptographically bound to the transaction, and any modification would invalidate the signature.
+1.  **Application-Level Mitigation (Existing for one type):** The most critical use case, smart contract deployment, is already protected by a secondary signature check.
+2.  **Consensus-Level Mitigation (Proposed):** The only robust and universal mitigation is to include the `data` field in the transaction's signature base. This would secure all transaction types.
 
 **CRITICAL NOTE:** This change is **consensus-breaking** and would require a **hard fork** of the blockchain. Modifying the signature base changes the fundamental rules of transaction validity. If this change were deployed, all new transactions would be invalid on old clients, and all old transactions would be invalid on new clients. Any such update must be carefully planned, coordinated across the entire network, and activated at a specific block height.
 
