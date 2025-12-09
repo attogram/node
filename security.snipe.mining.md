@@ -1,6 +1,8 @@
 # Security Analysis: SNIPE Miner Strategy
 
-A SNIPE miner is a malicious actor who attempts to steal a block reward from an honest miner by intentionally causing a 1-block chain reorganization. This is accomplished by "refinding" a block that has already been discovered by the network, but at a slightly lower `elapsed` time. If the SNIPE miner can find and broadcast their version of the block before the honest network finds the *next* block, they can force peer nodes to adopt their block, thereby orphaning the original honest block and stealing the reward.
+A SNIPE miner is a malicious actor who attempts to steal a block reward from an honest miner by intentionally causing a 1-block chain reorganization. The specific strategy is to observe the discovery of a new block, `Block N`, at an `elapsed` time of `X`, and then immediately begin a race to **refind** that same `Block N` at `elapsed = X-1`.
+
+If the SNIPE miner can successfully refind the block at this lower `elapsed` time and propagate it to the network before the honest network finds `Block N+1`, the chain's fork-resolution logic will favor the SNIPE block, causing a reorg and orphaning the original honest block.
 
 This document analyzes the viability of this attack. The analysis concludes that the attack is **impossible** for external miners but **possible** for a malicious node operator who can modify their node's internal mining software.
 
