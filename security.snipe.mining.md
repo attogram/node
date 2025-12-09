@@ -1,14 +1,10 @@
 # Security Analysis: SNIPE Miner Strategy
 
-This document analyzes the viability of a "SNIPE" mining attack, where a malicious actor attempts to steal a block reward by forcing a 1-block chain reorganization. The analysis concludes that the viability of this attack depends entirely on the type of attacker.
+This document analyzes the viability of a "SNIPE" mining attack. The analysis concludes that the attack is **impossible** for external miners but **possible** for a malicious node operator who can modify their node's internal mining software.
 
-## Threat Model: Two Attacker Types
+## The External Miner: Attack Impossible
 
-The ability to execute a SNIPE attack is not universal. It depends on whether the attacker is an **External Miner** using the node's public API or a **Malicious Node Operator** with control over the node's internal mining logic.
-
-### 1. The External Miner: Attack Impossible
-
-An external miner submits their blocks to a node via the `web/mine.php` API. This code path contains a fundamental protection that makes the SNIPE attack impossible.
+An external miner submits blocks to a node via the `web/mine.php` API. This code path contains a fundamental protection that makes the SNIPE attack impossible.
 
 When a block is submitted, it is eventually passed to the `Block->add()` method, which contains this critical check:
 
@@ -20,6 +16,7 @@ if($this->height - $currentHeight != 1) {
     throw new Exception("Block height failed");
 }
 ```
+
 This code asserts that any new block must have a height exactly one greater than the node's current blockchain height.
 
 **Why this prevents the attack:**
@@ -27,36 +24,37 @@ This code asserts that any new block must have a height exactly one greater than
 2.  If the external SNIPE miner then successfully refinds `Block N`, their refound block *also* has `height = N`.
 3.  When they submit this block to the node, the check `($N - $N) != 1` fails, and the block is rejected.
 
-For an external miner, there is no way to circumvent this check. The node they are communicating with will always be aware of the honest chain's height, making it impossible to submit a block for a height that has already been processed.
+**Conclusion:** The external mining API is secure against this attack vector.
 
-### 2. The Malicious Node Operator: Attack Possible
+## The Malicious Node Operator: Attack Possible via `Block::pop`
 
-A malicious node operator who runs their own node and uses the built-in `NodeMiner.php` logic is the only actor who can successfully perform a SNIPE attack.
+A malicious node operator can successfully perform a SNIPE attack by modifying their `NodeMiner.php` script.
 
-This is because they can modify their node's mining logic to create the necessary conditions for the attack. The key exploited code is in `NodeMiner.php`:
+### The Exploit Path
 
-```php
-// include/class/NodeMiner.php -> start() method
+The standard `NodeMiner.php` script stops mining when it detects a new block. A malicious operator would modify this logic to *continue* attempting to refind the block at a lower `elapsed` time.
 
-// ... inside the while (!$blockFound) loop
-if($this->attempt % $mod == 0) {
-    $info = $this->getMiningInfo();
-    if($info!==false) {
-        if($info['block']!= $prev_block_id) {
-            _log("New block received", 3);
-            break; // Honest miner stops and starts on the new block
-        }
+Upon successfully refinding the block, the malicious script executes a two-step process:
+
+1.  **`Block::pop(1);`**
+    The script first calls the `Block::pop(1)` function. This function deletes the most recent block from the node's local blockchain. In this case, it removes the honest `Block N` that the node had previously accepted. This action instantly reverts the node's local height back to `N-1`.
+
+    ```php
+    // include/class/Block.php -> pop() method
+    public static function pop($no = 1)
+    {
+        $current = Block::current();
+        return Block::delete($current['height'] - $no + 1);
     }
-}
-```
+    ```
 
-**How the attack is executed:**
-1.  **Modify the Miner:** The malicious node operator modifies the code above, commenting out or disabling the `break` statement. This prevents their internal miner from stopping when it learns of a new honest block.
-2.  **The Race:** When an honest `Block N` is found, the malicious node's `NodeMiner` ignores it and continues its attempt to refind `Block N` at a lower `elapsed` time.
-3.  **Local Block Acceptance:** Because the node's *miner* is ignoring the new block, the node's *own blockchain height* remains at `N-1`. When the malicious miner successfully refinds `Block N`, their own `Block->add()` method is called. The height check `($N - (N-1)) != 1` passes, and the SNIPE block is accepted into the local chain.
-4.  **Propagation and Reorganization:** The malicious node, now believing its SNIPE block is the valid `Block N`, propagates it to its peers. The peers, seeing a block with the same height but a lower `elapsed` time, are forced into a 1-block reorganization as described in the `PeerRequest.php` logic.
+2.  **`$block->add();`**
+    Immediately after popping the honest block, the script calls `$block->add()` to submit its own refound `Block N`. The `add()` method's height check now passes (`($N - (N-1)) == 1`), and the SNIPE block is successfully added to the node's local chain.
 
-**Conclusion:** The SNIPE attack is not a vulnerability in the external mining API, but rather an exploit possible only by a malicious node operator who can alter their own mining software.
+3.  **`Propagate::blockToAll("current");`**
+    After successfully adding the block, the malicious `NodeMiner` script calls `Propagate::blockToAll("current")`. This broadcasts the SNIPE block to all of the node's peers. The peers, seeing a block with the same height as the one they have but with a lower `elapsed` time, are forced into a 1-block reorganization, thus completing the attack.
+
+**Conclusion:** The SNIPE attack is a viable threat, but it can only be executed by a malicious node operator with the ability to modify their own node's source code.
 
 ## Effectiveness of SNIPE Mining (by a Malicious Node Operator)
 
@@ -82,12 +80,12 @@ Let's analyze the hashrate (`α`) required to achieve a 50% chance of success fo
     *   To have a 50% chance of success, a SNIPE miner needs `α ≈ 50.4%` of the network hashrate.
 
 *   **Honest block found at `X=10` (very quickly):**
-    *   To have a 50% chance of success, a SNIPE miner needs `α ≈ 87%` of the network hashrate. The extreme difficulty of refinding a block with such a low `elapsed` time makes the attack nearly impossible without an overwhelming hashrate advantage.
+    *   To have a 50% chance of success, a SNIPE miner needs `α ≈ 87%` of the network hashrate. The extreme difficulty of refinding a block with such a low `elapsed` time makes the attack extremely difficult without an overwhelming hashrate advantage.
 
 *   **Honest block found at `X=120` (very slowly):**
     *   To have a 50% chance of success, a SNIPE miner only needs `α ≈ 33.5%` of the network hashrate.
 
-**Conclusion:** The attack is most viable when an honest block is found after a long delay, as this makes the refinding task only marginally harder for the SNIPE miner. The attack is nearly impossible when a block is found quickly.
+**Conclusion:** The attack is most viable when an honest block is found after a long delay, as this makes the refinding task only marginally harder for the SNIPE miner. Conversely, the attack becomes significantly more difficult when a block is found quickly, as this increases the relative difficulty of the refinding task.
 
 ## Possible Defenses
 
