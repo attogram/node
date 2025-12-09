@@ -68,31 +68,49 @@ The primary mitigation is to **impose an application-level size limit in `Transa
 A malicious node on the network, particularly a block-producing miner.
 
 ### Target
-Any user submitting a transaction that relies on the integrity of the `data` field, such as a smart contract deployment.
+Any user submitting a transaction that relies on the integrity of the `data` field.
 
-### Attack Vector
-1.  **Craft Transaction:** A legitimate user creates a transaction to deploy a smart contract. The contract's source code is placed in the `data` field. The transaction is signed and broadcast.
-2.  **Intercept Transaction:** A malicious node receives the transaction and holds it in its mempool.
-3.  **Alter Data:** The node modifies the `data` field, replacing the legitimate contract code with malicious code.
-4.  **Preserve Signature:** The `Transaction::getSignatureBase()` method does not include the `data` field when generating the hash for the signature. Because of this, the original signature remains valid even though the `data` has been altered. The transaction ID also remains unchanged.
-5.  **Include in Block:** The malicious node, acting as a miner, includes the altered transaction in a block it successfully mines.
-6.  **Deploy Malicious Contract:** The network accepts the block, and the malicious contract is deployed instead of the user's intended contract. The user is deceived because the transaction ID matches their original submission.
-
-### Mitigations
-The only robust mitigation is to include the `data` field in the transaction's signature base. This ensures that the `data` is cryptographically bound to the transaction, and any modification would invalidate the signature.
-
-**CRITICAL NOTE:** This change is **consensus-breaking** and would require a **hard fork** of the blockchain. Modifying the signature base changes the fundamental rules of transaction validity. If this change were deployed, all new transactions would be invalid on old clients, and all old transactions would be invalid on new clients. Any such update must be carefully planned, coordinated across the entire network, and activated at a specific block height.
-
-The `getSignatureBase()` method in `include/class/Transaction.php` should be updated as follows:
+### Description
+Transaction malleability is an attack where a malicious actor can alter the contents of a transaction without invalidating its signature. In this system, the `getSignatureBase()` method in `include/class/Transaction.php` generates the data that is signed. Crucially, this method does not include the `data` field in the signature base.
 
 ```php
+// include/class/Transaction.php
 public function getSignatureBase() {
     // ...
-    $parts[]=$this->data; // Add the data field to the signature base
+    // The $this->data field is NOT included in the $parts array.
     $base = implode("-", $parts);
     return $base;
 }
 ```
+
+This means that for a standard transaction, an intermediary node could theoretically modify the `data` field after it has been signed by the user, and the core signature would remain valid.
+
+### Mitigation for Smart Contract Deployments
+The most critical use case for the `data` field is the deployment of smart contracts (`TX_TYPE_SC_CREATE`). For this specific transaction type, an effective, application-level mitigation is in place.
+
+The `SmartContract::checkCreateSmartContractTransaction()` method in `include/class/SmartContract.php` performs a secondary signature check. When a smart contract is created, a signature of the `data` field's content is placed into the `msg` field of the transaction. The `checkCreateSmartContractTransaction` method then verifies this signature against the sender's public key.
+
+```php
+// include/class/SmartContract.php
+public static function checkCreateSmartContractTransaction(...)
+{
+    // ...
+    $data_encoded = $transaction->data;
+    $sc_signature = $transaction->msg;
+    $res = ec_verify($data_encoded, $sc_signature, $transaction->publicKey);
+    if(!$res) {
+        throw new Exception("Invalid signature for smart contract");
+    }
+    // ...
+}
+```
+
+Because of this check, any attempt to alter the `data` field of a smart contract deployment transaction would cause the `ec_verify()` check to fail, invalidating the transaction. This effectively prevents the malleability attack for smart contracts.
+
+### Remaining Risk
+While the primary vector for this attack is secured, the underlying issue in `Transaction::getSignatureBase()` still exists. If any other current or future transaction type were to use the `data` field without implementing a similar secondary signature check, it would be vulnerable to this malleability attack.
+
+The most robust, consensus-level fix would be to include the `data` field in the signature base. However, this is a **consensus-breaking** change that would require a hard fork.
 
 ---
 
