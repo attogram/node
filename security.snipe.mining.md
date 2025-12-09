@@ -1,10 +1,12 @@
 # Security Analysis: SNIPE Miner Strategy
 
-This document analyzes the viability of a "SNIPE" mining attack. The analysis concludes that the attack is **impossible** for external miners but **possible** for a malicious node operator who can modify their node's internal mining software.
+A SNIPE miner is a malicious actor who attempts to steal a block reward from an honest miner by intentionally causing a 1-block chain reorganization. This is accomplished by "refinding" a block that has already been discovered by the network, but at a slightly lower `elapsed` time. If the SNIPE miner can find and broadcast their version of the block before the honest network finds the *next* block, they can force peer nodes to adopt their block, thereby orphaning the original honest block and stealing the reward.
 
-## The External Miner: Attack Impossible
+This document analyzes the viability of this attack. The analysis concludes that the attack is **impossible** for external miners but **possible** for a malicious node operator who can modify their node's internal mining software.
 
-An external miner submits blocks to a node via the `web/mine.php` API. This code path contains a fundamental protection that makes the SNIPE attack impossible.
+## The Miner-to-Node Path: Attack Impossible
+
+An external miner submits their blocks to a node via the `web/mine.php` API. This code path contains a fundamental protection that makes the SNIPE attack impossible.
 
 When a block is submitted, it is eventually passed to the `Block->add()` method, which contains this critical check:
 
@@ -26,35 +28,30 @@ This code asserts that any new block must have a height exactly one greater than
 
 **Conclusion:** The external mining API is secure against this attack vector.
 
-## The Malicious Node Operator: Attack Possible via `Block::pop`
+## The Node-to-Peer Path: Attack Possible
 
-A malicious node operator can successfully perform a SNIPE attack by modifying their `NodeMiner.php` script.
+The SNIPE attack becomes possible when a malicious block is propagated between peer nodes. A malicious node operator can create the conditions for this attack by modifying their `NodeMiner.php` script to continue mining a block even after it has been found by the network.
 
-### The Exploit Path
+When the malicious node successfully refinds the block with a lower `elapsed` time, it propagates it to its peers. The peer, upon receiving this block, executes the fork-resolution logic in `include/class/PeerRequest.php`:
 
-The standard `NodeMiner.php` script stops mining when it detects a new block. A malicious operator would modify this logic to *continue* attempting to refind the block at a lower `elapsed` time.
+```php
+// include/class/PeerRequest.php -> submitBlock() method
 
-Upon successfully refinding the block, the malicious script executes a two-step process:
+if ($current['height'] == $data['height'] && $current['id'] != $data['id']) {
+    // ...
+    // The following line is the core of the vulnerability.
+    // It prioritizes the block with the lower elapsed time.
+    $accept_new = $data['elapsed'] < $ourblock['elapsed'];
 
-1.  **`Block::pop(1);`**
-    The script first calls the `Block::pop(1)` function. This function deletes the most recent block from the node's local blockchain. In this case, it removes the honest `Block N` that the node had previously accepted. This action instantly reverts the node's local height back to `N-1`.
-
-    ```php
-    // include/class/Block.php -> pop() method
-    public static function pop($no = 1)
-    {
-        $current = Block::current();
-        return Block::delete($current['height'] - $no + 1);
+    if ($accept_new) {
+        // Executes a microsync to replace the honest block with the SNIPE block.
+        system(  "php $dir/microsync.php '$ip'  > /dev/null 2>&1  &");
+        // ...
     }
-    ```
+}
+```
 
-2.  **`$block->add();`**
-    Immediately after popping the honest block, the script calls `$block->add()` to submit its own refound `Block N`. The `add()` method's height check now passes (`($N - (N-1)) == 1`), and the SNIPE block is successfully added to the node's local chain.
-
-3.  **`Propagate::blockToAll("current");`**
-    After successfully adding the block, the malicious `NodeMiner` script calls `Propagate::blockToAll("current")`. This broadcasts the SNIPE block to all of the node's peers. The peers, seeing a block with the same height as the one they have but with a lower `elapsed` time, are forced into a 1-block reorganization, thus completing the attack.
-
-**Conclusion:** The SNIPE attack is a viable threat, but it can only be executed by a malicious node operator with the ability to modify their own node's source code.
+This code path is the true vulnerability. It allows a block with a lower `elapsed` time to be accepted over an existing block at the same height, forcing a 1-block reorganization via the `microsync.php` script. This orphans the honest block and awards the block reward to the SNIPE miner.
 
 ## Effectiveness of SNIPE Mining (by a Malicious Node Operator)
 
