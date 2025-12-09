@@ -1,83 +1,82 @@
 # Security Analysis: SNIPE Miner Strategy
 
-A SNIPE miner is a malicious actor who attempts to steal a block reward from an honest miner by intentionally causing a 1-block chain reorganization. This strategy exploits the core mining mechanics of the PHPCoin blockchain, specifically how the `elapsed` time between blocks influences mining difficulty.
+A SNIPE miner is a malicious actor who exploits the blockchain's fork-resolution mechanism to steal a block reward from an honest miner. This is accomplished by intentionally forcing a 1-block chain reorganization.
 
 ## The Attack Explained
 
-The SNIPE attack unfolds as a race between the SNIPE miner and the rest of the honest network. Here is the step-by-step process:
+1.  **Block Discovery:** An honest miner finds a new block, `Block N`, at an `elapsed` time of `X` seconds and broadcasts it to the network.
 
-1.  **Block Discovery:** An honest miner successfully finds a new block, let's call it `Block N`, at a certain `elapsed` time (the number of seconds since the previous block). Let's say this time is `X` seconds. The honest miner broadcasts this block to the network.
+2.  **SNIPE Miner Action:** A SNIPE miner, upon seeing `Block N`, ignores it and continues to mine for their own version of `Block N` at a lower `elapsed` time (e.g., `X-1`). This is computationally more difficult but can be achieved with sufficient hashing power.
 
-2.  **Honest Network Behavior:** Upon receiving `Block N`, the other honest miners on the network verify it and immediately begin mining the next block, `Block N+1`, using `Block N` as the new starting point.
+3.  **The Race:** The SNIPE miner must find their block before the honest network finds `Block N+1`.
 
-3.  **SNIPE Miner Behavior:** The SNIPE miner, however, does something different. When it sees the newly discovered `Block N`, it *continues* to mine for its *own* version of `Block N`. It is essentially trying to "re-find" the same block but at a lower `elapsed` time.
-
-4.  **The Race:** The SNIPE miner is now in a direct race. It must find its own valid version of `Block N` *before* the entire honest network can find `Block N+1`.
-
-5.  **Winning the Race:** If the SNIPE miner is successful, it immediately broadcasts its version of `Block N`. Nodes on the network will now have two competing, valid blocks at the same height.
-
-6.  **Forcing a Reorganization:** According to the chain's consensus rules, when two valid blocks at the same height are presented, the block with the **lowest `elapsed` time** is chosen as the winner. The SNIPE miner's goal is to find a block with an `elapsed` time of `X-1` or lower. If it does, its block will be accepted, forcing a 1-block reorganization and stealing the reward from the original, honest miner.
+4.  **Forcing a Reorganization:** If the SNIPE miner is successful, they broadcast their version of `Block N`. When a node receives this new block, it triggers the chain's reorganization logic.
 
 ## Code Exploitation
 
-The viability of the SNIPE attack hinges on the `calculateTarget` function within the `include/class/Block.php` file.
+The core of the SNIPE attack is the fork-resolution logic found in `include/class/PeerRequest.php`. When a node receives a block that has the same height as its current block, but a different ID, it executes the following code:
 
 ```php
-// include/class/Block.php
+// include/class/PeerRequest.php -> submitBlock() method
 
-function calculateTarget($elapsed) {
-    global $_config;
-    if($elapsed == 0) {
-        return 0;
-    }
-    $target = gmp_div(gmp_mul($this->difficulty , BLOCK_TIME), $elapsed);
-    // ...
-    return $target;
-}
-```
+if ($current['height'] == $data['height'] && $current['id'] != $data['id']) {
+    $accept_new = false;
+    _log("submitBlock:: DIFFERENT FORKS SAME HEIGHT", 3);
 
-This function directly ties the mining `target` to the `$elapsed` time. The `target` is what a miner's `hit` must exceed to mine a valid block. The formula shows that the `target` is inversely proportional to the `elapsed` time.
+    // ... block comparison logic ...
 
--   A **larger** `$elapsed` time (more seconds since the last block) results in a **lower** `target`, making the block easier to mine.
--   A **smaller** `$elapsed` time results in a **higher** `target`, making the block significantly harder to mine.
-
-A SNIPE miner exploits this by continuing to work on Block `N`. If an honest miner finds Block `N` at `elapsed=60`, the SNIPE miner might try to find it at `elapsed=59`. While this is computationally much harder (a higher target), if the SNIPE miner has enough hashing power, it can potentially succeed before the honest network finds Block `N+1` (which would take approximately another 60 seconds).
-
-The mining loop itself, found in `include/class/NodeMiner.php`, facilitates this process. The miner continuously checks for new blocks from the network, but a malicious miner can simply modify this logic to ignore new blocks for a short period while they attempt the SNIPE.
-
-```php
-// include/class/NodeMiner.php -> start() method
-
-// ... inside the while (!$blockFound) loop
-if($this->attempt % $mod == 0) {
-    $info = $this->getMiningInfo();
-    if($info!==false) {
-        _log("Checking new block from server ".$info['block']. " with our block $prev_block_id", 4);
-        if($info['block']!= $prev_block_id) {
-            _log("New block received", 3);
-            $this->miningStat['dropped']++;
-            break; // Honest miner stops and starts on the new block
+    if($data['elapsed']==$ourblock['elapsed']) {
+        if($data['date']==$ourblock['date']) {
+            $accept_new = strcmp($data['id'], $ourblock['id']);
+        } else {
+            $accept_new = $data['date'] < $ourblock['date'];
         }
+    } else {
+        $accept_new = $data['elapsed'] < $ourblock['elapsed'];
+    }
+
+    if ($accept_new) {
+        // if the new block is accepted, run a microsync to sync it
+        _log('submitBlock: ['.$ip."] Starting microsync - $data[height]",1);
+        $ip=escapeshellarg($ip);
+        $dir = ROOT."/cli";
+        system(  "php $dir/microsync.php '$ip'  > /dev/null 2>&1  &");
+        api_echo("microsync");
     }
 }
 ```
 
-A SNIPE miner would alter or disable this check, allowing it to continue mining its own version of the block, creating the race condition that enables the attack.
+This code explicitly gives preference to the block with the lower `elapsed` time. If the SNIPE miner's block has a smaller `elapsed` time, the `$accept_new` flag is set to `true`, and the `microsync.php` script is executed.
 
-## Possible Defenses
+The `microsync.php` script then carries out the reorganization:
 
-Mitigating the SNIPE attack requires changes to the consensus rules to disincentivize the withholding of blocks. Here are a few potential defense strategies:
+```php
+// cli/microsync.php
 
-### 1. Timestamp-Based Fork Resolution
+// ...
+// delete the last block
+Block::pop(1);
 
-Instead of relying on the `elapsed` time, the fork resolution logic could be modified to favor the block that was seen *first*. This would involve nodes keeping a record of when they first received a block and using that timestamp as the primary tie-breaker. This would neutralize the SNIPE attack, as the honestly-mined block would almost always be seen first.
+// add the new block
+// ...
+$res = $block->add($err);
+// ...
+```
 
-### 2. "Publish or Perish" Strategy
+This script removes the honest miner's block from the chain and replaces it with the SNIPE miner's block, effectively stealing the block reward.
 
-This strategy, proposed for Bitcoin, would require a block to be published within a certain time frame after it's mined. If a miner withholds a block for too long, it would be considered invalid. This would make it much more difficult for a SNIPE miner to withhold their block while waiting for the perfect moment to release it.
+## Possible Defenses (Non-Disruptive)
 
-### 3. Dynamic Difficulty Adjustment
+Given the constraint that the mining algorithm cannot be changed, the following defenses could be implemented as a soft fork:
 
-A more complex defense would be to dynamically adjust the mining difficulty when a fork is detected. If two blocks are found at the same height, the difficulty for the next block could be temporarily increased. This would make it more computationally expensive to continue the attack, thus discouraging SNIPE miners.
+### 1. Increase Confirmation Time
 
-Implementing any of these defenses would require a hard fork of the blockchain, as they represent a fundamental change to the consensus rules.
+The most straightforward defense is to increase the number of confirmations required before a block is considered final. While this does not prevent the SNIPE attack itself, it mitigates its impact. If, for example, a transaction is not considered final until it has 6 confirmations, a 1-block reorganization would be less likely to cause significant damage.
+
+### 2. "First Seen" Rule
+
+The fork-resolution logic in `PeerRequest.php` could be modified to prioritize the block that was *seen first*. This would involve nodes keeping a record of when they first received a block and using that timestamp as the primary tie-breaker in the event of a fork. This would neutralize the SNIPE attack, as the honestly-mined block would almost always be seen first.
+
+### 3. Penalize Block Withholding
+
+A more complex defense would be to introduce a penalty for broadcasting a block with a significantly lower `elapsed` time than the current block. This would disincentivize SNIPE miners by making their attack less profitable. This could be implemented by adding a check in the `submitBlock` method that rejects blocks with an `elapsed` time that is too far below the expected value.
