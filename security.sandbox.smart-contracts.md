@@ -157,3 +157,75 @@ The smart contract sandboxing mechanism in PHPCoin is fundamentally broken and i
 *   Because the contract code is public and the vulnerability is network-wide, a single malicious contract can be used to compromise **every node** that executes it.
 
 The security model is not merely flawed; it is entirely ineffective. It is strongly recommended to **immediately halt all smart contract execution** until a complete architectural overhaul is implemented, replacing the blacklist-based sandbox with a robust, containerized environment and removing all opportunities for arbitrary code execution.
+
+### Proposed whitelister
+
+```
+<?php
+
+// include/security/SyntacticWhitelistLinter.php
+
+class SyntacticWhitelistLinter
+{
+    // FACT 1: This is the explicit, complete list of ALLOWED functions.
+    // If a function's name is not in this array, the linter will flag it as a violation.
+    private const ALLOWED_FUNCTIONS = [
+        'strlen', 'strpos', 'substr', 'trim', 'explode', 'implode',
+        'count', 'array_merge', 'array_keys', 'is_null', 'is_int', 'isset',
+        'self::getState', 'self::setState', 'self::getTxValue', 'self::emitEvent',
+    ];
+
+    // FACT 2: This is the explicit, complete list of ALLOWED language constructs.
+    // These are identified by their PHP token constants.
+    // If a token ID (e.g., T_EVAL) is not in this array, the linter will flag it as a violation.
+    private const ALLOWED_CONSTRUCTS = [
+        T_ECHO, T_PRINT, T_IF, T_ELSE, T_FOR, T_FOREACH, T_WHILE, T_DO,
+        T_RETURN, T_BREAK, T_CONTINUE, T_SWITCH, T_CASE, T_CLASS, T_FUNCTION,
+        T_NEW, T_INSTANCEOF, T_TRY, T_CATCH, T_THROW,
+        T_ISSET, T_EMPTY, T_UNSET, T_LIST, T_ARRAY, T_STRING_CAST, T_BOOL_CAST,
+    ];
+
+    // FACT 3: This is the explicit, complete list of ALLOWED operators.
+    // If an operator character is not in this array, the linter will flag it.
+    private const ALLOWED_OPERATORS = [
+        '=', '=>', '->', '::', ';', ',', '.', '[', ']', '{', '}', '(', ')',
+        '+', '-', '*', '/', '%', '&&', '||', '!', '++', '--',
+        '==', '===', '!=', '!==', '>', '<', '>=', '<=', '.=', '+=', '-=', '*=', '/=', '%='
+    ];
+
+    // FACT 4: This function analyzes a file and returns a list of all violations found.
+    public static function analyze(string $filePath): array
+    {
+        $violations = [];
+        $sourceCode = file_get_contents($filePath);
+        $tokens = token_get_all($sourceCode);
+
+        foreach ($tokens as $token) {
+            if (is_array($token)) {
+                $tokenType = $token[0];
+                // Check functions
+                if ($tokenType === T_STRING) {
+                    $functionName = $token[1];
+                    $nextToken = next($tokens);
+                    if ($nextToken === '(') {
+                        if (!in_array($functionName, self::ALLOWED_FUNCTIONS, true)) {
+                            $violations[] = ['line' => $token[2], 'type' => 'function', 'element' => $functionName];
+                        }
+                    }
+                // Check constructs
+                } elseif (!in_array($tokenType, self::ALLOWED_CONSTRUCTS, true) && !in_array($tokenType, [T_WHITESPACE, T_COMMENT, T_OPEN_TAG, T_CLOSE_TAG])) {
+                    $violations[] = ['line' => $token[2], 'type' => 'construct', 'element' => token_name($tokenType)];
+                }
+            } else { // Check operators
+                $operator = $token;
+                if ($operator === '`') {
+                    $violations[] = ['type' => 'operator', 'element' => 'backtick'];
+                } elseif (!in_array($operator, self::ALLOWED_OPERATORS, true)) {
+                    $violations[] = ['type' => 'operator', 'element' => $operator];
+                }
+            }
+        }
+        return $violations;
+    }
+}
+```
