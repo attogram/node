@@ -64,3 +64,15 @@ The `SCUtil::executeView` function in `utils/scutil.php` provides a convenient w
 The `Api::getSmartContractView` function calls the `SmartContractEngine::view` function, which is responsible for executing the view method.
 
 The `SmartContractEngine` loads the contract's code and its current state from the blockchain, then executes the specified view method with the provided parameters. Since this is a read-only operation, no state changes are written back to the blockchain. The result of the view method is then returned to the client.
+
+## Web Explorer Interaction
+
+In addition to the command-line tools, the PHPCoin node includes a web-based explorer that can be used to interact with smart contracts. The explorer is located at `web/apps/explorer/` and the main file for smart contract interaction is `smart_contract.php`.
+
+The web explorer provides a user interface for:
+
+*   Viewing a smart contract's code, state, and metadata.
+*   Executing `@SmartContractView` methods.
+*   Generating and sending `@SmartContractTransact` transactions.
+
+The `smart_contract.php` script uses the same underlying `SmartContractEngine` and `Api` classes as the command-line tools to interact with the blockchain. It provides a user-friendly way to test and debug smart contracts without having to write custom scripts.
