@@ -30,7 +30,7 @@ The security features of this sandbox include:
     *   `show_source`
     *   `set_time_limit`
     *   `ini_set`
-*   **`open_basedir`**: This option is critical for limiting file system access. The sandbox restricts the Dapp to a specific set of paths constructed in [`include/class/Dapps.php`](include/class/Dapps.php). The exact allowed paths are:
+*   **`open_basedir`**: This option is critical for limiting file system access. The sandbox restricts the Dapp to a specific set of paths. The array of allowed paths is constructed in [`include/class/Dapps.php#L397-L417`](include/class/Dapps.php#L397-L417) and then passed to the `php` command at [`line 421`](include/class/Dapps.php#L421). The exact allowed paths are:
     *   The Dapp's root directory: `/dapps/{dapps_id}`
     *   A temporary Dapp directory: `/tmp/dapps`
     *   A temporary sessions directory: `/tmp/sessions`

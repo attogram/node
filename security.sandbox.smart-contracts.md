@@ -44,7 +44,7 @@ The security features of this sandbox include:
     *   `gettimeofday`
     *   `usleep`
     *   `getrandmax`
-*   **`open_basedir`**: This option is critical for limiting file system access. The sandbox restricts the smart contract to a specific set of paths constructed in [`include/class/SmartContractEngine.php`](include/class/SmartContractEngine.php). The exact allowed paths are:
+*   **`open_basedir`**: This option is critical for limiting file system access. The sandbox restricts the smart contract to a specific set of paths. The array of allowed paths is constructed in [`include/class/SmartContractEngine.php#L191-L208`](include/class/SmartContractEngine.php#L191-L208) and then passed to the `php` command at [`line 228`](include/class/SmartContractEngine.php#L228). The exact allowed paths are:
     *   The smart contract temporary run folder: `/tmp/sc`
     *   The entire smart contract class directory: `/include/class/sc/`
     *   Specific framework files required for operation, such as:
