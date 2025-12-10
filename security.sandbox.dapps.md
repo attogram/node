@@ -17,7 +17,19 @@ $cmd = "php $debug -d disable_functions=exec,passthru,shell_exec,system,proc_ope
 
 The security features of this sandbox include:
 
-*   **`disable_functions`**: This option disables a list of potentially dangerous PHP functions that could be used to execute shell commands, read or modify system files, or establish network connections. The disabled functions are: `exec`, `passthru`, `shell_exec`, `system`, `proc_open`, `popen`, `curl_exec`, `curl_multi_exec`, `parse_ini_file`, `show_source`, `set_time_limit`, `ini_set`.
+*   **`disable_functions`**: This option disables a list of potentially dangerous PHP functions. The following functions are disabled:
+    *   `exec`
+    *   `passthru`
+    *   `shell_exec`
+    *   `system`
+    *   `proc_open`
+    *   `popen`
+    *   `curl_exec`
+    *   `curl_multi_exec`
+    *   `parse_ini_file`
+    *   `show_source`
+    *   `set_time_limit`
+    *   `ini_set`
 *   **`open_basedir`**: This option restricts the file system access of the dapp to a specific set of directories. The allowed directories are the dapp's own directory, a temporary directory, and a list of allowed files.
 *   **Resource Limits**: The sandbox also imposes limits on the execution time (`max_execution_time=5`) and memory usage (`memory_limit=128M`) of the dapp.
 

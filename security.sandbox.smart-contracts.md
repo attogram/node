@@ -17,7 +17,34 @@ $exec_cmd.= " -f $cmd ";
 
 The security features of this sandbox include:
 
-*   **`disable_functions`**: This option disables a list of potentially dangerous PHP functions. The list of disabled functions is retrieved from the `get_sc_disable_functions` function in [`include/common.functions.php`](include/common.functions.php), and includes: `exec`, `passthru`, `shell_exec`, `system`, `proc_open`, `popen`, `curl_exec`, `curl_multi_exec`, `parse_ini_file`, `show_source`, `ini_set`, `getenv`, `sleep`, `set_time_limit`, `error_reporting`, `rand`, `shuffle`, `array_rand`, `mt_rand`, `uniqid`, `date`, `time`, `microtime`, `gettimeofday`, `sleep`, `usleep`, `getrandmax`.
+*   **`disable_functions`**: This option disables a list of potentially dangerous PHP functions. The list of disabled functions is retrieved from the `get_sc_disable_functions` function in [`include/common.functions.php`](include/common.functions.php). The following functions are disabled:
+    *   `exec`
+    *   `passthru`
+    *   `shell_exec`
+    *   `system`
+    *   `proc_open`
+    *   `popen`
+    *   `curl_exec`
+    *   `curl_multi_exec`
+    *   `parse_ini_file`
+    *   `show_source`
+    *   `ini_set`
+    *   `getenv`
+    *   `sleep`
+    *   `set_time_limit`
+    *   `error_reporting`
+    *   `rand`
+    *   `shuffle`
+    *   `array_rand`
+    *   `mt_rand`
+    *   `uniqid`
+    *   `date`
+    *   `time`
+    *   `microtime`
+    *   `gettimeofday`
+    *   `sleep`
+    *   `usleep`
+    *   `getrandmax`
 *   **`open_basedir`**: This option restricts the file system access of the smart contract to a specific set of directories. The allowed directories are a temporary directory and a list of allowed files.
 *   **Resource Limits**: The sandbox also imposes limits on the execution time (`max_execution_time`) and memory usage (`memory_limit`) of the smart contract.
 
