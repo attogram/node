@@ -42,10 +42,17 @@ The security features of this sandbox include:
     *   `time`
     *   `microtime`
     *   `gettimeofday`
-    *   `sleep`
     *   `usleep`
     *   `getrandmax`
-*   **`open_basedir`**: This option restricts the file system access of the smart contract to a specific set of directories. The allowed directories are a temporary directory and a list of allowed files.
+*   **`open_basedir`**: This option is critical for limiting file system access. The sandbox restricts the smart contract to a specific set of paths constructed in [`include/class/SmartContractEngine.php`](include/class/SmartContractEngine.php). The exact allowed paths are:
+    *   The smart contract temporary run folder: `/tmp/sc`
+    *   The entire smart contract class directory: `/include/class/sc/`
+    *   Specific framework files required for operation, such as:
+        *   `/chain_id`
+        *   `/include/sc.inc.php`
+        *   `/include/db.inc.php`
+        *   `/include/common.functions.php`
+        *   (conditional) `/include/coinspec.{chain_id}.inc.php`
 *   **Resource Limits**: The sandbox also imposes limits on the execution time (`max_execution_time`) and memory usage (`memory_limit`) of the smart contract.
 
 ## 2. SQL Injection Vulnerability
@@ -94,8 +101,54 @@ $this->query($this->address, "; UPDATE accounts SET balance = 1000000 WHERE id =
 
 This would cause the `query` method to execute the malicious `UPDATE` statement, giving the attacker control over the node's database.
 
-## 3. Conclusion
+## 3. Advanced Sandbox Bypass Techniques
 
-The smart contract sandboxing mechanism in PHPCoin provides a reasonable level of protection against a variety of attacks. However, the SQL injection vulnerability in the `SmartContractBase::query` method is a critical flaw that completely undermines the security of the sandbox.
+While the `disable_functions` directive is more comprehensive for smart contracts than for dapps, it is not foolproof. The backtick operator (`` ` ``) is also disabled as an alias for `shell_exec`. However, several bypass vectors remain.
 
-It is strongly recommended to remove the `query` method or to refactor it to use a safe, parameterized query system that does not allow for the execution of arbitrary SQL.
+### 3.1. Indirect Execution via Callback Functions
+
+**Severity:** High
+
+**Analysis:**
+The `disable_functions` list for smart contracts does not include callback functions like `call_user_func()` or `call_user_func_array()`. These functions can be used to call other functions by their string name, which can allow an attacker to invoke a disabled function indirectly.
+
+**Example Payload:**
+```php
+// The smart contract code contains this:
+call_user_func('shell_exec', 'ls -la /');
+```
+This represents a significant vector for sandbox escape, as `call_user_func` acts as a proxy to execute the disabled `shell_exec` function.
+
+### 3.2. File Manipulation
+
+**Severity:** Medium
+
+**Analysis:**
+Standard file I/O functions such as `file_put_contents()`, `fopen()`, or `fwrite()` are not disabled. This could allow a smart contract to write files to the filesystem.
+
+**Mitigation and Limitations:**
+This attack is heavily mitigated by the `open_basedir` configuration. A smart contract can only write to the `/tmp/sc` directory. Unlike the Dapp environment, there is no direct web-accessible path to execute a PHP file written here, which makes a traditional "web shell" attack unlikely. However, the ability to write files could still be used to exhaust disk space or interfere with the operation of other smart contracts.
+
+### 3.3. Other Execution Vectors
+
+**Severity:** Medium
+
+**Analysis:**
+Several other functions that can lead to code or command execution are not included in the `disable_functions` list:
+
+*   **`pcntl_exec()`**: Can be used to replace the current PHP process with another program.
+*   **`dl()`**: Allows for loading arbitrary PHP extensions. This is a severe risk, mitigated only by the `open_basedir` restriction preventing the contract from accessing an uploaded extension file.
+*   **`assert()`**: In certain configurations, `assert()` can be used for code execution.
+
+### 3.4. Server-Side Request Forgery (SSRF)
+
+**Severity:** Medium
+
+**Analysis:**
+While `curl_exec` is disabled, functions like `file_get_contents()` and `fsockopen()` are not. A smart contract could use these functions to make outbound network requests from the node, allowing an attacker to probe the node's internal network, access internal services, or exfiltrate data. The `open_basedir` setting does not prevent these outbound network requests.
+
+## 4. Conclusion
+
+The smart contract sandboxing mechanism in PHPCoin is more restrictive than the Dapp sandbox, but it is still critically flawed. The SQL injection vulnerability in the `SmartContractBase::query` method allows for a complete compromise of the node's database. Furthermore, the sandbox is vulnerable to several advanced bypass techniques that can undermine the `disable_functions` protection.
+
+It is strongly recommended to remove the vulnerable `query` method and to implement a more robust security model that does not rely solely on a blacklist of disabled functions.
