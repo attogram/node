@@ -103,7 +103,7 @@ This would cause the `query` method to execute the malicious `UPDATE` statement,
 
 ## 3. Advanced Sandbox Bypass Techniques
 
-While the `disable_functions` directive is more comprehensive for smart contracts than for dapps, it is not foolproof. The backtick operator (`` ` ``) is also disabled as an alias for `shell_exec`. However, several bypass vectors remain.
+While the `disable_functions` directive is more comprehensive for smart contracts than for dapps, it is not foolproof. The backtick operator (`` ` ``) is also disabled as an alias for `shell_exec`. However, as with other disabled functions, this can be trivially bypassed through the indirect execution techniques described below, rendering the blacklist ineffective. Several bypass vectors remain.
 
 ### 3.1. Indirect Execution via Callback Functions
 
@@ -129,7 +129,72 @@ Standard file I/O functions such as `file_put_contents()`, `fopen()`, or `fwrite
 **Mitigation and Limitations:**
 This attack is heavily mitigated by the `open_basedir` configuration. A smart contract can only write to the `{ROOT}/tmp/sc` directory. Unlike the Dapp environment, there is no direct web-accessible path to execute a PHP file written here, which makes a traditional "web shell" attack unlikely. However, the ability to write files could still be used for a Denial-of-Service attack. For example, a malicious contract could continuously write small files to `/tmp/sc` with unpredictable names. This could fill the `/tmp` partition, causing the node's database, log files, or other critical system processes to fail. This attack is also a form of Denial-of-Service against other legitimate smart contracts that rely on the same temporary space.
 
-### 3.3. Other Execution Vectors
+### 3.3. Stream Wrapper Abuse
+
+**Severity:** High
+
+**Analysis:**
+The sandbox does not restrict the use of PHP's stream wrappers, which can be used to bypass `open_basedir` and access the filesystem in unintended ways.
+
+*   **`phar://`**: This wrapper can be used to access the contents of `.phar` files. A malicious actor could craft a `.phar` file containing a webshell or other malicious code, and then use the `phar://` wrapper to execute it. This is a well-known bypass for `open_basedir`.
+*   **`php://`**: This wrapper provides access to various I/O streams. `php://filter` can be used to read local files, and `php://input` can be used to read raw POST data. This could be used to exfiltrate data or execute code.
+
+### 3.4. Information Disclosure
+
+**Severity:** Medium
+
+**Analysis:**
+Functions like `get_defined_constants()` and `constant()` are not disabled, allowing a smart contract to leak sensitive information about the host environment.
+
+*   **`get_defined_constants()`**: This function returns all defined constants, including sensitive information such as database credentials, API keys, and file paths.
+*   **`constant()`**: This function can be used to retrieve the value of a specific constant, given its name. An attacker could use this to access sensitive information if they know the name of the constant.
+
+### 3.5. Reflection-Based Bypasses
+
+**Severity:** High
+
+**Analysis:**
+The `ReflectionFunction` class can be used to invoke functions indirectly, which can be used to bypass the `disable_functions` directive. An attacker can create a `ReflectionFunction` object for a disabled function and then use the `invoke()` or `invokeArgs()` method to execute it.
+
+**Example Payload:**
+```php
+$func = new ReflectionFunction('shell_exec');
+$func->invoke('ls -la /');
+```
+
+### 3.6. Arbitrary Code Execution via `preg_replace()`
+
+**Severity:** Critical
+
+**Analysis:**
+The `preg_replace()` function with the `/e` (evaluate) modifier is a powerful feature that can lead to remote code execution if used with user-supplied input. An attacker can craft a string that, when evaluated by `preg_replace()`, executes arbitrary PHP code.
+
+**Example Payload:**
+```php
+preg_replace('/.*/e', 'shell_exec("ls -la /")', '');
+```
+
+### 3.7. Deserialization Vulnerabilities
+
+**Severity:** Critical
+
+**Analysis:**
+The `unserialize()` function is not disabled, which can lead to object injection and arbitrary code execution. If an attacker can control the input to `unserialize()`, they can craft a serialized string that, when deserialized, creates an object of a class with a `__wakeup()` or `__destruct()` magic method. This magic method can then be used to execute arbitrary code.
+
+**Example Payload:**
+```php
+class Evil {
+    public $cmd;
+    public function __destruct() {
+        shell_exec($this->cmd);
+    }
+}
+$evil = new Evil();
+$evil->cmd = 'ls -la /';
+echo serialize($evil);
+```
+
+### 3.8. Other Execution Vectors
 
 **Severity:** Medium
 
@@ -138,9 +203,11 @@ Several other functions that can lead to code or command execution are not inclu
 
 *   **`pcntl_exec()`**: A more advanced and stealthy bypass. Unlike `shell_exec`, `pcntl_exec` replaces the entire PHP process with an external program. This bypasses PHP-level logging and security hooks, making it significantly harder to detect in a post-incident forensic analysis. It gives the attacker a clean, OS-level process to execute their commands.
 *   **`dl()`**: Allows for loading arbitrary PHP extensions. This is a severe risk, mitigated only by the `open_basedir` restriction preventing the contract from accessing an uploaded extension file.
-*   **`assert()`**: In certain configurations, `assert()` can be used for code execution.
+*   **`assert()`**: In certain configurations, `assert()` can be used for code execution. This is especially dangerous if the first argument is a string, as it will be evaluated as PHP code.
+*   **`putenv()`**: This function can be used to set environment variables. An attacker could use this to influence the behavior of other programs or to escalate their privileges.
+*   **`register_shutdown_function()`**: This function registers a function to be executed when the script finishes. An attacker could use this to execute code after the main script has finished, potentially bypassing some security checks.
 
-### 3.4. Server-Side Request Forgery (SSRF)
+### 3.9. Server-Side Request Forgery (SSRF)
 
 **Severity:** Medium
 
