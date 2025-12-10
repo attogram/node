@@ -31,17 +31,17 @@ The security features of this sandbox include:
     *   `set_time_limit`
     *   `ini_set`
 *   **`open_basedir`**: This option is critical for limiting file system access. The sandbox restricts the Dapp to a specific set of paths. The array of allowed paths is constructed in [`include/class/Dapps.php#L397-L417`](include/class/Dapps.php#L397-L417) and then passed to the `php` command at [`line 421`](include/class/Dapps.php#L421). The exact allowed paths are:
-    *   The Dapp's root directory: `/dapps/{dapps_id}`
-    *   A temporary Dapp directory: `/tmp/dapps`
-    *   A temporary sessions directory: `/tmp/sessions`
+    *   The Dapp's root directory: `{ROOT}/dapps/{dapps_id}`
+    *   A temporary Dapp directory: `{ROOT}/tmp/dapps`
+    *   A temporary sessions directory: `{ROOT}/tmp/sessions`
     *   Specific framework files required for operation, such as:
-        *   `/chain_id`
-        *   `/include/dapps.functions.php`
-        *   `/include/common.functions.php`
-        *   `/include/coinspec.inc.php`
-        *   `/include/class/CommonSessionHandler.php`
-        *   (conditional) `/include/coinspec.{chain_id}.inc.php`
-        *   (conditional, for local dapps) `/config/dapps.config.inc.php`
+        *   `{ROOT}/chain_id`
+        *   `{ROOT}/include/dapps.functions.php`
+        *   `{ROOT}/include/common.functions.php`
+        *   `{ROOT}/include/coinspec.inc.php`
+        *   `{ROOT}/include/class/CommonSessionHandler.php`
+        *   (conditional) `{ROOT}/include/coinspec.{chain_id}.inc.php`
+        *   (conditional, for local dapps) `{ROOT}/config/dapps.config.inc.php`
 *   **Resource Limits**: The sandbox also imposes limits on the execution time (`max_execution_time=5`) and memory usage (`memory_limit=128M`) of the dapp.
 
 ## 2. Sandbox Escape Vulnerabilities

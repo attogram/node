@@ -45,14 +45,14 @@ The security features of this sandbox include:
     *   `usleep`
     *   `getrandmax`
 *   **`open_basedir`**: This option is critical for limiting file system access. The sandbox restricts the smart contract to a specific set of paths. The array of allowed paths is constructed in [`include/class/SmartContractEngine.php#L191-L208`](include/class/SmartContractEngine.php#L191-L208) and then passed to the `php` command at [`line 228`](include/class/SmartContractEngine.php#L228). The exact allowed paths are:
-    *   The smart contract temporary run folder: `/tmp/sc`
-    *   The entire smart contract class directory: `/include/class/sc/`
+    *   The smart contract temporary run folder: `{ROOT}/tmp/sc`
+    *   The entire smart contract class directory: `{ROOT}/include/class/sc/`
     *   Specific framework files required for operation, such as:
-        *   `/chain_id`
-        *   `/include/sc.inc.php`
-        *   `/include/db.inc.php`
-        *   `/include/common.functions.php`
-        *   (conditional) `/include/coinspec.{chain_id}.inc.php`
+        *   `{ROOT}/chain_id`
+        *   `{ROOT}/include/sc.inc.php`
+        *   `{ROOT}/include/db.inc.php`
+        *   `{ROOT}/include/common.functions.php`
+        *   (conditional) `{ROOT}/include/coinspec.{chain_id}.inc.php`
 *   **Resource Limits**: The sandbox also imposes limits on the execution time (`max_execution_time`) and memory usage (`memory_limit`) of the smart contract.
 
 ## 2. SQL Injection Vulnerability
