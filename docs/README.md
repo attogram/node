@@ -19,6 +19,7 @@ Welcome to the official documentation for PHPCoin. This documentation provides a
   * **[Setting up a Masternode](./masternodes/setting-up-a-masternode.md)** - A guide on how to set up a masternode.
 * **[Smart Contracts](./smart-contracts/)** - A comprehensive guide to developing smart contracts on the PHPCoin platform.
   * **[Smart Contract Builder's Guide](./smart-contracts/builders-guide.md)** - A detailed guide on how to build smart contracts.
+  * **[Smart Contract Technical Overview](./smart-contracts/technical-overview.md)** - A technical deep-dive into how smart contracts are processed by the node.
 * **[dApps](./dapps/)** - Information on how to build decentralized applications (Dapps) on PHPCoin.
   * **[Developing dApps](./dapps/developing-dapps.md)** - A guide on how to develop dApps.
 * **[API](./api/)** - The complete API reference for a PHPCoin node.
