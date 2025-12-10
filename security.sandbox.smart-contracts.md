@@ -141,13 +141,24 @@ The sandbox does not restrict the use of PHP's stream wrappers, which can be use
 
 ### 3.4. Information Disclosure
 
-**Severity:** Medium
+**Severity:** High
 
 **Analysis:**
-Functions like `get_defined_constants()` and `constant()` are not disabled, allowing a smart contract to leak sensitive information about the host environment.
+Functions like `get_defined_constants()`, `constant()`, and access to global variables are not restricted, allowing a smart contract to leak highly sensitive information about the host environment, including credentials.
 
-*   **`get_defined_constants()`**: This function returns all defined constants, including sensitive information such as database credentials, API keys, and file paths.
-*   **`constant()`**: This function can be used to retrieve the value of a specific constant, given its name. An attacker could use this to access sensitive information if they know the name of the constant.
+*   **`get_defined_constants()` and `constant()`**: These functions can be used to read the values of any defined constants. If the host application stores sensitive data like database passwords or API keys in constants, a smart contract can easily exfiltrate them.
+*   **Global Variables**: Similarly, global variables like `$_CONFIG` or `$GLOBALS` may contain sensitive configuration data. A smart contract can access these variables and leak their contents.
+
+**Example Payload:**
+```php
+// Leak database credentials stored in a constant
+$db_password = constant('DB_PASSWORD');
+
+// Leak credentials from the global config array
+global $_CONFIG;
+$db_user = $_CONFIG['db_user'];
+$db_pass = $_CONFIG['db_pass'];
+```
 
 ### 3.5. Reflection-Based Bypasses
 
