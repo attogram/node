@@ -15,6 +15,7 @@ This report details critical security vulnerabilities found in the codebase. Eac
 *   [Cross-Site Scripting (XSS)](./docs/security/cross-site-scripting.md)
 *   [Session Exploits](./docs/security/session-exploits.md)
 *   [Transaction Data Field Exploits](./docs/security/transaction-data-field-exploits.md)
+*   [Local File Inclusion (LFI)](./docs/security/local-file-inclusion.md)
 
 ## Sandbox Vulnerabilities
 
