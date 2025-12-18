@@ -1,8 +1,8 @@
-# PHPCoin Security Analysis: Masternode Attacks
+# Masternode Attacks
 
-Masternodes in the PHPCoin network have a privileged role that grants them the ability to approve blocks and receive rewards. This analysis examines the potential attacks a malicious masternode or a cartel of masternodes could execute.
+This document details vulnerabilities related to masternodes.
 
-## Attack Vector 1: Winner Selection Manipulation (Collusion Attack) - VIABLE
+## 1. Winner Selection Manipulation (Collusion Attack) - VIABLE
 
 A malicious block generator can collude with a malicious masternode to bypass the deterministic winner selection process and assign the block reward to the colluding masternode, even when they are not the legitimate winner.
 
@@ -20,7 +20,7 @@ A malicious block generator can collude with a malicious masternode to bypass th
 
 This block will be accepted by the network as valid. The validation logic is missing the crucial step of re-calculating the winner and comparing it to the winner claimed in the block. This allows a generator to play favorites, enabling collusion and undermining the fairness of the reward distribution.
 
-## Attack Vector 2: Denial-of-Service (Chain Stalling) - VIABLE
+## 2. Denial-of-Service (Chain Stalling) - VIABLE
 
 The most significant attack a masternode (or group of masternodes) can perform is to halt the blockchain.
 
@@ -30,10 +30,10 @@ The most significant attack a masternode (or group of masternodes) can perform i
 2.  **The Attack:** If a majority or all of the masternodes on the network collude to go offline (or simply stop broadcasting their signatures), they will no longer be considered "verified". Consequently, the `Masternode::getWinner()` function will find no eligible candidates.
 3.  **Chain Halt:** When no winner is found, the block generation process in `web/mine.php` fails, and the block validation process in `Masternode::verifyBlock()` will reject any block that is missing a required masternode signature. This effectively halts the chain.
 
-## Attack Vector 3: Transaction Censorship - NOT VIABLE
+## 3. Transaction Censorship - NOT VIABLE
 
 Masternodes **cannot** directly censor transactions. Their role is to validate and sign a block that has already been constructed by a block generator. They do not choose which transactions are included.
 
-## Attack Vector 4: Chain Manipulation (Forks) - NOT VIABLE
+## 4. Chain Manipulation (Forks) - NOT VIABLE
 
 A cartel of masternodes **cannot** create a valid alternate chain on their own. A block must still have a valid Proof-of-Work solution and a valid signature from the generator. The `mn_signature` is an additional check, not a replacement for the core security model.
