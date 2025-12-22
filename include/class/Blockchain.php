@@ -30,7 +30,7 @@ class Blockchain
 		return $elapsed / $blocks;
 	}
 
-	static function getMineInfo() {
+	static function calculateMineInfo() {
 		global $_config;
 		$diff = Block::difficulty();
 		$current = Block::current();
@@ -53,6 +53,12 @@ class Blockchain
 		];
 //		_log("getMineInfo: ".json_encode($res), 5);
 		return $res;
+	}
+
+	static function getMineInfo() {
+		return Cache::get("mineInfo", function () {
+			return Blockchain::calculateMineInfo();
+		});
 	}
 
 	static function addBlock(Block $block) {

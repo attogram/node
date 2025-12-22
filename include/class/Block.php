@@ -191,7 +191,7 @@ class Block
                 Cache::set("current", $this->toArray());
                 Cache::set("height", $this->height);
                 Cache::set("current_export", Block::export($hash));
-                Cache::set("mineInfo", Blockchain::getMineInfo());
+                Cache::set("mineInfo", Blockchain::calculateMineInfo());
 
                 Masternode::resetVerified();
 
