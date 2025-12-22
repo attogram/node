@@ -29,7 +29,7 @@ class Cache
 		if(file_exists($cache_file)) {
 			$content = file_get_contents($cache_file);
 			$res = json_decode($content, true);
-			if($res) {
+			if (json_last_error() === JSON_ERROR_NONE) {
 				return $res;
 			}
 		}
