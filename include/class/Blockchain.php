@@ -56,9 +56,12 @@ class Blockchain
 	}
 
 	static function getMineInfo() {
-		return Cache::get("mineInfo", function () {
-			return Blockchain::calculateMineInfo();
-		});
+		$info = Cache::get("mineInfo");
+		if(empty($info)) {
+			$info = Blockchain::calculateMineInfo();
+			Cache::set("mineInfo", $info);
+		}
+		return $info;
 	}
 
 	static function addBlock(Block $block) {
