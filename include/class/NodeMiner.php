@@ -149,15 +149,17 @@ class NodeMiner extends Task {
 
 				_log("Mining attempt={$this->attempt} height=$height difficulty=$difficulty elapsed=$elapsed hit=$hit target=$target speed={$this->speed} blockFound=$blockFound", 3);
 				$this->miningStat['hashes']++;
-				$info = $this->getMiningInfo();
-				if($info!==false) {
-					_log("Checking new block from server ".$info['block']. " with our block $prev_block_id", 4);
-					if($info['block']!= $prev_block_id) {
-						_log("New block received", 3);
-						$this->miningStat['dropped']++;
-						break;
-					}
-				}
+                if (empty($this->speed) || $this->attempt % round($this->speed) == 0) {
+                    $info = $this->getMiningInfo();
+                    if ($info !== false) {
+                        _log("Checking new block from server " . $info['block'] . " with our block $prev_block_id", 4);
+                        if ($info['block'] != $prev_block_id) {
+                            _log("New block received", 3);
+                            $this->miningStat['dropped']++;
+                            break;
+                        }
+                    }
+                }
 
                 $send_interval = 60;
                 $t=time();
