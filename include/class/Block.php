@@ -708,7 +708,6 @@ class Block
                     Cache::remove("current");
                     Cache::remove("height");
                     Cache::remove("current_export");
-                    Cache::remove("mineInfo");
 
                 } catch (Exception $e) {
                     _log("Error locking delete blocks ".$e->getMessage());
