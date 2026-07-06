@@ -168,15 +168,20 @@ class Nodeutil
 
 
 	static function calculateBlocksHash($height) {
-		global $db;
+		global $db, $_config;
 		if(empty($height)) {
 			$height = Block::getHeight();
 		}
+        $start_height = BLOCKCHAIN_CHECKPOINT;
+        if(Config::isPruned()) {
+            $start_height = $_config['pruned_height'];
+        }
 		$rows = $db->run("select id from blocks where height >= :height and height <=:top order by height asc",
-			[":height"=>BLOCKCHAIN_CHECKPOINT, ":top"=>$height]);
+			[":height"=>$start_height, ":top"=>$height]);
 		return [
 			'height'=>$height,
-			'hash'=>md5(json_encode($rows))
+			'hash'=>md5(json_encode($rows)),
+            'pruned' => Config::isPruned()
 		];
 	}
 
@@ -520,7 +525,8 @@ class Nodeutil
                 'miner'        => $miner,
                 'masternode'   => $masternode,
                 'lastBlockTime'=>$current['date'],
-                'php_version' => PHP_VERSION
+                'php_version' => PHP_VERSION,
+                'pruned_height' => $_config['pruned_height'],
             ];
         }
 
@@ -584,7 +590,8 @@ class Nodeutil
 			'hashRate10'=>$cachedData['hashRate10'],
 			'hashRate100'=>$cachedData['hashRate100'],
 			'lastBlockTime'=>$current['date'],
-            'php_version' => PHP_VERSION
+            'php_version' => PHP_VERSION,
+            'pruned_height' => $_config['pruned_height'],
 		];
 	}
 
@@ -904,5 +911,71 @@ class Nodeutil
             @rmdir($lockDir);
         }
 
+    }
+
+    static function checkDBSchema($dry_run = true) {
+        global $_config;
+        _log("DB schema check start");
+
+        $pruned = Config::isPruned();
+        $schema_file = ROOT . "/include/schema/".NETWORK.($pruned ? "-pruned":"").".sql";
+        if(!file_exists($schema_file)) {
+            _log("Schema file not found: ".$schema_file);
+            return;
+        }
+
+        _log("Checking schema file: ".$schema_file);
+
+        $lock_dir = ROOT . "/tmp/db-migrate";
+        if (mkdir($lock_dir, 0700, true)) {
+
+            $config_file = tempnam(sys_get_temp_dir(), "db_updater") . ".json";
+            $db_updater_config = [
+                'database' => [
+                    'dsn' => $_config['db_connect'],
+                    'username' => $_config['db_user'],
+                    'password' => $_config['db_pass'],
+                ],
+                'ignore_columns' => [
+                    'transactions.data'
+                ]
+            ];
+            file_put_contents($config_file, json_encode($db_updater_config, JSON_PRETTY_PRINT));
+            $cmd="php " .ROOT . "/utils/db_updater.phar ".escapeshellarg($schema_file)." --json --config=".escapeshellarg($config_file)." ".
+                ($dry_run ? "--dry-run" : "");
+            _log($cmd,4);
+            _log("DB updater started ...");
+            $res = shell_exec($cmd);
+            _log("DB updater finished ...");
+            $res = json_decode($res, true);
+            $error = false;
+            if($res['success'] === true) {
+                _log("DB updater: " . $res['message']);
+            } else if ($res['status']=="dry_run") {
+                _log("DB updater: " . print_r($res));
+                _log("Check migration file", 2);
+            } else {
+                $error = true;
+                _log("Error executing db update: " . $res['error']);
+            }
+            if(!$error) {
+                $migration_file = ROOT . "/include/schema/migrations/".DB_SCHEMA_VERSION.".php";
+                if(file_exists($migration_file)) {
+                    if(!$dry_run) {
+                        _log("DB updater: Executing migration");
+                        require_once($migration_file);
+                    }
+                }
+                if(!$dry_run) {
+                    Config::setVal('dbversion', DB_SCHEMA_VERSION);
+                }
+            }
+            unlink($config_file);
+            @rmdir($lock_dir);
+        } else {
+            _log("Can not lock dir $lock_dir");
+        }
+
+        _log("DB schema check complete");
     }
 }

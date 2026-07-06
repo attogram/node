@@ -2,6 +2,33 @@
 
 class Transaction
 {
+    // Canonical TX_TYPE_DATA payload field order used for deterministic hashing/signatures.
+    public static $txDataFieldOrder = [
+        'app',
+        'action',
+        'string1',
+        'string2',
+        'int1',
+        'int2',
+        'float1',
+        'float2',
+        'address1',
+        'address2',
+        'json_data',
+    ];
+    public static $txDataAllowedFields = [
+        'app',
+        'action',
+        'string1',
+        'string2',
+        'int1',
+        'int2',
+        'float1',
+        'float2',
+        'address1',
+        'address2',
+        'json_data',
+    ];
 
 
 	public $val;
@@ -16,6 +43,7 @@ class Transaction
 	public $peer;
 	public $id;
 	public $data;
+    public $tx_data;
 
 	public $src;
 
@@ -44,6 +72,8 @@ class Transaction
 			$fee = Blockchain::getSmartContractExecFee($block_height);
 		} else if($this->type == TX_TYPE_SC_SEND) {
 			$fee = Blockchain::getSmartContractExecFee($block_height);
+		} else if($this->type == TX_TYPE_DATA) {
+			$fee = TX_DATA_FEE;
 		} else if($this->type == TX_TYPE_BURN || $this->type == TX_TYPE_SYSTEM) {
 			$fee = 0;
 		}
@@ -74,7 +104,9 @@ class Transaction
         global $db;
 
 		try {
-			$txs = $db->run("SELECT * FROM transactions WHERE block=:block ORDER by `type` DESC", [":block" => $block['id']]);
+			$txs = $db->run("SELECT t.*, td.data FROM transactions t
+                    LEFT JOIN transaction_data td on t.id = td.tx_id
+                    WHERE block=:block ORDER by `type` DESC", [":block" => $block['id']]);
 			foreach ($txs as $tx) {
 
                 $t1=microtime(true);
@@ -92,7 +124,7 @@ class Transaction
 		        if($type == TX_TYPE_REWARD) {
 			        $res = $res && Account::addBalance($tx->dst, floatval($tx->val)*(-1),$dst_height);
 		        }
-				if ($type == TX_TYPE_SEND || $type == TX_TYPE_SYSTEM) {
+				if ($type == TX_TYPE_SEND || $type == TX_TYPE_SYSTEM || $type == TX_TYPE_DATA) {
 			        $res = $res && Account::addBalance($tx->dst, floatval($tx->val)*(-1),$dst_height);
 			        $res = $res && Account::addBalance($tx->src, floatval($tx->val) + floatval($tx->fee),$src_height);
 					$tx->add_mempool();
@@ -246,6 +278,10 @@ class Transaction
 	    $trans->height = $x['height'];
 	    $trans->peer = @$x['peer'];
 	    $trans->data = $x['data'];
+        $trans->tx_data = @$x['tx_data'];
+        if($trans->type == TX_TYPE_DATA && !empty($trans->tx_data)) {
+            $trans->tx_data = self::buildCanonicalTxDataPayloadString($trans->tx_data);
+        }
 	    return $trans;
     }
 
@@ -262,6 +298,7 @@ class Transaction
 		$trans->fee = floatval($x['fee']);
 		$trans->signature = @$x['signature'];
 		$trans->data = @$x['data'];
+        $trans->tx_data = @$x['tx_data'];
 		$trans->height = @$x['height'];
 		return $trans;
 	}
@@ -282,6 +319,13 @@ class Transaction
 		if(!empty($this->data)) {
 			$trans['data']=$this->data;
 		}
+        if(!empty($this->tx_data)) {
+            if(intval($this->type) === TX_TYPE_DATA) {
+                $trans['tx_data']=self::buildCanonicalTxDataPayloadString($this->tx_data);
+            } else {
+                $trans['tx_data']=$this->tx_data;
+            }
+        }
 	    ksort($trans);
 	    return $trans;
     }
@@ -418,12 +462,17 @@ class Transaction
     }
 
 	// add a new transaction to mempool and lock it with the current height
-	public function add_mempool($peer = "")
+	public function add_mempool($peer = "", &$err = null)
 	{
 		global $db;
 
 		$current = Block::current();
 		$height = $current['height'];
+        $txData = null;
+        if($this->type == TX_TYPE_DATA) {
+            $txData = self::buildCanonicalTxDataPayloadString($this->tx_data);
+            $this->tx_data = $txData;
+        }
 		$bind = [
 			":peer"      => $peer,
 			":id"        => $this->id,
@@ -438,16 +487,18 @@ class Transaction
 			":date"      => $this->date,
 			":message"   => $this->msg,
 			":data"   => $this->data,
+            ":tx_data" => $txData,
 		];
 
 
 		$res = $db->run(
 			"INSERT into mempool  
-			    (peer, id, public_key, height, src, dst, val, fee, signature, type, message, `date`, data)
-			    values (:peer, :id, :public_key, :height, :src, :dst, :val, :fee, :signature, :type, :message, :date, :data)",
+			    (peer, id, public_key, height, src, dst, val, fee, signature, type, message, `date`, data, tx_data)
+			    values (:peer, :id, :public_key, :height, :src, :dst, :val, :fee, :signature, :type, :message, :date, :data, :tx_data)",
 			$bind
 		);
 		if($res === false) {
+            $err = $db->error;
 			return false;
 		}
 		return true;
@@ -566,19 +617,30 @@ class Transaction
 				":type"    => $this->type,
 				":date"       => $this->date,
 				":message"    => $this->msg,
-				":src"        => $src,
-				":data"    => $this->data
+				":src"        => $src
 			];
 			$res = Transaction::insert($bind);
 			if ($res != 1) {
 				throw new Exception("Can not insert transaction");
 			}
 
+            if($this->type == TX_TYPE_DATA) {
+                $res = Transaction::insertTxData($this->id, $this->tx_data, $this->data, $error);
+                if ($res != 1) {
+                    throw new Exception("Can not insert tx_data: $error");
+                }
+            } else if(!empty($this->data)) {
+                $res = Transaction::insertData($this->id, $this->data);
+                if ($res != 1) {
+                    throw new Exception("Can not insert transaction data");
+                }
+            }
+
 			$type = $this->type;
 			$res = true;
 			if($type == TX_TYPE_REWARD && $this->val > 0) {
 				$res = $res && Account::addBalance($this->dst, $this->val,$height);
-			} else if ($type == TX_TYPE_SEND || $type == TX_TYPE_MN_CREATE || $type == TX_TYPE_SYSTEM) {
+			} else if ($type == TX_TYPE_SEND || $type == TX_TYPE_MN_CREATE || $type == TX_TYPE_SYSTEM || $type == TX_TYPE_DATA) {
 				$res = $res && Account::addBalance($this->src, ($this->val + $this->fee)*(-1),$height);
 				$res = $res && Account::addBalance($this->dst, ($this->val),$height);
 			} else if ($type == TX_TYPE_FEE) {
@@ -708,7 +770,7 @@ class Transaction
 
 	        // the value must be >=0
 	        if ($this->val <= 0 && in_array($phase, ["genesis","launch","mining","combined","deflation","increasing","decreasing","main"]) && $height > UPDATE_10_ZERO_TX_NOT_ALLOWED) {
-				if($this->type != TX_TYPE_SC_CREATE && $this->type != TX_TYPE_SC_EXEC && $this->type != TX_TYPE_SC_SEND) {
+				if($this->type != TX_TYPE_SC_CREATE && $this->type != TX_TYPE_SC_EXEC && $this->type != TX_TYPE_SC_SEND && $this->type != TX_TYPE_DATA) {
 		            throw new Exception("Transaction type {$this->val} - Value <= 0", 3);
 		        }
 	        }
@@ -727,7 +789,7 @@ class Transaction
 
 			//check types
 		    $type = $this->type;
-			$allowedTypes = [TX_TYPE_REWARD, TX_TYPE_SEND, TX_TYPE_SYSTEM];
+			$allowedTypes = [TX_TYPE_REWARD, TX_TYPE_SEND, TX_TYPE_SYSTEM, TX_TYPE_DATA];
 			if(Masternode::allowedMasternodes($height)) {
 				$allowedTypes[]=TX_TYPE_MN_CREATE;
 				$allowedTypes[]=TX_TYPE_MN_REMOVE;
@@ -789,7 +851,8 @@ class Transaction
 
 
             if ($this->type==TX_TYPE_SEND || $this->type == TX_TYPE_MN_CREATE || $this->type == TX_TYPE_MN_REMOVE || $this->type == TX_TYPE_SC_SEND
-                || $this->type == TX_TYPE_SC_EXEC || $this->type == TX_TYPE_SC_CREATE || $this->type == TX_TYPE_SYSTEM) {
+                || $this->type == TX_TYPE_SC_EXEC || $this->type == TX_TYPE_SC_CREATE || $this->type == TX_TYPE_SYSTEM
+				|| $this->type == TX_TYPE_DATA) {
 	            // invalid destination address
 	            if (!Account::valid($this->dst)) {
 		            throw new Exception("{$this->id} - Invalid destination address");
@@ -845,7 +908,8 @@ class Transaction
             }
 
 
-			if($this->type==TX_TYPE_SEND || $this->type == TX_TYPE_BURN || $this->type == TX_TYPE_MN_CREATE || $this->type == TX_TYPE_SYSTEM) {
+			if($this->type==TX_TYPE_SEND || $this->type == TX_TYPE_BURN || $this->type == TX_TYPE_MN_CREATE
+                || $this->type == TX_TYPE_SYSTEM || $this->type == TX_TYPE_DATA) {
 				$res = Masternode::checkIsSendFromMasternode($height, $this, $error, $verify);
 				if(!$res) {
 					throw new Exception("Invalid transaction for send: $error");
@@ -886,6 +950,27 @@ class Transaction
 					throw new Exception("Invalid transaction for send smart contract: $error");
 				}
 			}
+
+            if($this->type==TX_TYPE_DATA) {
+                if(empty($this->tx_data)) {
+                    throw new Exception("Missing tx_data payload");
+                }
+                $payload = [];
+                $rawPayload = $this->tx_data;
+                if(!empty($rawPayload)) {
+                    $payload = json_decode($rawPayload, true);
+                    if(json_last_error() !== JSON_ERROR_NONE) {
+                        throw new Exception("Invalid tx_data payload json");
+                    }
+                    if(!is_array($payload)) {
+                        throw new Exception("Invalid tx_data payload format");
+                    }
+                }
+                $res = self::validateTxDataPayload($payload, $error);
+                if(!$res) {
+                    throw new Exception("Invalid transaction for tx_data payload: $error");
+                }
+            }
 
 			if ($this->type == TX_TYPE_REWARD) {
 				$res = Masternode::checkTx($this, $block, $error);
@@ -975,7 +1060,9 @@ class Transaction
 					}
 					$maturity = $height - $last_height;
 					if($maturity < Blockchain::getStakingMaturity($height)) {
-						throw new Exception("Staking winner check failed: Staking maturity not valid ".$maturity);
+                        if(Blockchain::isValidHeight($height)) {
+                            throw new Exception("Staking winner check failed: Staking maturity not valid ".$maturity);
+                        }
 					}
 
 					$balance = Account::getBalanceAtHeight($this->dst, $height);
@@ -1030,8 +1117,123 @@ class Transaction
     	$parts[]=$this->type;
     	$parts[]=$this->publicKey;
     	$parts[]=$date;
+        if($this->type == TX_TYPE_DATA) {
+            $rawPayload = $this->tx_data;
+            $canonicalPayload = self::buildCanonicalTxDataPayloadString($rawPayload);
+            $parts[] = hash("sha256", $canonicalPayload);
+        }
 	    $base = implode("-", $parts);
 	    return $base;
+    }
+
+    public static function buildCanonicalTxDataPayloadString($rawData) {
+        if($rawData === null || $rawData === "") {
+            $payload = [];
+        } else {
+            $payload = json_decode($rawData, true);
+            if(!is_array($payload)) {
+                // Keep deterministic behavior even for invalid payloads.
+                return (string)$rawData;
+            }
+        }
+        $canonical = self::normalizeTxDataPayloadForSignature($payload);
+        return json_encode($canonical, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    }
+
+    public static function buildCanonicalTxDataPayloadFromDbRow($row) {
+        $payload = [];
+        foreach (self::$txDataFieldOrder as $field) {
+            $payload[$field] = array_key_exists($field, $row) ? $row[$field] : null;
+        }
+        $canonical = self::normalizeTxDataPayloadForSignature($payload);
+        return json_encode($canonical, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    }
+
+    public static function normalizeTxDataPayloadForSignature($payload) {
+        $canonical = [];
+        foreach (self::$txDataFieldOrder as $field) {
+            $value = array_key_exists($field, $payload) ? $payload[$field] : null;
+            if($value === null) {
+                $canonical[$field] = null;
+                continue;
+            }
+            if($field === "app" || $field === "action" || $field === "string1" || $field === "string2") {
+                $canonical[$field] = (string)$value;
+            } else if($field === "int1" || $field === "int2") {
+                $canonical[$field] = intval($value);
+            } else if($field === "float1" || $field === "float2") {
+                $canonical[$field] = floatval($value);
+            } else if($field === "address1" || $field === "address2") {
+                $canonical[$field] = (string)$value;
+            } else if($field === "json_data") {
+                if(is_string($value)) {
+                    $decoded = json_decode($value, true);
+                    if(json_last_error() === JSON_ERROR_NONE) {
+                        $canonical[$field] = $decoded;
+                    } else {
+                        $canonical[$field] = $value;
+                    }
+                } else {
+                    $canonical[$field] = $value;
+                }
+            } else {
+                $canonical[$field] = $value;
+            }
+        }
+        return $canonical;
+    }
+
+    public static function validateTxDataPayload($payload, &$error = null) {
+        try {
+            if($payload === null || $payload === "") {
+                return true;
+            }
+            if(!is_array($payload)) {
+                throw new Exception("Invalid tx_data payload format");
+            }
+
+            foreach ($payload as $key => $value) {
+                if(!in_array($key, self::$txDataAllowedFields, true)) {
+                    throw new Exception("Invalid tx_data key: $key");
+                }
+                if($value === null) {
+                    continue;
+                }
+
+                if($key === "app" || $key === "action" || $key === "string1" || $key === "string2") {
+                    if(!is_string($value)) {
+                        throw new Exception("tx_data.$key must be string");
+                    }
+                    if(($key === "app" || $key === "action") && strlen($value) > 64) {
+                        throw new Exception("tx_data.$key too long");
+                    }
+                    if(($key === "string1" || $key === "string2") && strlen($value) > 255) {
+                        throw new Exception("tx_data.$key too long");
+                    }
+                } else if($key === "int1" || $key === "int2") {
+                    if(!(is_int($value) || (is_string($value) && preg_match('/^-?[0-9]+$/', $value) === 1))) {
+                        throw new Exception("tx_data.$key must be integer");
+                    }
+                } else if($key === "float1" || $key === "float2") {
+                    if(!(is_float($value) || is_int($value) || (is_string($value) && is_numeric($value)))) {
+                        throw new Exception("tx_data.$key must be numeric");
+                    }
+                } else if($key === "address1" || $key === "address2") {
+                    if(!is_string($value) || !Account::valid($value)) {
+                        throw new Exception("tx_data.$key invalid address");
+                    }
+                } else if($key === "json_data" && is_string($value)) {
+                    json_decode($value, true);
+                    if(json_last_error() !== JSON_ERROR_NONE) {
+                        throw new Exception("tx_data.json_data invalid json");
+                    }
+                }
+            }
+            return true;
+        } catch (Exception $e) {
+            $error = $e->getMessage();
+            return false;
+        }
     }
 
 //	private function get_check_height() {
@@ -1060,7 +1262,9 @@ class Transaction
         global $db;
         $current = Block::current();
 
-        $x = $db->row("SELECT * FROM transactions WHERE id=:id", [":id" => $id]);
+        $x = $db->row("SELECT t.*, td.* FROM transactions t 
+            left join transaction_data td on t.id = td.tx_id
+                    WHERE id=:id", [":id" => $id]);
 
         if (!$x) {
             return false;
@@ -1084,6 +1288,9 @@ class Transaction
 		    "public_key" => $x['public_key'],
 		    "data" => $x['data'],
 	    ];
+        if(intval($x['type']) === TX_TYPE_DATA) {
+            $trans['tx_data'] = self::buildCanonicalTxDataPayloadFromDbRow($x);
+        }
 	    $trans['confirmations'] = $height - $x['height'];
 
 	    if ($x['type'] == TX_TYPE_REWARD) {
@@ -1117,9 +1324,13 @@ class Transaction
             return false;
         }
         if (!empty($id)) {
-            $r = $db->run("SELECT * FROM transactions WHERE block=:id", [":id" => $id]);
+            $r = $db->run("SELECT t.*, td.data FROM transactions t 
+            LEFT JOIN transaction_data td on t.id = td.tx_id
+         WHERE block=:id", [":id" => $id]);
         } else {
-            $r = $db->run("SELECT * FROM transactions WHERE height=:height", [":height" => $height]);
+            $r = $db->run("SELECT t.*, td.data FROM transactions t 
+         LEFT JOIN transaction_data td on t.id = td.tx_id
+         WHERE height=:height", [":height" => $height]);
         }
         $res = [];
         foreach ($r as $x) {
@@ -1155,6 +1366,9 @@ class Transaction
 		if(!empty($x['data'])) {
 			$trans['data']=$x['data'];
 		}
+		if(!empty($x['tx_data'])) {
+            $trans['tx_data']=$x['tx_data'];
+        }
 
         $trans['type_label'] = "mempool";
         $trans['confirmations'] = -1;
@@ -1193,8 +1407,13 @@ class Transaction
 
 	static function getById($id) {
 		global $db;
-		$x = $db->row("SELECT * FROM transactions WHERE id=:id", [":id" => $id]);
+		$x = $db->row("SELECT t.*, td.* FROM transactions t 
+            LEFT JOIN transaction_data td on t.id = td.tx_id
+            WHERE t.id=:id", [":id" => $id]);
 		if($x) {
+            if(intval($x['type']) === TX_TYPE_DATA) {
+                $x['tx_data'] = self::buildCanonicalTxDataPayloadFromDbRow($x);
+            }
 			return Transaction::getFromDbRecord($x);
 		} else {
 			return null;
@@ -1244,9 +1463,23 @@ class Transaction
 				throw new Exception("Invalid Date");
 			}
 
+            // Stricter date validation ONLY for smart contract transactions
+            // This limits manipulation window from 49 days to ±5 minutes for SC transactions
+            if (in_array($this->type, [TX_TYPE_SC_CREATE, TX_TYPE_SC_EXEC, TX_TYPE_SC_SEND])) {
+                $max_past = 300;   // 5 minutes in past
+                $max_future = 300; // 5 minutes in future
+                
+                if ($this->date < time() - $max_past) {
+                    throw new Exception("Smart contract transaction date is too old (max 5 minutes in past)");
+                }
+                if ($this->date > time() + $max_future) {
+                    throw new Exception("Smart contract transaction date is too far in future (max 5 minutes)");
+                }
+            }
+
             $src = Account::getAddress($this->publicKey);
             _log("addToMemPool $src");
-            if(Blacklist::checkAddress($src)) {
+            if(!empty($src) && Blacklist::checkAddress($src)) {
                 throw new Exception("Address {$src} is blacklisted");
             }
 
@@ -1291,9 +1524,9 @@ class Transaction
 				Masternode::checkSend($this);
 			}
 
-			$res = $this->add_mempool("local");
+			$res = $this->add_mempool("local", $err);
 			if(!$res) {
-				throw new Exception("Error adding tansaction to mempool");
+				throw new Exception("Error adding tansaction to mempool: " . json_encode($err));
 			}
 
 			$db->commit();
@@ -1349,12 +1582,79 @@ class Transaction
     	global $db;
 	    $res = $db->run(
 		    "INSERT into transactions 
-    			(id, public_key, block,  height, dst, val, fee, signature, type, message, `date`, src, data)
-    			values (:id, :public_key, :block, :height, :dst, :val, :fee, :signature, :type, :message, :date, :src, :data)
+    			(id, public_key, block,  height, dst, val, fee, signature, type, message, `date`, src)
+    			values (:id, :public_key, :block, :height, :dst, :val, :fee, :signature, :type, :message, :date, :src)
     			",
 		    $bind
 	    );
 	    return $res;
+    }
+
+    static function insertData($txid, $data) {
+        global $db;
+        $sql="insert into transaction_data (tx_id, data) values (:id, :data)";
+        $res = $db->run($sql, [":id"=>$txid, ":data"=>$data]);
+        return $res;
+    }
+
+    static function insertTxData($txid, $txDataRaw, $data, &$error = null) {
+        global $db;
+        try {
+            if(empty($txDataRaw)) {
+                throw new Exception("Missing tx_data payload");
+            }
+            $payload = json_decode($txDataRaw, true);
+            if(!is_array($payload) || json_last_error() !== JSON_ERROR_NONE) {
+                throw new Exception("Invalid tx_data payload json");
+            }
+
+            $res = self::validateTxDataPayload($payload, $validationError);
+            if(!$res) {
+                throw new Exception($validationError);
+            }
+
+            $app = array_key_exists("app", $payload) ? $payload["app"] : null;
+            $action = array_key_exists("action", $payload) ? $payload["action"] : null;
+            $string1 = array_key_exists("string1", $payload) ? $payload["string1"] : null;
+            $string2 = array_key_exists("string2", $payload) ? $payload["string2"] : null;
+            $int1 = (array_key_exists("int1", $payload) && $payload["int1"] !== null) ? intval($payload["int1"]) : null;
+            $int2 = (array_key_exists("int2", $payload) && $payload["int2"] !== null) ? intval($payload["int2"]) : null;
+            $float1 = (array_key_exists("float1", $payload) && $payload["float1"] !== null) ? floatval($payload["float1"]) : null;
+            $float2 = (array_key_exists("float2", $payload) && $payload["float2"] !== null) ? floatval($payload["float2"]) : null;
+            $address1 = array_key_exists("address1", $payload) ? $payload["address1"] : null;
+            $address2 = array_key_exists("address2", $payload) ? $payload["address2"] : null;
+            $jsonData = array_key_exists("json_data", $payload) ? $payload["json_data"] : null;
+            if(!is_null($jsonData) && !is_string($jsonData)) {
+                $jsonData = json_encode($jsonData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            }
+
+            $sql = "insert into `transaction_data`
+                    (`tx_id`, `data`, `app`, `action`, `string1`, `string2`, `int1`, `int2`, `float1`, `float2`, `address1`, `address2`, `json_data`)
+                    values
+                    (:tx_id, :data, :app, :action, :string1, :string2, :int1, :int2, :float1, :float2, :address1, :address2, :json_data)";
+            $res = $db->run($sql, [
+                ":tx_id"=>$txid,
+                ":data"=>$data,
+                ":app"=>$app,
+                ":action"=>$action,
+                ":string1"=>$string1,
+                ":string2"=>$string2,
+                ":int1"=>$int1,
+                ":int2"=>$int2,
+                ":float1"=>$float1,
+                ":float2"=>$float2,
+                ":address1"=>$address1,
+                ":address2"=>$address2,
+                ":json_data"=>$jsonData
+            ]);
+            if($res === false) {
+                throw new Exception("DB insert tx_data failed: ".$db->error);
+            }
+            return $res;
+        } catch (Exception $e) {
+            $error = $e->getMessage();
+            return false;
+        }
     }
 
 	static function getAddressStat($address) {
@@ -1421,6 +1721,8 @@ class Transaction
 				return "Send smart contract";
 			case TX_TYPE_SYSTEM:
 				return "System";
+            case TX_TYPE_DATA:
+                return "Data";
 		}
 	}
 

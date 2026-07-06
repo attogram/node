@@ -9,6 +9,7 @@ Welcome to the official documentation for PHPCoin. This documentation provides a
   * **[Running a Node](./getting-started/running-a-node.md)** - Instructions on how to run a PHPCoin node.
 * **[Wallet](./wallet/)** - Instructions on how to use the command-line and web-based wallets.
   * **[Using the Wallet](./wallet/using-the-wallet.md)** - A detailed guide on how to use the PHPCoin wallet.
+  * **[Asymmetric Messaging](./wallet/asymmetric-messaging.md)** - Public-key encrypt/decrypt with PHPCoin secp256k1 keys (API, CLI, wallet).
 * **[Mining](./mining/)** - Information on how to mine PHPCoin using different methods.
   * **[How to Mine](./mining/how-to-mine.md)** - A guide on how to get started with mining.
   * **[Miner Workflow](./mining/miner-workflow.md)** - A detailed, technical step-by-step breakdown of the different mining processes.
@@ -21,5 +22,6 @@ Welcome to the official documentation for PHPCoin. This documentation provides a
   * **[Smart Contract Builder's Guide](./smart-contracts/builders-guide.md)** - A detailed guide on how to build smart contracts.
 * **[dApps](./dapps/)** - Information on how to build decentralized applications (Dapps) on PHPCoin.
   * **[Developing dApps](./dapps/developing-dapps.md)** - A guide on how to develop dApps.
+  * **[TX_DATA Developer Instruction Manual](./dapps/tx-data-developer-instruction-manual.md)** - A developer manual for building TX_DATA-based applications and services.
 * **[API](./api/)** - The complete API reference for a PHPCoin node.
   * **[API Reference](./api/api-reference.md)** - A detailed reference for the PHPCoin API.

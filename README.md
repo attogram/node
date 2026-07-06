@@ -1,3 +1,5 @@
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/phpcoinn/node)
+
 # The PHPCoin (PHP) cryptocurrency node.
 
 For detailed information on installation, usage, and development, please see the [PHPCoin Documentation](./docs/).
@@ -21,6 +23,16 @@ RIPEMD160 + 3xSHA256
 Address prefix: P
 
 Transaction fee: 0 (during mining and masternode phase)
+
+**Asymmetric messaging** (live on mainnet, Jun 2026)
+
+PHPCoin includes asymmetric message encryption in production node code, based on PHPCoin secp256k1 keys:
+
+* sender encrypts with recipient public key
+* payload is returned as a single base64 packet string
+* receiver decrypts with the matching wallet private key
+* works in Node, browser bundle, and PHP
+* available from `phpcoin-crypto`, `api.php`, `cli/util.php`, and `utils/wallet.php`
 
 **Mainnet**
 
@@ -78,6 +90,10 @@ https://main3.phpcoin.net/
 https://m1.phpcoin.net/
 
 https://m2.phpcoin.net/ 
+
+
+
+
 
 ## Install
 

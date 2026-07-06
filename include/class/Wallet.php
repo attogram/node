@@ -179,11 +179,20 @@ class Wallet
 				$this->removeMasternode(@$this->arg2, @$this->arg3);
 				break;
 			case "sign":
-				$this->sign(@$this->arg2);
+					$this->sign(@$this->arg2);
+					break;
+			case "decrypt-message":
+				$this->decryptMessage(@$this->arg2);
 				break;
-			case "smart-contract-create":
-				$this->createSmartContract(@$this->arg2, @$this->arg3);
-				break;
+				case "verify":
+					$this->verifySignature(@$this->arg2, @$this->arg3, @$this->arg4);
+					break;
+				case "network":
+					$this->network();
+					break;
+				case "smart-contract-create":
+					$this->createSmartContract(@$this->arg2, @$this->arg3);
+					break;
 			case "smart-contract-exec":
 				$this->execSmartContract(@$this->arg2, @$this->arg3);
 				break;
@@ -255,6 +264,14 @@ class Wallet
 			die("Could not write the wallet file! Please check the permissions on the current directory and save a backup of the above keys.\n");
 		}
 		echo "The wallet has been decrypted!\n";
+	}
+
+	function decryptMessage($payloadB64) {
+		if (empty($payloadB64)) {
+			die("ERROR: Missing encrypted payload".PHP_EOL);
+		}
+		$plaintext = decryptWithPrivateKey($payloadB64, $this->private_key);
+		echo $plaintext.PHP_EOL;
 	}
 
 	function transactions() {
@@ -352,7 +369,7 @@ class Wallet
 		if(DEVELOPMENT) {
 			return "http://phpcoin";
 		} else {
-            echo "CHAIN: ".DEFAULT_CHAIN_ID . PHP_EOL;
+            echo "CHAIN: ".CHAIN_ID . PHP_EOL;
 			echo "Connected to peer: $peer".PHP_EOL;
 			return $peer;
 		}
@@ -477,14 +494,31 @@ class Wallet
 		echo "Transaction created: ".$res['data'].PHP_EOL;
 	}
 
-	function sign($message) {
-		if(empty($message)) {
-			echo "Message is empty!".PHP_EOL;
-			exit;
+		function sign($message) {
+			if(empty($message)) {
+				echo "Message is empty!".PHP_EOL;
+				exit;
+			}
+			$res = ec_sign($message, $this->private_key);
+			echo $res . PHP_EOL;
 		}
-		$res = ec_sign($message, $this->private_key);
-		echo $res . PHP_EOL;
-	}
+
+		function verifySignature($message, $signature, $publicKey = null) {
+			if(empty($message)) {
+				echo "Message is empty!".PHP_EOL;
+				exit;
+			}
+			if(empty($signature)) {
+				echo "Signature is empty!".PHP_EOL;
+				exit;
+			}
+			if(empty($publicKey)) {
+				$publicKey = $this->public_key;
+			}
+			$res = ec_verify($message, $signature, $publicKey);
+			echo $res ? "VALID" : "INVALID";
+			echo PHP_EOL;
+		}
 
 	function createSmartContract($sc_address, $file) {
 		if(empty($sc_address)) {
@@ -643,7 +677,7 @@ class Wallet
 	}
 
 
-	function sendSmartContract($dst_address, $method) {
+		function sendSmartContract($dst_address, $method) {
 		if(empty($dst_address)) {
 			echo "Destination address not specified".PHP_EOL;
 			exit;
@@ -686,11 +720,21 @@ class Wallet
 		$this->checkApiResponse($res);
 		echo "Transaction created: ".$res['data'].PHP_EOL;
 
-	}
+		}
+
+		function network() {
+			echo "Network: ".NETWORK.PHP_EOL;
+			echo "Chain ID: ".CHAIN_ID.PHP_EOL;
+			echo "Remote peers source: ".REMOTE_PEERS_LIST_URL.PHP_EOL;
+			$envNetwork = getenv("NETWORK");
+			if($envNetwork !== false && strlen($envNetwork) > 0) {
+				echo "NETWORK env: ".$envNetwork.PHP_EOL;
+			}
+		}
 
 
-	function help() {
-		die("wallet <command> <options>
+		function help() {
+			die("wallet <command> <options>
 
 Commands:
 
@@ -698,6 +742,8 @@ balance                                                             prints the b
 balance <address>                                                   prints the balance of the specified address
 export                                                              prints the wallet data
 block                                                               show data about the current block
+verify <message> <signature> [public_key]                           verifies signed message
+network                                                             prints selected network and chain id
 encrypt                                                             encrypts the wallet
 decrypt                                                             decrypts the wallet
 transactions                                                        show the latest transactions
@@ -707,6 +753,7 @@ login-link                                                          generate log
 masternode-create <address> <reward_address>                        create masternode with address
 masternode-remove <payoutaddress>  <address>                        remove masternode with address
 sign <message>                                                      sign message with wallet private key
+decrypt-message <payload_b64>                                       decrypt asymmetric message with wallet private key
 smart-contract-create <address> <file>	                            create smart contract
 smart-contract-exec <address> <method>                  			execute smart contract method
 smart-contract-send <address> <method>                      		transfer coins from smart contract
