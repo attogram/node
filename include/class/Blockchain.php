@@ -3,6 +3,7 @@
 
 class Blockchain
 {
+	static $mineInfo;
 
 	static function getHashRate($blocks) {
 		$blockCount = Block::getHeight();
@@ -31,28 +32,34 @@ class Blockchain
 	}
 
 	static function getMineInfo() {
-		global $_config;
-		$diff = Block::difficulty();
-		$current = Block::current();
-		$reward = Block::reward($current['height']+1);
-		$res = [
-			"difficulty" => $diff,
-			"block"      => $current['id'],
-			"height"     => $current['height'],
-			"date"=>$current['date'],
-			"data"=>[],
-			"time"=>time(),
-			"reward"=>num($reward['miner']),
-			"version"=>Block::versionCode($current['height']+1),
-			"generator"=>Account::getAddress($_config['generator_public_key']),
-			"ip"=>@$_SERVER['SERVER_ADDR'],
-			"hashingOptions"=>Block::hashingOptions($current['height']+1),
-			"fee"=>Blockchain::getFee(),
-			"network"=>NETWORK,
-			"chain_id"=>CHAIN_ID
-		];
-//		_log("getMineInfo: ".json_encode($res), 5);
-		return $res;
+		if(empty(self::$mineInfo)) {
+			global $_config;
+			$diff = Block::difficulty();
+			$current = Block::current();
+			$reward = Block::reward($current['height']+1);
+			$res = [
+				"difficulty" => $diff,
+				"block"      => $current['id'],
+				"height"     => $current['height'],
+				"date"=>$current['date'],
+				"data"=>[],
+				"time"=>time(),
+				"reward"=>num($reward['miner']),
+				"version"=>Block::versionCode($current['height']+1),
+				"generator"=>Account::getAddress($_config['generator_public_key']),
+				"ip"=>@$_SERVER['SERVER_ADDR'],
+				"hashingOptions"=>Block::hashingOptions($current['height']+1),
+				"fee"=>Blockchain::getFee(),
+				"network"=>NETWORK,
+				"chain_id"=>CHAIN_ID
+			];
+			self::$mineInfo = $res;
+		}
+		return self::$mineInfo;
+	}
+
+	static function invalidateMineInfo() {
+		self::$mineInfo = null;
 	}
 
 	static function addBlock(Block $block) {
