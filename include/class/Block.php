@@ -174,7 +174,15 @@ class Block
                     $schash = $this->processSmartContractTxs($this->height);
                     _log("SCHASH: block=" . $this->schash . " calc=" . $schash, 5);
                     if ($schash === false) {
-                        throw new Exception("Parse block failed " . $this->height . " Missing schash");
+                        if(NETWORK == "testnet") {
+                            if(in_array($this->id, ['B9DzmeoTRWtqMbbjfbANgmKNiNTbhhyxubGypLDUmCXR'])) {
+                                _log("Ignore Missing schash id=".$this->id);
+                            } else {
+                                throw new Exception("Parse block failed " . $this->height . " Missing schash id=".$this->id);
+                            }
+                        } else {
+                            throw new Exception("Parse block failed " . $this->height . " Missing schash id=".$this->id);
+                        }
                     }
                     if (!empty($this->schash) && $this->schash != $schash) {
                         if (in_array($this->height, IGNORE_SC_HASH_HEIGHT)) {
@@ -240,6 +248,9 @@ class Block
             return null;
         }
         $process_schash = SmartContract::process($smart_contracts, $height, $test,  $err, $state_updates);
+        if(empty($process_schash)){
+            return false;
+        }
         if($height >= UPDATE_15_EXTENDED_SC_HASH_V2) {
             $res = Nodeutil::calculateSmartContractsHashV2($height);
             $current_state_hash = $res['hash'];
@@ -516,7 +527,7 @@ class Block
 		        $max = Block::max_transactions();
 				$count = 0;
 		        foreach ($this->data as $x) {
-					if($x['type']==TX_TYPE_SEND || $x['type']==TX_TYPE_BURN || $x['type']==TX_TYPE_SYSTEM) {
+					if($x['type']==TX_TYPE_SEND || $x['type']==TX_TYPE_BURN || $x['type']==TX_TYPE_SYSTEM || $x['type']==TX_TYPE_DATA) {
 						$count++;
 					}
 		        }
@@ -542,7 +553,7 @@ class Block
 
 		        // prepare total balance
 		        $type = $tx->type;
-		        if ($type == TX_TYPE_SEND || $type == TX_TYPE_MN_CREATE || $type == TX_TYPE_MN_REMOVE  || $type == TX_TYPE_BURN || $type == TX_TYPE_SYSTEM) {
+		        if ($type == TX_TYPE_SEND || $type == TX_TYPE_MN_CREATE || $type == TX_TYPE_MN_REMOVE  || $type == TX_TYPE_BURN || $type == TX_TYPE_SYSTEM || $type == TX_TYPE_DATA) {
 			        @$balance[$tx->src] += $tx->val + $tx->fee;
 		        }
 
@@ -766,7 +777,9 @@ class Block
         if (!$block) {
             return false;
         }
-        $r = $db->run("SELECT * FROM transactions WHERE block=:block", [":block" => $block['id']]);
+        $r = $db->run("SELECT t.*, td.* FROM transactions t 
+            LEFT JOIN transaction_data td on td.tx_id = t.id
+            WHERE block=:block", [":block" => $block['id']]);
         $transactions = [];
         foreach ($r as $x) {
             $trans = [
@@ -784,6 +797,9 @@ class Block
 			if(!empty($x['data'])) {
 				$trans['data']=$x['data'];
 			}
+            if(intval($x['type']) === TX_TYPE_DATA) {
+                $trans['tx_data'] = Transaction::buildCanonicalTxDataPayloadFromDbRow($x);
+            }
             ksort($trans);
             $transactions[$x['id']] = $trans;
         }
@@ -918,10 +934,10 @@ class Block
 
     static function getAll($page, $limit) {
     	global $db;
-	    $start = ($page-1)*$limit;
-		if($start < 0) $start = 0;
-    	$sql="select * from blocks order by height desc limit $start, $limit";
-    	return $db->run($sql);
+    	$height=self::getHeight();
+	    $start = $height-($page -1)* $limit;
+    	$sql="select * from blocks where height <= ? order by height desc limit ?";
+    	return $db->run($sql,[$start,$limit],false);
     }
 
     static function getHeight() {
@@ -953,7 +969,7 @@ class Block
     }
 
 	public function verifyBlock(&$error = false) {
-
+        global $_config;
 		$data = $this->data;
 		$height = $this->height;
 
@@ -983,7 +999,9 @@ class Block
 			$difficulty = $this->difficulty;
 			$calculated_difficulty = Block::difficulty($this->height-1);
 			if($difficulty != $calculated_difficulty) {
+                if(Blockchain::isValidHeight($this->height)) {
 				throw new Exception("Block check: invalid difficulty $difficulty - expected $calculated_difficulty");
+			}
 			}
 
 			$prev_block = Block::getAtHeight($height - 1);

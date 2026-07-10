@@ -17,3 +17,7 @@ function explorer_address_link2($address, $short= false) {
 	}
 	return '<a href="/apps/explorer/address.php?address='.$address.'">'.$text.'</a>';
 }
+
+function safeDisplay($string) {
+    return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
+}

@@ -1,6 +1,7 @@
 <?php
-$_config['chain_id'] = trim(@file_get_contents(dirname(__DIR__)."/chain_id"));
-if($_config['chain_id'] != DEFAULT_CHAIN_ID && file_exists(__DIR__ . "/coinspec.".$_config['chain_id'].".inc.php")) {
+require_once __DIR__ . "/network_chain_id.inc.php";
+$_config['chain_id'] = resolve_chain_id();
+if(file_exists(__DIR__ . "/coinspec.".$_config['chain_id'].".inc.php")) {
 	require_once __DIR__ . "/coinspec.".$_config['chain_id'].".inc.php";
 	return;
 }
@@ -9,9 +10,9 @@ if($_config['chain_id'] != DEFAULT_CHAIN_ID && file_exists(__DIR__ . "/coinspec.
 const NETWORK = "mainnet";
 const CHAIN_ID = "00";
 const COIN_PORT = "";
-const VERSION = "1.6.8";
-const BUILD_VERSION = 389;
-const MIN_VERSION = "1.6.6";
+const VERSION = "1.11.0";
+const BUILD_VERSION = 405;
+const MIN_VERSION = "1.10.2";
 const DEVELOPMENT = false;
 const XDEBUG = "";
 const XDEBUG_CLI = "";
@@ -42,6 +43,7 @@ const TX_TYPE_SC_EXEC = 6;
 const TX_TYPE_SC_SEND = 7;
 const TX_TYPE_BURN = 8;
 const TX_TYPE_SYSTEM = 9;
+const TX_TYPE_DATA = 10;
 
 const HASHING_ALGO = PASSWORD_ARGON2I;
 const HASHING_OPTIONS = ['memory_cost' => 2048, "time_cost" => 2, "threads" => 1];
@@ -64,6 +66,7 @@ const STAKING_START_HEIGHT = 20001;
 
 const SC_MAX_EXEC_TIME = 30;
 const SC_MEMORY_LIMIT = "256M";
+const TX_DATA_FEE = 1;
 
 const GIT_URL = "https://github.com/phpcoinn/node";
 const UPDATE_1_BLOCK_ZERO_TIME = 0;
@@ -99,3 +102,5 @@ const IGNORE_SC_HASH_HEIGHT = [];
 const BLACKLISTED_SMART_CONTRACTS = [];
 
 const DEV_REWARD_ADDRESS = "PdEvtfZwNsbddKLCZQcjTgjpdcznS1w3pG";
+
+const DB_SCHEMA_VERSION = 107;

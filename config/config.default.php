@@ -2,6 +2,12 @@
 /**
  * Default config file
  */
+// Backward compatibility for existing config.inc.php files created before
+// network selection was moved to chain_id-based loaders.
+if(!defined("DEFAULT_CHAIN_ID")) {
+    define("DEFAULT_CHAIN_ID", "00");
+}
+
 // Default database connection
 $_config['chain_id'] = trim(file_get_contents(dirname(__DIR__)."/chain_id"));
 $_config['db_connect'] = 'mysql:host=localhost;dbname=phpcoin;charset=utf8';
@@ -15,10 +21,14 @@ $_config['public_api'] = true;
 $_config['allowed_hosts'] = ['*'];
 
 // The initial peers to sync from
-$_config['initial_peer_list'] = [
+$_config['initial_peer_list'] = $_config['chain_id'] == "00"  ? [
     'https://main1.phpcoin.net',
     'https://main2.phpcoin.net',
     'https://main3.phpcoin.net'
+] : [
+    'https://node1.phpcoin.net',
+    'https://node2.phpcoin.net',
+    'https://node3.phpcoin.net'
 ];
 
 // does not peer with any of the peers. Uses the seed peers and syncs only from those peers. Requires a cronjob on sync.php
@@ -109,18 +119,21 @@ $_config['homepage_apps'] = [
     "explorer" => [
         "title" => "Explorer",
         "url" => "/apps/explorer",
+        "icon_type" => "fa",
         "icon" => "fas fa-binoculars",
         "condition" => true
     ],
     "miner" => [
         "title" => "Miner",
         "url" => "/apps/miner",
+        "icon_type" => "fa",
         "icon" => "fas fa-hammer",
         "condition" => "miner_enabled"
     ],
     "dapps" => [
         "title" => "Dapps",
         "url" => "/dapps.php?url={dapps_id}",
+        "icon_type" => "fa",
         "icon" => "fas fa-cubes",
         "condition" => "dapps_enabled",
         "tooltip" => "Decentralized apps"
@@ -128,6 +141,7 @@ $_config['homepage_apps'] = [
     "exchange" => [
         "title" => "Exchange",
         "url" => "https://klingex.io/trade/PHP-USDT?ref=3436CA42",
+        "icon_type" => "img",
         "icon" => "https://klingex.io/symbol.svg",
         "target" => "_blank",
         "condition" => true,
@@ -136,6 +150,7 @@ $_config['homepage_apps'] = [
     "docs" => [
         "title" => "Docs",
         "url" => "/apps/docs",
+        "icon_type" => "fa",
         "icon" => "fas fa-file-alt",
         "condition" => true
     ]
