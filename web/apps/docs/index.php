@@ -36,7 +36,14 @@ class ParsedownExt extends Parsedown {
 
     protected function inlineLink($Excerpt)
     {
+        if (!isset($Excerpt['text'])) {
+            return null;
+        }
         $link = parent::inlineLink($Excerpt);
+        if (!isset($link['element']['attributes']['href'])) {
+            return $link;
+        }
+        $link['element']['attributes']['href'] = "/apps/docs/index.php?link=".urlencode($link['element']['attributes']['href']);
         $href = $link['element']['attributes']['href'];
 
         // Don't rewrite external links, mailto links, or anchors

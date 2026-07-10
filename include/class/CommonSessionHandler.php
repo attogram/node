@@ -52,6 +52,10 @@ class CommonSessionHandler implements SessionHandlerInterface {
     #[\ReturnTypeWillChange]
     public function read(string $id): string
     {
+        $out = "";
+        $sess_file = $this->path."/sess_$id";
+        if(file_exists($sess_file)) $out=@file_get_contents($sess_file);
+        return (string) $out;
         $safeId = preg_replace('/[^a-zA-Z0-9,-]/', '', $id); // Sanitize the session ID to prevent path traversal attacks.
         $sessionFilePath = $this->path . '/sess_' . $safeId; // Construct the full path to the session file.
         $sessionData = file_get_contents($sessionFilePath);  // returns the data as a string or FALSE on failure
@@ -71,7 +75,9 @@ class CommonSessionHandler implements SessionHandlerInterface {
         $handler = new CommonSessionHandler();
         session_set_save_handler($handler, true);
         $sessions_dir = ROOT."/tmp/sessions";
-        @mkdir($sessions_dir);
+        if (!is_dir($sessions_dir)) {
+            @mkdir($sessions_dir, 0755, true);
+        }
         session_save_path($sessions_dir);
         if(!empty($session_id)) {
             session_id($session_id);

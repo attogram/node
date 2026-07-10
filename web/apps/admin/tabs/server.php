@@ -7,21 +7,21 @@ if (!defined("ADMIN_TAB")) {
 global $action, $db;
 
 if($action == "task_enable") {
-	$task = $_GET['task'];
+	$task = $_GET['task'] ?? null;
     $task::enable();
 	header("location: ".APP_URL."/?view=server");
 	exit;
 }
 
 if($action == "task_disable") {
-    $task = $_GET['task'];
+    $task = $_GET['task'] ?? null;
     $task::disable();
 	header("location: ".APP_URL."/?view=server");
 	exit;
 }
 
 if($action == "task_stop") {
-    $task = $_GET['task'];
+    $task = $_GET['task'] ?? null;
     $name = $task::$name;
 	$cmd = "php ".ROOT."/cli/$name.php --stop";
 	$res = shell_exec($cmd);

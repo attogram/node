@@ -68,17 +68,17 @@ require_once __DIR__. '/../common/include/top.php';
 <form class="row mb-3" method="get" action="">
     <div class="col-lg-2">
         <input type="text" class="form-control flatpickr-input p-1 datepicker" placeholder="Date from" name="search[date][from]"
-               value="<?php echo $dm['search']['date']['from']?>">
+               value="<?php echo $dm['search']['date']['from'] ?? '' ?>">
     </div>
     <div class="col-lg-2">
         <input type="text" class="form-control flatpickr-input p-1 datepicker" placeholder="Date to" name="search[date][to]"
-               value="<?php echo $dm['search']['date']['to']?>">
+               value="<?php echo $dm['search']['date']['to'] ?? '' ?>">
     </div>
     <div class="col-lg-2">
-        <input type="text" class="form-control p-1" placeholder="Source" value="<?php echo $dm['search']['src']?>" name="search[src]">
+        <input type="text" class="form-control p-1" placeholder="Source" value="<?php echo $dm['search']['src'] ?? '' ?>" name="search[src]">
     </div>
     <div class="col-lg-2">
-        <input type="text" class="form-control p-1" placeholder="Destination" value="<?php echo $dm['search']['dst']?>" name="search[dst]">
+        <input type="text" class="form-control p-1" placeholder="Destination" value="<?php echo $dm['search']['dst'] ?? '' ?>" name="search[dst]">
     </div>
     <div class="col-lg-2">
         <select class="form-control"

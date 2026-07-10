@@ -13,6 +13,7 @@ const APP_URL = "/apps/admin";
 
 require_once __DIR__. '/../common/include/top.php';
 
+$msg = [];
 if(isset($_POST['action'])) {
     $action = $_POST['action'];
     if($action == "generate") {
@@ -141,7 +142,7 @@ if(isset($_GET['action'])) {
 }
 
 $setAdminPass = !empty($_config['admin_password']);
-$login = $_SESSION['login'];
+$login = $_SESSION['login'] ?? false;
 
 if(isset($_GET['view'])) {
 	$view = $_GET['view'];
