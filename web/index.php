@@ -114,45 +114,55 @@ global $_config;
                 </a>
             </div>
             <div class="row justify-content-center">
-                <div class="col-sm-6 col-md-4 col-lg-3 col-12 col-xl-2 my-3">
-                    <div class="d-grid gap-2">
-                        <a class="btn btn-lg btn-primary btn-block text-white-50 waves-effect waves-light" href="/apps/explorer">
-                            <h5 class="mb-3 text-white">Explorer</h5>
-                            <i class="fas fa-binoculars fa-2x"></i>
-                        </a>
-                    </div>
-                </div>
-                <?php if (Nodeutil::miningEnabled()) { ?>
-                    <div class="col-sm-6 col-md-4 col-lg-3 col-12 col-xl-2 my-3">
-                        <div class="d-grid gap-2">
-                            <a class="btn btn-lg btn-primary btn-block text-white-50 waves-effect waves-light" href="/apps/miner">
-                                <h5 class="mb-3 text-white">Miner</h5>
-                                <i class="fas fa-hammer fa-2x"></i>
-                            </a>
-                        </div>
-                    </div>
-                <?php } ?>
-                <?php if(Dapps::isEnabled() && !empty($_config['dapps_public_key'])) {
-                    $dapps_id = Account::getAddress($_config['dapps_public_key']);
+                <?php
+                if (!isset($_config['homepage_apps'])) {
+                    $_config['homepage_apps'] = [
+                        "explorer" => [
+                            "title" => "Explorer",
+                            "url" => "/apps/explorer",
+                            "icon_type" => "fa",
+                            "icon" => "fas fa-binoculars",
+                            "condition" => true
+                        ]
+                    ];
+                }
+                foreach ($_config['homepage_apps'] as $app) {
+                    $condition = $app['condition'];
+                    if ($condition !== true) {
+                        $show = false;
+                        if ($condition == "miner_enabled") {
+                            $show = Nodeutil::miningEnabled();
+                        } else if ($condition == "dapps_enabled") {
+                            $show = Dapps::isEnabled() && !empty($_config['dapps_public_key']);
+                        }
+                        if(!$show) {
+                            continue;
+                        }
+                    }
+                    $url = $app['url'];
+                    if (strpos($url, '{dapps_id}') !== false) {
+                        $dapps_id = Account::getAddress($_config['dapps_public_key']);
+                        $url = str_replace('{dapps_id}', $dapps_id, $url);
+                    }
+                    $target = isset($app['target']) ? 'target="'.$app['target'].'"' : '';
+                    $tooltip = isset($app['tooltip']) ? 'data-bs-toggle="tooltip" title="'.$app['tooltip'].'"' : '';
+                    $icon = $app['icon'];
+                    $icon_type = isset($app['icon_type']) ? $app['icon_type'] : 'fa';
+                    if ($icon_type === 'img') {
+                        $iconHtml = '<img src="'.$icon.'" style="width:38px;height:38px" class="p-1 bg-white rounded-2"/>';
+                    } else {
+                        $iconHtml = '<i class="'.$icon.' fa-2x"></i>';
+                    }
                     ?>
                     <div class="col-sm-6 col-md-4 col-lg-3 col-12 col-xl-2 my-3">
-                        <div class="d-grid gap-2" data-bs-toggle="tooltip" title="Decentralized apps">
-                            <a class="btn btn-lg btn-primary btn-block text-white-50 waves-effect waves-light" href="/dapps.php?url=<?php echo $dapps_id ?>">
-                                <h5 class="mb-3 text-white">Dapps</h5>
-                                <i class="fas fa-cubes fa-2x"></i>
+                        <div class="d-grid gap-2" <?php echo $tooltip ?>>
+                            <a class="btn btn-lg btn-primary btn-block text-white-50 waves-effect waves-light" href="<?php echo $url ?>" <?php echo $target ?>>
+                                <h5 class="mb-3 text-white"><?php echo $app['title'] ?></h5>
+                                <?php echo $iconHtml ?>
                             </a>
                         </div>
                     </div>
                 <?php } ?>
-                <div class="col-sm-6 col-md-4 col-lg-3 col-12 col-xl-2 my-3">
-                    <div class="d-grid gap-2" data-bs-toggle="tooltip" title="Exchange">
-                        <a class="btn btn-lg btn-primary btn-block text-white-50 waves-effect waves-light"
-                           href="https://klingex.io/trade/PHP-USDT?ref=3436CA42" target="_blank">
-                            <h5 class="mb-3 text-white">Exchange</h5>
-                            <img src="https://klingex.io/symbol.svg" style="width:38px;height:38px" class="p-1 bg-white rounded-2"/>
-                        </a>
-                    </div>
-                </div>
             </div>
         </div>
 
