@@ -5,8 +5,9 @@ if(!defined("ROOT")) {
 
 }
 
-if(!defined("DEFAULT_CHAIN_ID")) {
-    define("DEFAULT_CHAIN_ID", "00");
+$chain_id = trim(file_get_contents(ROOT."/chain_id")) ?? "00";
+if(!defined("CHAIN_ID")) {
+    define("CHAIN_ID", $chain_id);
 }
 
 require_once ROOT . "/include/coinspec.inc.php";
@@ -16,6 +17,7 @@ require_once ROOT . "/include/class/CommonSessionHandler.php";
 if(php_sapi_name() == "cli") {
     $cmdDataJson = stream_get_contents(STDIN);
     $cmdData = json_decode($cmdDataJson, true);
+    $_SERVER=$cmdData['SERVER'];
     $_SERVER['GET_DATA']=$cmdData['GET_DATA'];
     $_SERVER['POST_DATA']=$cmdData['POST_DATA'];
     $_SERVER['INPUT_DATA']=$cmdData['INPUT_DATA'];

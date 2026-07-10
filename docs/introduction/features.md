@@ -1,3 +1,8 @@
+[PHPCoin Docs](../) > [Introduction](./) > Features
+
+
+---
+
 # Features
 
 PHPcoin comes with a wide range of features that make it a powerful and flexible cryptocurrency platform. Here are some of its key features:
@@ -13,5 +18,7 @@ PHPcoin comes with a wide range of features that make it a powerful and flexible
 *   **Web Interface:** PHPcoin includes a user-friendly web interface that provides access to a block explorer, wallet, and other tools.
 
 *   **API:** A comprehensive API is available for developers who want to build applications that interact with the PHPcoin blockchain.
+
+*   **Asymmetric Messaging:** Production node feature (live on mainnet, Jun 2026). Public-key message encryption with secp256k1 account keys (ECDH + AES-256-GCM). Senders encrypt via API or CLI; the receiver decrypts with the wallet private key. See [Asymmetric Messaging](../wallet/asymmetric-messaging.md).
 
 *   **Open Source:** PHPcoin is an open-source project, which means its code is publicly available for anyone to review, use, or contribute to.

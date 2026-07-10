@@ -26,9 +26,16 @@ class Util
 	 *
 	 * @apiExample {cli} Example usage:
 	 * php util.php pop 1
+     * php util.php pop =10000 - delete up to block 10000
 	 */
 	static function pop($argv) {
-		$no = intval(@$argv[2]);
+        $val=@$argv[2];
+        if(!empty($val) && substr($val,0,1)=='=') {
+            $block_number = intval(substr($val,1));
+            $no = Block::getHeight() - $block_number;
+        } else {
+            $no = intval($val);
+        }
 		if(empty($no)) {
 			$no = 1;
 		}
@@ -193,14 +200,18 @@ class Util
 	 *
 	 */
 	static function recheckBlocks() {
-		global $db;
+		global $db, $_config;
 		$blocks = [];
 		$r = $db->run("SELECT * FROM blocks ORDER by height");
 		foreach ($r as $x) {
 			$blocks[$x['height']] = $x;
 			$max_height = $x['height'];
 		}
-		for ($i = 2; $i <= $max_height; $i++) {
+        $start = 2;
+        if(Config::isPruned()) {
+            $start = $_config['pruned_height'] + 2;
+        }
+		for ($i = $start; $i <= $max_height; $i++) {
 			self::log("Checking block $i / $max_height") ;
 			$data = $blocks[$i];
 
@@ -451,6 +462,33 @@ class Util
 		echo PHP_EOL;
 	}
 
+	/**
+	 * @api {php util.php} encrypt-for-public-key Encrypt-for-public-key
+	 * @apiName encrypt-for-public-key
+	 * @apiGroup UTIL
+	 * @apiDescription Encrypts a message for a recipient public key and returns a base64 packet string
+	 *
+	 * @apiParam {text} arg2 Message to encrypt
+	 * @apiParam {text} arg3 Recipient public key
+	 *
+	 * @apiExample {cli} Example usage:
+	 * php util.php encrypt-for-public-key "hello world" PZ8Tyr4Nx8MHsRAGMpZmZ6TWY63dXWSC...
+	 */
+	static function encryptForPublicKey($argv) {
+		$message = @$argv[2];
+		$public_key = trim(@$argv[3]);
+		if ($message === null || $message === '') {
+			echo "Missing argument: encrypt-for-public-key <message> <public-key>".PHP_EOL;
+			exit;
+		}
+		if (empty($public_key)) {
+			echo "Missing argument: encrypt-for-public-key <message> <public-key>".PHP_EOL;
+			exit;
+		}
+		$encrypted = encryptForPublicKey($message, $public_key);
+		echo $encrypted.PHP_EOL;
+	}
+
 	static function cleanBlacklist() {
 		Peer::cleanBlacklist();
 		echo "All the peers have been removed from the blacklist\n";
@@ -533,6 +571,7 @@ class Util
 		$res=Nodeutil::calculateBlocksHash($height);
 		echo "Height:\t\t".$res['height']."\n";
 		echo "Hash:\t\t".$res['hash']."\n\n";
+        if($res['pruned']) echo "Pruned: ".$res['pruned']."\n";
 	}
 
 	static function version() {
@@ -679,6 +718,7 @@ class Util
 	}
 
 	static function verifyBlocks($argv) {
+        global $_config;
 		$range = @$argv[2];
 		if(empty($range)) {
 			$start=1;
@@ -697,7 +737,9 @@ class Util
 			$start = intval($range);
 			$stop = $start;
 		}
-
+        if(Config::isPruned() && $start < $_config['pruned_height']+100) {
+            $start = $_config['pruned_height']+100;
+        }
 		for($i=$start;$i<=$stop;$i++) {
 			$block = Block::export("",$i);
 			$res = Block::getFromArray($block)->verifyBlock($error);
@@ -744,7 +786,7 @@ class Util
 		global $db;
 		$db_name = $db->single('select database()');
 		echo "Exporting database...".PHP_EOL;
-		$cmd = "mysqldump $options --single-transaction $db_name accounts blocks transactions masternode smart_contracts smart_contract_state > $file";
+		$cmd = "mysqldump $options --single-transaction $db_name accounts blocks transactions transaction_data masternode smart_contracts smart_contract_state > $file";
 		shell_exec($cmd);
 		echo "Database exported".PHP_EOL;
 	}
@@ -843,22 +885,18 @@ class Util
 	}
 
 	static function update($argv) {
-		global $_config;
-		$branch = @trim($argv[2]);
-		$force = @trim($argv[3]);
-		if(empty($branch)) {
-            $branch = GIT_BRANCH;
-		}
+		$force = in_array("--force", $argv);
+        $chain_id = CHAIN_ID;
         $currentVersion = BUILD_VERSION;
-		echo "Checking node branch=$branch force=$force update current version = ".BUILD_VERSION.PHP_EOL;
+        _log("Checking node CHAIN_ID=$chain_id force=$force update current version = ".BUILD_VERSION);
 		$maxPeerBuildNumber = Peer::getMaxBuildNumber();
 
-        $check_url = "https://phpcoin.net/version.php?branch={branch}";
-        $check_url=str_replace("{branch}",$branch,$check_url);
+        $check_url = "https://phpcoin.net/version.php?chain_id=$chain_id";
         $cmd= "curl -m 30 -H 'Cache-Control: no-cache, no-store' -s $check_url";
         $res = shell_exec($cmd);
         $version = intval($res);
         _log("AUTO_UPDATE: check url $check_url version=$version",4);
+
 
         $user = shell_exec("whoami");
 
@@ -867,7 +905,7 @@ class Util
 //            return;
 //        }
 
-        _log("AUTO_UPDATE: call php util check_url=$check_url branch=$branch force=$force node version=$currentVersion git version=$version maxPeerBuildNumber=$maxPeerBuildNumber user=$user");
+        _log("AUTO_UPDATE: call php util check_url=$check_url CHAIN_ID=$chain_id force=$force node version=$currentVersion git version=$version maxPeerBuildNumber=$maxPeerBuildNumber user=$user");
 		if($version > $currentVersion || $maxPeerBuildNumber > $currentVersion || !empty($force)) {
 			echo "There is new version: $version - updating node".PHP_EOL;
             _log("AUTO_UPDATE: Updating node");
@@ -911,19 +949,21 @@ class Util
             $res = shell_exec($cmd);
             _log("AUTO_UPDATE: cmd=$cmd res=$res",4);
 
+
             $cmd="cd ".ROOT." && git fetch  2>&1";
             $res = shell_exec($cmd);
             _log("AUTO_UPDATE: cmd=$cmd res=$res",4);
 
-			$cmd="cd ".ROOT." && git restore .  2>&1";
+
+            $cmd="cd ".ROOT." && git restore .  2>&1";
 			$res = shell_exec($cmd);
 			_log("AUTO_UPDATE: cmd=$cmd res=$res",4);
 
-			$cmd="cd ".ROOT." && git checkout -b $branch 2>&1";
+			$cmd="cd ".ROOT." && git checkout -B main 2>&1";
 			$res = shell_exec($cmd);
 			_log("AUTO_UPDATE: cmd=$cmd res=$res",4);
 
-			$cmd="cd ".ROOT." && git reset --hard origin/$branch";
+			$cmd="cd ".ROOT." && git reset --hard origin/main";
 			$res = shell_exec($cmd);
 			_log("AUTO_UPDATE: cmd=$cmd res=$res");
 
@@ -935,7 +975,7 @@ class Util
             $res = shell_exec($cmd);
             _log("AUTO_UPDATE: cmd=$cmd res=$res",4);
 
-			$cmd="cd ".ROOT." && git pull origin $branch  2>&1";
+			$cmd="cd ".ROOT." && git pull origin main  2>&1";
 			$res = shell_exec($cmd);
 			_log("AUTO_UPDATE: cmd=$cmd res=$res",4);
 
@@ -1740,6 +1780,10 @@ class Util
 			if($calc_acc_cnt <>  $real_acc_cnt || (!empty($argv) && in_array("--force", $argv))) {
 				_log("Accounts rows are different");
 				_log("delete accounts");
+                if(Config::isPruned()) {
+                    _log("Accounts table is invalid - restore blockchain");
+                    return;
+                }
 //				$db->exec("lock tables transactions t write, transactions ts write, blocks b write, accounts write");
 				$sql="delete from accounts";
 				$db->exec($sql);
@@ -1768,8 +1812,37 @@ class Util
 //				$db->exec("unlock tables");
 			}
 
-			_log("Check differences");
-			$sql="select calc.*, a.*
+            _log("Check differences");
+            if(Config::isPruned()) {
+                $sql = "select calc.*, a.*
+                    from (
+                             select ids.id,
+                                    sum(val) as balance,
+                                    max(max_height) as height
+                             from (
+                                      select t.dst as id, max(t.height) as max_height, sum(t.val) as val, min(t.height) as min_height
+                                      from transactions t
+                                      where t.dst is not null
+                                      group by t.dst
+                                      union
+                                      select t.src as id, max(t.height) as max_height, sum((t.val + t.fee)*(-1)) as val, min(t.height) as min_height
+                                      from transactions t
+                                      where t.src is not null
+                                      group by t.src
+                                  ) as ids
+                             group by ids.id
+                         ) as calc
+                             left join accounts a on (calc.id = a.id)
+                    where calc.balance != a.balance";
+                $res = $db->run($sql);
+                $diff_rows = count($res);
+                _log("Found $diff_rows different rows");
+                if ($diff_rows > 0) {
+                    _log("Accounts table is invalid - restore blockchain");
+                    return;
+                }
+            } else {
+                $sql = "select calc.*, a.*
 				from (
 		         select ids.id,
 		                (select case when tp.public_key is null then '' else tp.public_key end from transactions tp where tp.src = ids.id limit 1) as public_key,
@@ -1794,13 +1867,13 @@ class Util
 				   or calc.block <> a.block
 				   or calc.balance <> a.balance
 				   or calc.height <> a.height";
-			$res = $db->run($sql);
-			$diff_rows = count($res);
-			_log("Found $diff_rows different rows");
+                $res = $db->run($sql);
+                $diff_rows = count($res);
+                _log("Found $diff_rows different rows");
 
-			if($diff_rows > 0) {
-				_log("Update accounts table");
-				$sql="update (
+                if ($diff_rows > 0) {
+                    _log("Update accounts table");
+                    $sql = "update (
 			         select ids.id,
 			                (select case when tp.public_key is null then '' else tp.public_key end from transactions tp where tp.src = ids.id limit 1) as public_key,
 			                (select b.id from blocks b where b.height = min(min_height)) as block,
@@ -1825,11 +1898,12 @@ class Util
 			   or calc.block <> a.block
 			   or calc.balance <> a.balance
 			   or calc.height <> a.height";
-				$res=$db->run($sql);
-				_log("Accounts updated res=$res");
-			} else {
-				_log("No need to update accounts");
-			}
+                    $res = $db->run($sql);
+                    _log("Accounts updated res=$res");
+                } else {
+                    _log("No need to update accounts");
+                }
+            }
 
             //check generators without public_key
             $sql= "select gen.generator, a.public_key,
@@ -1845,6 +1919,10 @@ class Util
             $diff_rows = count($res);
             _log("Check generators public keys - found $diff_rows diffs");
             if($diff_rows > 0) {
+                if(Config::isPruned()) {
+                    _log("Accounts table is invalid - restore blockchain");
+                    return;
+                }
                 $sql="update(
                 select gen.generator, a.public_key,
                        (select distinct tp.public_key
@@ -1938,7 +2016,8 @@ class Util
 
             $sql="delete from smart_contract_state";
             $db->run($sql);
-            $url=$node."/api.php?q=getScState";
+            $top_height = Block::getHeight();
+            $url=$node."/api.php?q=getScState&to_height=".$top_height;
             $res = url_get($url);
             $res = json_decode($res, true);
             if($res!==false) {
@@ -2055,6 +2134,210 @@ class Util
                 $cmd = "(sleep 60 && php ".ROOT."/cli/cron.php)";
                 Nodeutil::runSingleProcess($cmd);
             }
+        }
+    }
+
+    static function pruneNode() {
+        global $db, $_config;
+        if(!isset($_config['pruned_height'])) {
+            _log("Prune height config is not set");
+            exit;
+        }
+        if(empty($_config['pruned_height'])) {
+            _log("Prune height config is empty");
+            exit;
+        }
+        $prune_height = intval($_config['pruned_height']);
+        if($prune_height <= 0) {
+            _log("Invalid prune height: $prune_height");
+            exit;
+        }
+		touch(ROOT."/maintenance");
+        $sql='select min(height) as min_height from blocks';
+        $row = $db->row($sql);
+        $min_height=$row['min_height'];
+        if($min_height == $prune_height) {
+            _log("Database is already pruned");
+            exit;
+        }
+        $start = time();
+        _log("Starting pruning database at height $prune_height");
+        Config::setSync(1);
+
+        // Lock tables to prevent concurrent access during this destructive operation
+        // IMPORTANT: DDL operations (CREATE TABLE, DROP TABLE, RENAME TABLE) automatically 
+        // release table locks in MySQL/MariaDB. The locks here provide protection BEFORE 
+        // we start DDL operations, preventing other processes from beginning operations on 
+        // these tables. Once DDL starts, locks are released, but we're already committed 
+        // to the operation. This should be run during maintenance windows when the node 
+        // is not actively processing blocks/transactions.
+        _log("Locking tables");
+        $db->lockTables();
+        
+        try {
+            // Start database transaction
+            // Note: DDL operations (CREATE TABLE, DROP TABLE, RENAME TABLE, CREATE INDEX) 
+            // auto-commit in MySQL/MariaDB and release table locks. The transaction here 
+            // provides better error handling and allows rollback of DML operations (DELETE).
+            // DDL operations cannot be rolled back.
+            $db->beginTransaction();
+            
+            // Disable foreign key checks temporarily
+            $db->fkCheck(false);
+
+            // Drop foreign key
+            _log("Drop foreign key");
+            $sql='alter table transaction_data
+                drop foreign key fk_tx_data;';
+            $db->run($sql);
+            
+            _log("Creating new table");
+            $sql='drop table if exists transactions1';
+            $db->run($sql);
+            
+            // Use intval to ensure safe integer value (CREATE TABLE doesn't support parameters)
+            $prune_height_safe = intval($prune_height);
+            $sql='
+        create table if not exists  transactions1
+with t1 as (
+    select t.id, t.block, t.height, t.dst, t.val, t.fee, t.signature, t.type, t.message, t.date, t.public_key, t.src 
+    from transactions t where t.height <= '.$prune_height_safe.' and t.type in (2,3,5,6,7,10)
+    union all
+    select t.id, t.block, t.height, t.dst, t.val, t.fee, t.signature, t.type, t.message, t.date, t.public_key, t.src 
+            from transactions t
+            where t.height > '.$prune_height_safe.'
+            union all
+            select null          as id,
+                   null          as block,
+                   '.$prune_height_safe.' as height,
+                   t.dst,
+                   cast(sum(t.val) as decimal(20,8))    as val,
+                   cast(sum(t.fee) as decimal(20,8))    as fee,
+                   null          as signature,
+                   t.type           as type,
+                   null          as message,
+                   null          as date,
+                   null          as public_key,
+                   t.src
+            from transactions t
+            where t.type not in (2, 3, 5, 6, 7, 10)
+              and t.height <= '.$prune_height_safe.'
+            group by t.type, t.src, t.dst
+) select * from t1
+order by t1.height, t1.id;
+        
+        ';
+            $db->run($sql);
+            
+            // Drop foreign key constraint if it exists
+            _log("Dropping foreign key constraint");
+            try {
+                $sql='alter table accounts drop foreign key accounts';
+                $db->run($sql);
+            } catch (Exception $e) {
+                _log("Warning: Could not drop foreign key constraint: ".$e->getMessage());
+                // Continue anyway as it might not exist
+            }
+            
+            _log("Dropping old transactions table");
+            $sql= 'drop table transactions';
+            $db->run($sql);
+            
+            _log("Deleting blocks");
+            $sql = 'delete from blocks where height <= ?';
+            $db->run($sql, [$prune_height], false);
+            
+            _log("Renaming transactions1 to transactions");
+            $sql='rename table transactions1 to transactions';
+            $db->run($sql);
+            
+            // Recreate all original indexes
+            _log("Recreating indexes");
+            $indexes = [
+                'create index dst on transactions (dst)',
+                'create index transactions_src_index on transactions (src)',
+                'create index height on transactions (height)',
+                'create index message on transactions (message)',
+                'create index public_key on transactions (public_key)',
+                'create index transactions_src_dst_val_fee_index on transactions (src, dst, val, fee)',
+                'create index transactions_type_index on transactions (type)',
+                'create index idx_src_height on transactions (src, height, val)',
+                'create index idx_dst_height on transactions (dst, height, val)',
+                'create index transactions_block_index on transactions (block)',
+                'create index transactions_id_index on transactions (id)',
+                'create index transactions_src_dst_height_index on transactions (src, dst, height)'
+            ];
+
+            foreach($indexes as $index_sql) {
+                try {
+                    $db->run($index_sql);
+                } catch (Exception $e) {
+                    _log("Warning: Could not create index: ".$e->getMessage());
+                }
+            }
+
+            // Restore foreign key
+            _log("Restore foreign key");
+            $sql='alter table transaction_data
+                add constraint fk_tx_data
+                    foreign key (tx_id) references transactions (id)
+                        on delete cascade;';
+            $db->run($sql);
+            
+            // Re-enable foreign key checks
+            $db->fkCheck(true);
+            
+            // Commit transaction if still active (DDL operations auto-commit, so this may not be needed)
+            // The DELETE operation would benefit from transaction, but DDL operations have already committed
+            if($db->inTransaction()) {
+                $db->commit();
+            }
+            
+            Config::setVal("blockchain_invalid", 0);
+            Config::setSync(0);
+            $time = time() - $start;
+            _log("Complete prune time=$time seconds");
+            
+            // Unlock tables after successful completion
+            _log("Unlocking tables");
+            $db->unlockTables();
+            unlink(ROOT."/maintenance");
+        } catch (Exception $e) {
+            _log("Error during pruning: ".$e->getMessage());
+            
+            // Rollback transaction if we're still in one
+            if($db->inTransaction()) {
+                _log("Rolling back transaction");
+                $db->rollBack();
+            }
+            
+            $db->fkCheck(true); // Re-enable FK checks even on error
+            
+            // Always unlock tables, even on error
+            _log("Unlocking tables after error");
+            $db->unlockTables();
+            unlink(ROOT."/maintenance");
+            throw $e;
+        }
+
+    }
+
+    static function dbSchema($argv) {
+        echo("DB Schema check tool\n");
+        if(!isset($argv[2]) || !in_array($argv[2], ["check","update"])) {
+            echo "Usage:\n
+check   - check current database structure with defined
+update  - update current structure to defined\n";
+            exit;
+        }
+
+        switch($argv[2]) {
+            case "check":
+                Nodeutil::checkDBSchema(true);
+                break;
+            case "update":
+                Nodeutil::checkDBSchema(false);
+                break;
         }
     }
 }

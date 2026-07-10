@@ -674,6 +674,10 @@ class PeerRequest
 			api_err("invalid-peer");
 		}
 
+        if (Config::isSync()) {
+            api_err("submitBlock: sync");
+        }
+
 		$current = Block::current();
 
 		$diff = $current['height']-$data['height'];
@@ -798,7 +802,9 @@ class PeerRequest
         $sql="select * from blocks b where b.height > ? and b.height <= ? order by b.height";
         $blocks = $db->run($sql,[$height,$max_height], false);
 
-        $sql="select * from transactions t where t.height > ? and t.height <= ? order by t.height";
+        $sql="select t.*, td.data from transactions t 
+           left join transaction_data td on td.tx_id = t.id
+         where t.height > ? and t.height <= ? order by t.height";
         $txs = $db->run($sql,[$height,$max_height], false);
 
 
@@ -831,6 +837,10 @@ class PeerRequest
             "smart_contract_state"=>$smart_contract_state,
         ];
         api_echo($res);
+    }
+
+    static function getInfo() {
+        api_echo(Peer::getInfo());
     }
 
 }
