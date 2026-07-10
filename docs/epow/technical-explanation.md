@@ -80,41 +80,92 @@ This formula means that as `elapsed_time` increases, the `target` decreases, mak
 
 ### 4. Hashing and Finding a Valid Block
 
-Unlike traditional Proof of Work where miners search for a random `nonce`, in ePoW, the mining process is an iteration over the **`elapsed` time**. The `nonce` is calculated deterministically, not found.
+In ePoW, the mining process is an iteration over **hash attempts**, where miners continuously generate new hashes until they find a `hit` that exceeds the `target`. While the `target` value only changes once per second (with the `elapsed_time`), miners can perform many thousands or millions of hash attempts within that second.
+
+This is possible because the hashing process introduces randomness, allowing each attempt to be unique.
 
 Here is the mining loop:
 
-1.  For each second that passes, the miner increments the `elapsed_time` value.
-2.  A new **Argon2id hash** is calculated using the `previous_block_date` and the new `elapsed_time`. Argon2id is a memory-hard hashing algorithm, making it resistant to ASIC miners.
-3.  A deterministic **`nonce`** is then calculated using a SHA-256 hash of the miner's address, the `elapsed_time`, and the new Argon2 hash. There is no randomness here; for the same inputs, the output `nonce` is always the same.
-4.  The miner calculates the `hit` value.
-5.  The miner recalculates the `target`, which changes with each increment of `elapsed_time`.
-6.  If `hit > target`, a valid block has been found. The miner can then submit the block with the successful `elapsed_time`, the calculated `argon` hash, and the deterministic `nonce`.
+1.  **Outer Loop (Time-based):** For each second that passes, the miner updates the `elapsed_time` and recalculates the `target`.
+2.  **Inner Loop (Hashing):** Within each second, the miner performs as many hashing attempts as their hardware allows.
+3.  **Generate a Random Argon Hash:** For each attempt, a new **Argon2id hash** is calculated. The Argon2id algorithm automatically generates a **random salt** for each hash. This randomness is the key to getting a different result on each attempt.
+4.  **Calculate a Deterministic Nonce:** The new, random `argon_hash` is used to calculate a deterministic `nonce`. While the `nonce` calculation itself is deterministic, the randomness of its input (`argon_hash`) ensures the `nonce` is unique for each attempt.
+5.  **Calculate the Hit:** The miner calculates the `hit` value based on this unique `nonce`.
+6.  **Check Against Target:** If `hit > target`, a valid block has been found. The miner submits the block with the successful `elapsed_time`, the `argon` hash, and the `nonce` that produced the winning `hit`.
 
 **Pseudo-code:**
 ```
 previous_block_date = node.get_latest_block().date
 
 while (true):
+    // Outer loop: updated each second
     current_timestamp = get_current_time()
     elapsed_time = current_timestamp - previous_block_date
-
-    // Recalculate target for the current elapsed_time
     target = (difficulty * BLOCK_TIME) / elapsed_time
 
-    // Calculate hashes deterministically
-    argon_hash = argon2("previous_block_date-elapsed_time")
-    nonce = sha256("miner_address-previous_block_date-elapsed_time-argon_hash")
+    // Inner loop: runs as fast as possible
+    while (get_current_time() - current_timestamp < 1):
+        // Each call to argon2 produces a different hash due to random salt
+        argon_hash = argon2("previous_block_date-elapsed_time")
 
-    hit = calculate_hit(miner_address, nonce, block_height, difficulty)
+        nonce = sha256("miner_address-previous_block_date-elapsed_time-argon_hash")
 
-    if (hit > target):
-        // Block found!
-        submit_block(nonce, argon_hash, elapsed_time)
-        break
+        hit = calculate_hit(miner_address, nonce, block_height, difficulty)
 
-    // Wait for the next second to increment elapsed_time
-    wait(1_second)
+        if (hit > target):
+            // Block found!
+            submit_block(nonce, argon_hash, elapsed_time)
+            exit_loops() // Exit both inner and outer loops
+```
+
+#### Calculating the Hit
+
+The `hit` value is a crucial part of ePoW, representing the quality of a single hash attempt. It's a number that must exceed the current `target` to solve the block. The `hit` is unique to each attempt and to each miner.
+
+Here's why each `hit` is different:
+*   **For the same miner:** A miner can generate thousands of `hit` values per second because each call to the Argon2id hashing function produces a new, random `argon_hash`. This changes the `nonce`, which in turn changes the `hit`.
+*   **For different miners:** Even with the same `elapsed_time` and `difficulty`, two different miners will always calculate different `hit` values. This is because their unique `miner_address` is a key component of the `nonce` calculation, ensuring they are not working on the same puzzle.
+
+The calculation process is as follows:
+
+1.  **Create a Base String:** A unique string is created for each attempt, combining the miner's address, the current `nonce`, the block `height`, and the current `difficulty`.
+    -   `base = miner_address + "-" + nonce + "-" + height + "-" + difficulty`
+
+2.  **Double SHA-256 Hash:** The `base` string is hashed twice using the SHA-256 algorithm.
+    -   `hash = sha256(sha256(base))`
+
+3.  **Extract a Hash Part:** The first 8 characters (4 bytes) of the resulting hexadecimal hash are extracted.
+    -   `hash_part = substring(hash, 0, 8)`
+
+4.  **Convert to a Number:** This hexadecimal `hash_part` is converted into a numerical value.
+    -   `value = hex_to_decimal(hash_part)`
+
+5.  **Calculate the Final Hit:** The final `hit` is calculated using a formula that scales the `value`. `BLOCK_TARGET_MUL` is a constant with a value of `1000`.
+    -   `hit = (0xffffffff * BLOCK_TARGET_MUL) / value`
+
+
+**Pseudo-code for `calculate_hit`:**
+```
+function calculate_hit(miner_address, nonce, block_height, difficulty):
+    // 1. Create the base string
+    base_string = miner_address + "-" + nonce + "-" + block_height + "-" + difficulty
+
+    // 2. Double SHA-256 hash
+    hash1 = sha256(base_string)
+    hash2 = sha256(hash1)
+
+    // 3. Extract the first 8 characters
+    hash_part = substring(hash2, 0, 8)
+
+    // 4. Convert hex to decimal
+    value = hex_to_decimal(hash_part)
+
+    // 5. Calculate the final hit
+    // Note: 0xffffffff is the maximum 32-bit unsigned integer
+    BLOCK_TARGET_MUL = 1000
+    hit = (0xffffffff * BLOCK_TARGET_MUL) / value
+
+    return hit
 ```
 
 ### 5. Submitting a Block
