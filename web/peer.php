@@ -27,12 +27,12 @@ OR OTHER DEALINGS IN THE SOFTWARE.
 require_once dirname(__DIR__).'/include/init.inc.php';
 header('Content-Type: application/json');
 
-$q = $_GET['q'];
+$q = $_GET['q'] ?? null;
 
 $t1=microtime(true);
 
 $info = "";
-$data = json_decode(trim($_POST['data']), true);
+$data = json_decode(trim($_POST['data'] ?? ''), true);
 
 $lock_name = false;
 $lock_filename = false;

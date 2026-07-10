@@ -52,7 +52,7 @@ function TransactiongetAll($dm) {
 }
 
 $link = '/apps/explorer/txs.php?';
-$dm = get_data_model(TransactiongetCount(), $link, "order by height desc");
+$dm = get_data_model(PHP_INT_MAX, $link, "order by height desc");
 $txs = TransactiongetAll($dm);
 
 define("HEAD_CSS", ["/apps/common/css/flatpickr.min.css","/apps/common/css/choices.min.css"]);
@@ -68,17 +68,17 @@ require_once __DIR__. '/../common/include/top.php';
 <form class="row mb-3" method="get" action="">
     <div class="col-lg-2">
         <input type="text" class="form-control flatpickr-input p-1 datepicker" placeholder="Date from" name="search[date][from]"
-               value="<?php echo $dm['search']['date']['from']?>">
+               value="<?php echo $dm['search']['date']['from'] ?? '' ?>">
     </div>
     <div class="col-lg-2">
         <input type="text" class="form-control flatpickr-input p-1 datepicker" placeholder="Date to" name="search[date][to]"
-               value="<?php echo $dm['search']['date']['to']?>">
+               value="<?php echo $dm['search']['date']['to'] ?? '' ?>">
     </div>
     <div class="col-lg-2">
-        <input type="text" class="form-control p-1" placeholder="Source" value="<?php echo $dm['search']['src']?>" name="search[src]">
+        <input type="text" class="form-control p-1" placeholder="Source" value="<?php echo $dm['search']['src'] ?? '' ?>" name="search[src]">
     </div>
     <div class="col-lg-2">
-        <input type="text" class="form-control p-1" placeholder="Destination" value="<?php echo $dm['search']['dst']?>" name="search[dst]">
+        <input type="text" class="form-control p-1" placeholder="Destination" value="<?php echo $dm['search']['dst'] ?? '' ?>" name="search[dst]">
     </div>
     <div class="col-lg-2">
         <select class="form-control"
@@ -94,6 +94,7 @@ require_once __DIR__. '/../common/include/top.php';
             <option value="<?php echo TX_TYPE_SC_CREATE ?>" <?php if(isset($dm['search']['type']) && in_array(TX_TYPE_SC_CREATE,$dm['search']['type'])) { ?> selected<?php } ?>>Create Smart Contract</option>
             <option value="<?php echo TX_TYPE_SC_EXEC ?>" <?php if(isset($dm['search']['type']) && in_array(TX_TYPE_SC_EXEC,$dm['search']['type'])) { ?> selected<?php } ?>>Execute Smart Contract</option>
             <option value="<?php echo TX_TYPE_SC_SEND ?>" <?php if(isset($dm['search']['type']) && in_array(TX_TYPE_SC_SEND,$dm['search']['type'])) { ?> selected<?php } ?>>Send Smart Contract</option>
+            <option value="<?php echo TX_TYPE_DATA ?>" <?php if(isset($dm['search']['type']) && in_array(TX_TYPE_DATA,$dm['search']['type'])) { ?> selected<?php } ?>>Data</option>
             <option value="<?php echo TX_TYPE_SYSTEM ?>" <?php if(isset($dm['search']['type']) && in_array(TX_TYPE_SYSTEM,$dm['search']['type'])) { ?> selected<?php } ?>>System</option>
         </select>
     </div>
@@ -162,10 +163,14 @@ require_once __DIR__. '/../common/include/top.php';
     .choices__list--multiple .choices__item {
         padding: 2px 5px;
     }
+
+    @media (min-width: 640px) {
+        .choices__list--dropdown .choices__item--selectable {
+            padding-right: 10px !important;
+        }
+    }
 </style>
 
 <?php
 require_once __DIR__ . '/../common/include/bottom.php';
 ?>
-
-

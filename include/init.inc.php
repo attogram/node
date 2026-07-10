@@ -1,8 +1,6 @@
 <?php
 $GLOBALS['start_time']=microtime(true);
 
-const DEFAULT_CHAIN_ID = "00";
-
 $blocked_agents = ["DataForSeoBot","BLEXBot","SemrushBot","YandexBot","AhrefsBot"];
 if (php_sapi_name() !== 'cli') {
 	if(isset($_SERVER['HTTP_USER_AGENT'])) {
@@ -39,6 +37,10 @@ if (!DEVELOPMENT && php_sapi_name() !== 'cli' && substr_count($_SERVER['PHP_SELF
 
 if(PHP_VERSION_ID < 80000) {
     die("Invalid php version! Please upgrade your node");
+}
+
+if(file_exists(ROOT."/maintenance")){
+	die("Node is under maintenance");
 }
 
 $config_file = ROOT.'/config/config.inc.php';
@@ -133,15 +135,9 @@ require_once __DIR__ . "/checkpoints.php";
 $block = Block::get(1);
 if($block) {
     if($block['id']!=$checkpoints[1]) {
-        api_err("Invalid chain. Please check config files");
+        api_err("Invalid genesis block. DB block id ".$block['id']." does not match checkpoint id ".$checkpoints[1]);
     }
 }
-
-$chain_id = trim(file_get_contents(dirname(__DIR__)."/chain_id"));
-if($chain_id!= CHAIN_ID) {
-    api_err("Invalid chain. Please check chain_id file");
-}
-
 
 if(!defined("CRON")) {
     Nodeutil::runAtInterval("check-cron", 60, function () {

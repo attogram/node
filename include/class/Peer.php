@@ -252,7 +252,6 @@ class Peer
 
 	static function getInfo() {
 		global $_config;
-		$appsHash = null;
 		$generator = isset($_config['generator_public_key']) && $_config['generator'] ? Account::getAddress($_config['generator_public_key']) :  null;
 		$miner = isset($_config['miner_public_key']) && $_config['miner'] ? Account::getAddress($_config['miner_public_key']) :  null;
 		$masternode = isset($_config['masternode_public_key']) && $_config['masternode'] ? Account::getAddress($_config['masternode_public_key']) : null;
@@ -265,7 +264,6 @@ class Peer
 //		_log("Cache: dapps_data = ".json_encode($dapps_data), 5);
 		return [
 			"height" => $current['height'],
-			"appshash" => $appsHash,
 			"score"=>@$_config['node_score'],
 			"version"=> VERSION . "." . BUILD_VERSION,
 			"miner"=>$miner,
@@ -274,7 +272,9 @@ class Peer
 			"block"=>$current['id'],
 			"hostname"=>$_config['hostname'],
 			"dapps_id"=>$dapps_data['dapps_id'],
-			"dapps_hash"=>$dapps_data['dapps_hash']
+			"dapps_hash"=>$dapps_data['dapps_hash'],
+			"dbversion"=>$_config['dbversion'],
+            "pruned_height"=>@$_config['pruned_height'],
 		];
 	}
 
@@ -397,10 +397,10 @@ class Peer
 		$generator = isset($info['generator']) && !empty($info['generator']) ? $info['generator'] : null;
 		$masternode = isset($info['masternode']) && !empty($info['masternode']) ? $info['masternode'] : null ;
 //		_log("PeerSync: update peer data $id info=".json_encode($info));
-		$db->run("UPDATE peers SET ping=".DB::unixTimeStamp().", height=:height, block_id=:block_id, appshash=:appshash, score=:score, version=:version,  
+		$db->run("UPDATE peers SET ping=".DB::unixTimeStamp().", height=:height, block_id=:block_id, score=:score, version=:version,  
 				miner=:miner, generator=:generator, masternode=:masternode
 				WHERE id=:id",
-			[":id" => $id, ':height'=>$info['height'], ':appshash'=>$info['appshash'],
+			[":id" => $id, ':height'=>$info['height'],
 				':score'=>$info['score'], ':version' => $info['version'],
 				':miner' => $miner, ':generator' => $generator, ':masternode'=>$masternode,
 				':block_id' => $info['block']]);
@@ -412,13 +412,14 @@ class Peer
 		if(empty($info['height']) || empty($info['block'])) {
 			_log("updatePeerInfo: EMPTY HEIGHT or BLOCK - peer not updated ", 3);
 		}
-		$db->run("UPDATE peers SET ping=".DB::unixTimeStamp().", height=:height, block_id=:block_id, appshash=:appshash, score=:score, version=:version,  
-				miner=:miner, generator=:generator, masternode=:masternode, hostname=:hostname, dapps_id =:dapps_id, dappshash =:dapps_hash
+		$db->run("UPDATE peers SET ping=".DB::unixTimeStamp().", height=:height, block_id=:block_id, score=:score, version=:version,  
+				miner=:miner, generator=:generator, masternode=:masternode, hostname=:hostname, dapps_id =:dapps_id, dappshash =:dapps_hash, info=:info
 				WHERE ip=:ip",
-			[":ip" => $ip, ':height'=>$info['height'], ':appshash'=>@$info['appshash'],
+			[":ip" => $ip, ':height'=>$info['height'],
 				':score'=>$info['score'], ':version' => $info['version'],
 				':miner' => @$info['miner'], ':generator' => @$info['generator'], ':masternode'=>@$info['masternode'],
-				':block_id' => $info['block'], ":hostname"=>$info['hostname'], ":dapps_id"=>@$info['dapps_id'], ":dapps_hash"=>@$info['dapps_hash']]);
+				':block_id' => $info['block'], ":hostname"=>$info['hostname'], ":dapps_id"=>@$info['dapps_id'], ":dapps_hash"=>@$info['dapps_hash'],
+                ":info"=>json_encode($info)]);
 	}
 
 	static function storeResponseTime($hostname, $connect_time) {
@@ -562,7 +563,7 @@ class Peer
 
     static function getMiningNodes($limit = 10) {
         global $db;
-        $sql="select * from peers where miner is not null 
+        $sql="select * from peers where generator is not null 
             and blacklisted < ".DB::unixTimeStamp()." order by response_time/response_cnt
             limit $limit";
         $rows = $db->run($sql);
