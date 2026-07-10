@@ -147,6 +147,7 @@ global $_config;
                     $target = isset($app['target']) ? 'target="'.$app['target'].'"' : '';
                     $tooltip = isset($app['tooltip']) ? 'data-bs-toggle="tooltip" title="'.$app['tooltip'].'"' : '';
                     $icon = $app['icon'];
+                    if (strpos($icon, 'http') === 0) {
                     $icon_type = isset($app['icon_type']) ? $app['icon_type'] : 'fa';
                     if ($icon_type === 'img') {
                         $iconHtml = '<img src="'.$icon.'" style="width:38px;height:38px" class="p-1 bg-white rounded-2"/>';
